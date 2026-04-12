@@ -91,12 +91,7 @@ return new class extends Migration
         }
 
         if (Schema::hasTable('penggajian') && ! Schema::hasColumn('penggajian', 'periode_id')) {
-            Schema::table('penggajian', function (Blueprint $table): void {
-                $table->dropForeign('penggajian_v6_relawan_fk');
-                $table->dropForeign('penggajian_v6_profil_fk');
-                $table->dropForeign('penggajian_v6_created_fk');
-                $table->dropForeign('penggajian_v6_approved_fk');
-            });
+            $this->dropPenggajianForeignKeysForPeriodeWire();
             $pengDup = collect(Schema::getIndexes('penggajian'))
                 ->first(function (array $idx): bool {
                     if (empty($idx['unique'])) {
@@ -156,6 +151,39 @@ return new class extends Migration
         }
 
         Schema::dropIfExists('periode');
+    }
+
+    /**
+     * Hapus FK pada kolom yang akan di-wire ulang. Nama constraint bisa `penggajian_v6_*`
+     * atau default Laravel (`*_foreign`), sehingga drop nama tetap sering gagal di migrate:fresh.
+     */
+    private function dropPenggajianForeignKeysForPeriodeWire(): void
+    {
+        $columnsToRelease = ['relawan_id', 'profil_mbg_id', 'created_by', 'approved_by'];
+
+        try {
+            $foreignKeys = Schema::getForeignKeys('penggajian');
+        } catch (\Throwable) {
+            return;
+        }
+
+        $names = [];
+        foreach ($foreignKeys as $fk) {
+            $cols = $fk['columns'] ?? [];
+            if ($cols === [] || array_intersect($columnsToRelease, $cols) === []) {
+                continue;
+            }
+            $name = $fk['name'] ?? null;
+            if ($name) {
+                $names[] = $name;
+            }
+        }
+
+        foreach ($names as $name) {
+            Schema::table('penggajian', function (Blueprint $table) use ($name): void {
+                $table->dropForeign($name);
+            });
+        }
     }
 
     /**

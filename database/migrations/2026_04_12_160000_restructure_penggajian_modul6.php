@@ -54,8 +54,8 @@ return new class extends Migration
 
         $defaultUserId = DB::table('users')->orderBy('id')->value('id');
         if (! $defaultUserId) {
-            Schema::dropIfExists('penggajian');
-            Schema::rename('penggajian_old', 'penggajian');
+            // migrate:fresh: belum ada user (seeder belum jalan). Pertahankan skema modul6 yang sudah dibuat.
+            Schema::dropIfExists('penggajian_old');
 
             return;
         }
