@@ -274,6 +274,37 @@
         }
         .inst-btn-outline:hover { background: #f0f6fb; }
         a.inst-btn-outline.flex-1 { width: 100%; }
+        /* Tombol sekunder (dipakai di filter / export; sebelumnya kelas ini tidak punya gaya) */
+        .inst-btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-sizing: border-box;
+            border-radius: 0.5rem;
+            padding: 0.625rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            line-height: 1.25;
+            color: #1a4a6b;
+            background: #ffffff;
+            border: 1px solid #d4e8f4;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s;
+            text-decoration: none;
+        }
+        a.inst-btn-secondary,
+        a.inst-btn-secondary:visited {
+            color: #1a4a6b;
+            text-decoration: none;
+        }
+        .inst-btn-secondary:hover {
+            background: #f0f6fb;
+            border-color: #c5dce8;
+        }
+        button.inst-btn-secondary {
+            font-family: inherit;
+        }
         .inst-link { font-size: 0.875rem; font-weight: 600; color: #4a9b7a; text-decoration: none; }
         .inst-link:hover { text-decoration: underline; }
         .inst-back { font-size: 0.875rem; font-weight: 600; color: #4a9b7a; }

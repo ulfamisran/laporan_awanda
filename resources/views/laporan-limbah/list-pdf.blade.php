@@ -17,7 +17,7 @@
         .pdf-header .hdr-row { width: 100%; margin: 0; padding: 0; text-align: center; line-height: 1; }
         /* Satu spasi vertikal antara logo dan baris teks pertama */
         .pdf-header .hdr-logo { margin: 0 0 0.5em 0; padding: 0; }
-        .header-logo { max-height: 100px; max-width: 260px; width: auto; height: auto; object-fit: contain; display: block; margin: 0 auto; }
+        .header-logo { max-height: 84px; max-width: 220px; width: auto; height: auto; object-fit: contain; display: block; margin: 0 auto; }
         .line-bgn { color: #b5e0ea; font-weight: bold; }
         .line-bgn .italic-en { font-style: italic; font-weight: bold; }
         .line-sppg { font-weight: bold; }
@@ -35,7 +35,16 @@
         td.menu { font-size: 10px; word-wrap: break-word; line-height: 1.1; }
         td.kat-cell { font-size: 6px; line-height: 1; padding: 1px 1px; }
         td.kat-cell img { width: 100%; max-width: 100%; max-height: 130px; height: auto; object-fit: contain; display: block; margin: 0 auto; }
-        td.kat-cell .jml { font-family: DejaVu Sans Mono, monospace; white-space: nowrap; margin: 0; padding: 0; line-height: 1; }
+        td.kat-cell .jml {
+            font-family: DejaVu Sans, sans-serif;
+            font-size: 10px;
+            font-weight: bold;
+            white-space: nowrap;
+            margin: 2px 0 0 0;
+            padding: 0;
+            line-height: 1.15;
+            color: #1a4a6b;
+        }
         tr { page-break-inside: avoid; }
     </style>
 </head>

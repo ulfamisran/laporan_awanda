@@ -35,40 +35,40 @@
         </div>
     </div>
 
-    <form method="get" action="{{ route('laporan-limbah.index') }}" class="inst-filter-panel mb-4 space-y-3">
+    <form method="get" action="{{ route('laporan-limbah.index') }}" class="inst-filter-panel mb-4">
         <input type="hidden" id="f-profil" value="{{ $profilIdDefault }}">
-        <div class="flex flex-wrap gap-4">
-            <div>
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div class="min-w-0">
                 <label for="f-kat" class="inst-label-filter">Kategori</label>
-                <select id="f-kat" name="kategori_limbah_id" class="inst-select mt-2 w-52 select2">
+                <select id="f-kat" name="kategori_limbah_id" class="inst-select mt-2 w-full min-w-0 select2">
                     <option value="">Semua</option>
                     @foreach ($kategoris as $k)
                         <option value="{{ $k->id }}" @selected((string) request('kategori_limbah_id') === (string) $k->id)>{{ $k->nama_kategori }}</option>
                     @endforeach
                 </select>
             </div>
-            <div>
+            <div class="min-w-0">
                 <label for="f-jenis" class="inst-label-filter">Penanganan</label>
-                <select id="f-jenis" name="jenis_penanganan" class="inst-select mt-2 w-48">
+                <select id="f-jenis" name="jenis_penanganan" class="inst-select mt-2 w-full min-w-0">
                     <option value="">Semua</option>
                     @foreach (\App\Enums\JenisPenangananLimbah::cases() as $jen)
                         <option value="{{ $jen->value }}" @selected(request('jenis_penanganan') === $jen->value)>{{ $jen->label() }}</option>
                     @endforeach
                 </select>
             </div>
-            <div>
+            <div class="min-w-0">
                 <label for="f-dari" class="inst-label-filter">Tanggal dari</label>
-                <input type="date" id="f-dari" name="tanggal_dari" value="{{ request('tanggal_dari') }}" class="inst-input mt-2 w-40">
+                <input type="date" id="f-dari" name="tanggal_dari" value="{{ request('tanggal_dari') }}" class="inst-input mt-2 w-full min-w-0 max-w-full">
             </div>
-            <div>
+            <div class="min-w-0">
                 <label for="f-sampai" class="inst-label-filter">Tanggal sampai</label>
-                <input type="date" id="f-sampai" name="tanggal_sampai" value="{{ request('tanggal_sampai') }}" class="inst-input mt-2 w-40">
+                <input type="date" id="f-sampai" name="tanggal_sampai" value="{{ request('tanggal_sampai') }}" class="inst-input mt-2 w-full min-w-0 max-w-full">
             </div>
         </div>
-        <div class="flex flex-wrap gap-2">
-            <button type="submit" class="inst-btn-secondary text-sm">Terapkan</button>
-            <a href="{{ route('laporan-limbah.export-excel', request()->query()) }}" class="inst-btn-secondary text-sm">Export Excel</a>
-            <a href="{{ route('laporan-limbah.export-pdf', request()->query()) }}" target="_blank" class="inst-btn-secondary text-sm">Export PDF</a>
+        <div class="mt-4 flex flex-wrap items-center gap-2 border-t pt-4" style="border-color:#e8f1f8;">
+            <button type="submit" class="inst-btn-primary text-sm shrink-0">Terapkan</button>
+            <a href="{{ route('laporan-limbah.export-excel', request()->query()) }}" class="inst-btn-secondary text-sm shrink-0">Export Excel</a>
+            <a href="{{ route('laporan-limbah.export-pdf', request()->query()) }}" target="_blank" rel="noopener" class="inst-btn-secondary text-sm shrink-0">Export PDF</a>
         </div>
     </form>
 
