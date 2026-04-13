@@ -6,6 +6,7 @@ use App\Enums\BarangMasukSumber;
 use App\Enums\StatusAktif;
 use App\Models\Barang;
 use App\Models\BarangMasuk;
+use App\Models\OrderBarangItem;
 use App\Support\KodeTransaksiStok;
 use App\Support\PeriodeTenant;
 use App\Support\ProfilMbgTenant;
@@ -75,9 +76,16 @@ class BarangMasukController extends Controller
         $profilId = $this->profilMbgIdForStokOrFirst($request);
         $periodeId = PeriodeTenant::id();
         $barangs = Barang::query()->where('status', StatusAktif::Aktif)->orderBy('nama_barang')->get();
+        $orderItems = OrderBarangItem::query()
+            ->with(['orderBarang', 'supplier', 'barang'])
+            ->whereHas('orderBarang', function ($q) use ($profilId, $periodeId): void {
+                $q->where('profil_mbg_id', $profilId)->where('periode_id', $periodeId);
+            })
+            ->orderByDesc('id')
+            ->get();
         $previewKode = $this->previewNextKode();
 
-        return view('barang-masuk.create', compact('profilId', 'periodeId', 'barangs', 'previewKode'));
+        return view('barang-masuk.create', compact('profilId', 'periodeId', 'barangs', 'previewKode', 'orderItems'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -86,6 +94,17 @@ class BarangMasukController extends Controller
         $this->mergeHargaMasukFromRequest($request);
 
         $data = $this->validatedMasuk($request);
+        if (! empty($data['order_barang_item_id'])) {
+            $orderItem = OrderBarangItem::query()->with('orderBarang')->find((int) $data['order_barang_item_id']);
+            if (! $orderItem || ! $orderItem->orderBarang) {
+                abort(422, 'Item order barang tidak ditemukan.');
+            }
+            if ((int) $orderItem->orderBarang->profil_mbg_id !== (int) $profilId || (int) $orderItem->orderBarang->periode_id !== PeriodeTenant::id()) {
+                abort(422, 'Item order barang tidak sesuai cabang/periode aktif.');
+            }
+            $data['barang_id'] = (int) $orderItem->barang_id;
+            $data['satuan'] = (string) $orderItem->satuan_barang;
+        }
         $data['profil_mbg_id'] = $profilId;
         $data['periode_id'] = PeriodeTenant::id();
         $data['created_by'] = (int) $request->user()->getKey();
@@ -106,7 +125,7 @@ class BarangMasukController extends Controller
     public function show(Request $request, BarangMasuk $masuk): View
     {
         $this->ensureProfilPeriodeRow($request, $masuk);
-        $masuk->load(['barang.kategoriBarang', 'profilMbg', 'creator']);
+        $masuk->load(['barang.kategoriBarang', 'profilMbg', 'creator', 'orderItem.orderBarang', 'orderItem.supplier']);
 
         return view('barang-masuk.show', compact('masuk'));
     }
@@ -120,6 +139,28 @@ class BarangMasukController extends Controller
         $periodeId = PeriodeTenant::id();
 
         return view('barang-masuk.edit', compact('masuk', 'profilId', 'periodeId', 'previewKode'));
+    }
+
+    public function orderItemApi(Request $request, OrderBarangItem $item): JsonResponse
+    {
+        $item->loadMissing('orderBarang', 'supplier');
+        $order = $item->orderBarang;
+        if (! $order
+            || (int) $order->profil_mbg_id !== ProfilMbgTenant::id()
+            || (int) $order->periode_id !== PeriodeTenant::id()) {
+            abort(404);
+        }
+
+        return response()->json([
+            'id' => $item->id,
+            'barang_id' => $item->barang_id,
+            'nama_barang' => $item->nama_barang,
+            'satuan_barang' => $item->satuan_barang,
+            'harga_barang' => (float) $item->harga_barang,
+            'jumlah_barang' => (float) $item->jumlah_barang,
+            'supplier' => $item->supplier?->nama_supplier,
+            'nomor_order' => $order->nomor_order,
+        ]);
     }
 
     public function update(Request $request, BarangMasuk $masuk): RedirectResponse
@@ -294,13 +335,15 @@ class BarangMasukController extends Controller
     private function validatedMasuk(Request $request, bool $isUpdate = false): array
     {
         $rules = [
-            'barang_id' => [$isUpdate ? 'sometimes' : 'required', 'integer', 'exists:barang,id'],
+            'barang_id' => [$isUpdate ? 'sometimes' : 'required_without:order_barang_item_id', 'nullable', 'integer', 'exists:barang,id'],
+            'order_barang_item_id' => ['nullable', 'integer', 'exists:order_barang_items,id'],
             'tanggal' => ['required', 'date'],
             'jumlah' => ['required', 'numeric', 'min:0.01', 'max:9999999999999.99'],
             'satuan' => ['required', 'string', 'max:32'],
             'harga_satuan' => ['required', 'numeric', 'min:0', 'max:9999999999999.99'],
             'sumber' => ['required', 'string', Rule::in(array_map(static fn (BarangMasukSumber $e) => $e->value, BarangMasukSumber::cases()))],
             'keterangan' => ['nullable', 'string', 'max:5000'],
+            'kondisi_penerimaan' => ['nullable', 'string', 'max:255'],
             'gambar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ];
 

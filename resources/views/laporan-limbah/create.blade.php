@@ -6,7 +6,8 @@
     <div class="inst-form-page" style="max-width:52rem;">
         <a href="{{ route('laporan-limbah.index') }}" class="inst-back">← Kembali</a>
         <h2 class="inst-form-title">Tambah laporan limbah harian</h2>
-        <p class="inst-form-lead text-sm" style="color:#4a6b7f;">Isi <strong>semua kategori</strong> untuk satu tanggal. Kode laporan per baris detail dibuat otomatis.</p>
+        <p class="inst-form-lead text-sm" style="color:#4a6b7f;">Anda bisa isi sebagian kategori dulu, lalu lengkapi kategori lain saat update.</p>
+        @include('components.periode-aktif-badge')
 
         <form method="POST" action="{{ route('laporan-limbah.store') }}" enctype="multipart/form-data" class="space-y-6">
             @csrf
@@ -39,15 +40,15 @@
 
                     <div class="grid gap-4 sm:grid-cols-2">
                         <div>
-                            <label class="inst-label" for="jumlah_{{ $kid }}">Jumlah <span class="inst-required">*</span></label>
-                            <input type="number" step="0.01" min="0.01" name="kategori[{{ $kid }}][jumlah]" id="jumlah_{{ $kid }}" class="inst-input font-mono" required value="{{ old("kategori.$kid.jumlah") }}">
+                            <label class="inst-label" for="jumlah_{{ $kid }}">Jumlah</label>
+                            <input type="number" step="0.01" min="0.01" name="kategori[{{ $kid }}][jumlah]" id="jumlah_{{ $kid }}" class="inst-input font-mono" value="{{ old("kategori.$kid.jumlah") }}">
                             @error("kategori.$kid.jumlah")
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
                         <div>
-                            <label class="inst-label" for="satuan_{{ $kid }}">Satuan <span class="inst-required">*</span></label>
-                            <select name="kategori[{{ $kid }}][satuan]" id="satuan_{{ $kid }}" class="inst-select" required>
+                            <label class="inst-label" for="satuan_{{ $kid }}">Satuan</label>
+                            <select name="kategori[{{ $kid }}][satuan]" id="satuan_{{ $kid }}" class="inst-select">
                                 @foreach (\App\Enums\SatuanLimbah::cases() as $s)
                                     <option value="{{ $s->value }}" @selected(old("kategori.$kid.satuan") === $s->value)>{{ $s->label() }}</option>
                                 @endforeach
@@ -56,8 +57,8 @@
                     </div>
 
                     <div>
-                        <label class="inst-label" for="jenis_{{ $kid }}">Jenis penanganan <span class="inst-required">*</span></label>
-                        <select name="kategori[{{ $kid }}][jenis_penanganan]" id="jenis_{{ $kid }}" class="inst-select" required x-model="jenis">
+                        <label class="inst-label" for="jenis_{{ $kid }}">Jenis penanganan</label>
+                        <select name="kategori[{{ $kid }}][jenis_penanganan]" id="jenis_{{ $kid }}" class="inst-select" x-model="jenis">
                             @foreach (\App\Enums\JenisPenangananLimbah::cases() as $j)
                                 <option value="{{ $j->value }}" @selected($j0 === $j->value)>{{ $j->label() }}</option>
                             @endforeach
@@ -70,8 +71,8 @@
                     </div>
 
                     <div>
-                        <label class="inst-label" for="gambar_{{ $kid }}">Foto limbah <span class="inst-required">*</span></label>
-                        <input type="file" name="kategori[{{ $kid }}][gambar]" id="gambar_{{ $kid }}" accept="image/jpeg,image/png,image/webp" class="inst-input @error("kategori.$kid.gambar") border-red-500 @enderror" required>
+                        <label class="inst-label" for="gambar_{{ $kid }}">Foto limbah</label>
+                        <input type="file" name="kategori[{{ $kid }}][gambar]" id="gambar_{{ $kid }}" accept="image/jpeg,image/png,image/webp" class="inst-input @error("kategori.$kid.gambar") border-red-500 @enderror">
                         @error("kategori.$kid.gambar")
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror

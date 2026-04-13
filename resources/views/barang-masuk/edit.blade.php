@@ -58,6 +58,11 @@
                 </div>
 
                 <div>
+                    <label for="kondisi_penerimaan" class="inst-label">Kondisi penerimaan</label>
+                    <input type="text" name="kondisi_penerimaan" id="kondisi_penerimaan" class="inst-input" value="{{ old('kondisi_penerimaan', $masuk->kondisi_penerimaan) }}">
+                </div>
+
+                <div>
                     <label for="gambar" class="inst-label">Gambar baru (opsional)</label>
                     @if ($masuk->gambar_url)
                         <p class="mb-2 text-xs" style="color:#7fa8c9;">Gambar saat ini:</p>

@@ -20,7 +20,9 @@ use App\Http\Controllers\LaporanKeuanganController;
 use App\Http\Controllers\LaporanLimbahController;
 use App\Http\Controllers\LaporanRekapController;
 use App\Http\Controllers\MutasiStokController;
+use App\Http\Controllers\OrderBarangController;
 use App\Http\Controllers\PenggajianController;
+use App\Http\Controllers\PenerimaanBarangController;
 use App\Http\Controllers\PeriodeController;
 use App\Http\Controllers\PosisiRelawanController;
 use App\Http\Controllers\ProfilMbgController;
@@ -29,6 +31,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\StokAwalBarangController;
 use App\Http\Controllers\StokBarangApiController;
 use App\Http\Controllers\StokDanaAwalController;
+use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UserController;
 use App\Http\Middleware\ResolvePeriode;
 use Illuminate\Support\Facades\Route;
@@ -143,6 +146,15 @@ Route::middleware(['auth', 'dapur.role:super_admin,admin_pusat,admin', ResolvePe
             Route::delete('posisi-relawan/{posisi_relawan}', [PosisiRelawanController::class, 'destroy'])->name('posisi-relawan.destroy');
         });
 
+        Route::get('supplier', [SupplierController::class, 'index'])->name('supplier.index');
+        Route::middleware('dapur.role:super_admin,admin_pusat')->group(function () {
+            Route::get('supplier/create', [SupplierController::class, 'create'])->name('supplier.create');
+            Route::post('supplier', [SupplierController::class, 'store'])->name('supplier.store');
+            Route::get('supplier/{supplier}/edit', [SupplierController::class, 'edit'])->name('supplier.edit');
+            Route::put('supplier/{supplier}', [SupplierController::class, 'update'])->name('supplier.update');
+            Route::delete('supplier/{supplier}', [SupplierController::class, 'destroy'])->name('supplier.destroy');
+        });
+
         Route::get('relawan/data', [RelawanController::class, 'data'])->name('relawan.data');
         Route::get('relawan/export-excel', [RelawanController::class, 'exportExcel'])->name('relawan.export-excel');
         Route::get('relawan', [RelawanController::class, 'index'])->name('relawan.index');
@@ -157,6 +169,7 @@ Route::middleware(['auth', 'dapur.role:super_admin,admin_pusat,admin', ResolvePe
 
     Route::prefix('stok')->name('stok.')->group(function () {
         Route::get('api/barang/{barang}', [StokBarangApiController::class, 'show'])->name('api.barang');
+        Route::get('api/order-item/{item}', [BarangMasukController::class, 'orderItemApi'])->name('api.order-item');
 
         Route::get('awal', [StokAwalBarangController::class, 'index'])->name('awal.index');
         Route::post('awal/generate-dari-periode-sebelumnya', [StokAwalBarangController::class, 'generateFromPeriodeSebelumnya'])->name('awal.generate-prev');
@@ -178,6 +191,17 @@ Route::middleware(['auth', 'dapur.role:super_admin,admin_pusat,admin', ResolvePe
         Route::get('masuk/{masuk}/edit', [BarangMasukController::class, 'edit'])->name('masuk.edit');
         Route::put('masuk/{masuk}', [BarangMasukController::class, 'update'])->name('masuk.update');
         Route::delete('masuk/{masuk}', [BarangMasukController::class, 'destroy'])->name('masuk.destroy');
+
+        Route::get('order', [OrderBarangController::class, 'index'])->name('order.index');
+        Route::get('order/create', [OrderBarangController::class, 'create'])->name('order.create');
+        Route::post('order', [OrderBarangController::class, 'store'])->name('order.store');
+        Route::get('order/{order}', [OrderBarangController::class, 'show'])->name('order.show');
+        Route::get('order/{order}/cetak-nota', [OrderBarangController::class, 'cetakNota'])->name('order.cetak-nota');
+
+        Route::get('penerimaan', [PenerimaanBarangController::class, 'index'])->name('penerimaan.index');
+        Route::get('penerimaan/laporan/pdf', [PenerimaanBarangController::class, 'reportPdf'])->name('penerimaan.report-pdf');
+        Route::get('penerimaan/{item}/terima', [PenerimaanBarangController::class, 'create'])->name('penerimaan.create');
+        Route::post('penerimaan/{item}/terima', [PenerimaanBarangController::class, 'store'])->name('penerimaan.store');
 
         Route::get('keluar/data', [BarangKeluarController::class, 'data'])->name('keluar.data');
         Route::get('keluar', [BarangKeluarController::class, 'index'])->name('keluar.index');
@@ -238,6 +262,9 @@ Route::middleware(['auth', 'dapur.role:super_admin,admin_pusat,admin', ResolvePe
 
     Route::prefix('penggajian')->name('penggajian.')->group(function () {
         Route::get('/', [PenggajianController::class, 'index'])->name('index');
+        Route::get('/batch-detail', [PenggajianController::class, 'batchDetail'])->name('batch-detail');
+        Route::post('/batch-status', [PenggajianController::class, 'batchStatus'])->name('batch-status');
+        Route::get('/cetak-kwitansi-batch', [PenggajianController::class, 'cetakKwitansiBatch'])->name('cetak-kwitansi-batch');
         Route::get('/create', [PenggajianController::class, 'create'])->name('create');
         Route::post('/generate-bulk', [PenggajianController::class, 'generateBulk'])->name('generate-bulk');
         Route::post('/', [PenggajianController::class, 'store'])->name('store');

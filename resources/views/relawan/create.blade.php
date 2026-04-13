@@ -40,18 +40,19 @@
                 return digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
             }
 
-            const gaji = document.getElementById('gaji_pokok');
-            if (gaji) {
-                gaji.addEventListener('input', function () {
-                    const caret = gaji.selectionStart;
-                    const before = gaji.value.length;
-                    gaji.value = formatRupiahDigits(gaji.value);
-                    const after = gaji.value.length;
+            ['gaji_pokok', 'gaji_per_hari'].forEach(function (id) {
+                const input = document.getElementById(id);
+                if (!input) return;
+                input.addEventListener('input', function () {
+                    const caret = input.selectionStart;
+                    const before = input.value.length;
+                    input.value = formatRupiahDigits(input.value);
+                    const after = input.value.length;
                     try {
-                        gaji.setSelectionRange(caret + (after - before), caret + (after - before));
+                        input.setSelectionRange(caret + (after - before), caret + (after - before));
                     } catch (e) {}
                 });
-            }
+            });
 
             function initSelect2Relawan() {
                 if (!window.jQuery || !jQuery.fn.select2) return;

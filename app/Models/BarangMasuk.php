@@ -14,6 +14,7 @@ class BarangMasuk extends Model
     protected $fillable = [
         'kode_transaksi',
         'barang_id',
+        'order_barang_item_id',
         'profil_mbg_id',
         'periode_id',
         'tanggal',
@@ -23,6 +24,7 @@ class BarangMasuk extends Model
         'total_harga',
         'sumber',
         'keterangan',
+        'kondisi_penerimaan',
         'gambar',
         'created_by',
     ];
@@ -50,6 +52,11 @@ class BarangMasuk extends Model
     public function barang(): BelongsTo
     {
         return $this->belongsTo(Barang::class, 'barang_id');
+    }
+
+    public function orderItem(): BelongsTo
+    {
+        return $this->belongsTo(OrderBarangItem::class, 'order_barang_item_id');
     }
 
     public function profilMbg(): BelongsTo

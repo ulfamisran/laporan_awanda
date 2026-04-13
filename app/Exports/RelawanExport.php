@@ -33,6 +33,7 @@ class RelawanExport implements FromQuery, WithHeadings, WithMapping
             'Tanggal lahir',
             'Tanggal bergabung',
             'Gaji pokok',
+            'Gaji per hari',
             'Status',
             'Keterangan',
         ];
@@ -55,6 +56,7 @@ class RelawanExport implements FromQuery, WithHeadings, WithMapping
             optional($row->tanggal_lahir)->format('Y-m-d'),
             optional($row->tanggal_bergabung)->format('Y-m-d'),
             (float) $row->gaji_pokok,
+            (float) $row->gaji_per_hari,
             $row->status,
             $row->keterangan,
         ];

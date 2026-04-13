@@ -181,6 +181,7 @@
         p.inst-label { margin-top: 0; }
         input.inst-input,
         select.inst-select,
+        textarea.inst-input,
         textarea.inst-textarea {
             box-sizing: border-box;
             display: block;
@@ -205,21 +206,28 @@
             padding-right: 2.5rem;
         }
         input.inst-input::placeholder,
+        textarea.inst-input::placeholder,
         textarea.inst-textarea::placeholder {
             color: #a8c0d4;
         }
         input.inst-input:hover,
         select.inst-select:hover,
+        textarea.inst-input:hover,
         textarea.inst-textarea:hover {
             border-color: #c5dce8;
         }
         input.inst-input:focus,
         select.inst-select:focus,
+        textarea.inst-input:focus,
         textarea.inst-textarea:focus {
             border-color: #4a9b7a;
             box-shadow: 0 0 0 1px #4a9b7a;
         }
-        .inst-textarea { resize: vertical; min-height: 5rem; }
+        textarea.inst-input,
+        .inst-textarea {
+            resize: vertical;
+            min-height: 5rem;
+        }
         .inst-checkbox {
             margin-top: 0.25rem;
             border-radius: 0.25rem;

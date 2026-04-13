@@ -28,6 +28,7 @@ class Relawan extends Model
         'tanggal_bergabung',
         'foto',
         'gaji_pokok',
+        'gaji_per_hari',
         'status',
         'keterangan',
     ];
@@ -40,6 +41,7 @@ class Relawan extends Model
             'tanggal_lahir' => 'date',
             'tanggal_bergabung' => 'date',
             'gaji_pokok' => 'decimal:2',
+            'gaji_per_hari' => 'decimal:2',
         ];
     }
 

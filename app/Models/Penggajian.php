@@ -17,6 +17,10 @@ class Penggajian extends Model
         'periode_id',
         'periode_bulan',
         'periode_tahun',
+        'periode_mulai',
+        'periode_selesai',
+        'metode_penggajian',
+        'jumlah_hadir',
         'gaji_pokok',
         'tunjangan_transport',
         'tunjangan_makan',
@@ -42,6 +46,10 @@ class Penggajian extends Model
             'periode_id' => 'integer',
             'periode_bulan' => 'integer',
             'periode_tahun' => 'integer',
+            'periode_mulai' => 'date',
+            'periode_selesai' => 'date',
+            'metode_penggajian' => 'string',
+            'jumlah_hadir' => 'integer',
             'gaji_pokok' => 'decimal:2',
             'tunjangan_transport' => 'decimal:2',
             'tunjangan_makan' => 'decimal:2',
@@ -112,6 +120,10 @@ class Penggajian extends Model
 
     public function getPeriodeLabelAttribute(): string
     {
+        if ($this->periode_mulai && $this->periode_selesai) {
+            return $this->periode_mulai->format('d M Y').' - '.$this->periode_selesai->format('d M Y');
+        }
+
         $bulan = (int) ($this->periode_bulan ?? 0);
         $tahun = (int) ($this->periode_tahun ?? 0);
         $nama = [

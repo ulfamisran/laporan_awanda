@@ -54,6 +54,7 @@ class RelawanController extends Controller
             ->addColumn('posisi_label', fn (Relawan $r) => e($r->posisiRelawan?->nama_posisi ?? '—'))
             ->addColumn('dapur_label', fn (Relawan $r) => e($r->profilMbg?->nama_dapur ?? '—'))
             ->addColumn('gaji_label', fn (Relawan $r) => formatRupiah($r->gaji_pokok))
+            ->addColumn('gaji_harian_label', fn (Relawan $r) => formatRupiah($r->gaji_per_hari))
             ->addColumn('status_badge', function (Relawan $r) {
                 return match ($r->status) {
                     'aktif' => '<span class="rounded-full px-3 py-1 text-[11px] font-semibold" style="background:#d4f0e8;color:#2d7a60;">Aktif</span>',
@@ -95,6 +96,7 @@ class RelawanController extends Controller
 
         if (! $request->user()?->hasRole('super_admin')) {
             $data['gaji_pokok'] = 0;
+            $data['gaji_per_hari'] = 0;
         }
 
         if ($request->hasFile('foto')) {
@@ -142,7 +144,7 @@ class RelawanController extends Controller
         unset($data['foto'], $data['crop_x'], $data['crop_y'], $data['crop_w'], $data['crop_h']);
 
         if (! $request->user()?->hasRole('super_admin')) {
-            unset($data['gaji_pokok']);
+            unset($data['gaji_pokok'], $data['gaji_per_hari']);
         }
 
         if ($request->hasFile('foto')) {

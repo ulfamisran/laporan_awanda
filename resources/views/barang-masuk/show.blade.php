@@ -24,6 +24,12 @@
                 <div><dt class="text-xs font-bold uppercase" style="color:#7fa8c9;">Harga satuan</dt><dd>{{ formatRupiah($masuk->harga_satuan) }}</dd></div>
                 <div><dt class="text-xs font-bold uppercase" style="color:#7fa8c9;">Total</dt><dd class="font-semibold">{{ formatRupiah($masuk->total_harga) }}</dd></div>
                 <div><dt class="text-xs font-bold uppercase" style="color:#7fa8c9;">Sumber</dt><dd>{{ $masuk->sumber?->label() }}</dd></div>
+                @if ($masuk->orderItem?->orderBarang)
+                    <div><dt class="text-xs font-bold uppercase" style="color:#7fa8c9;">Nomor order</dt><dd>{{ $masuk->orderItem->orderBarang->nomor_order }}</dd></div>
+                @endif
+                @if ($masuk->kondisi_penerimaan)
+                    <div><dt class="text-xs font-bold uppercase" style="color:#7fa8c9;">Kondisi penerimaan</dt><dd>{{ $masuk->kondisi_penerimaan }}</dd></div>
+                @endif
                 <div><dt class="text-xs font-bold uppercase" style="color:#7fa8c9;">Input oleh</dt><dd>{{ $masuk->creator?->name }}</dd></div>
                 @if ($masuk->keterangan)
                     <div><dt class="text-xs font-bold uppercase" style="color:#7fa8c9;">Keterangan</dt><dd>{{ $masuk->keterangan }}</dd></div>

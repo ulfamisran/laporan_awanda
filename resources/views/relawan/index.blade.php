@@ -57,6 +57,7 @@
                         <th>Cabang</th>
                         <th>Status</th>
                         <th>Gaji pokok</th>
+                        <th>Gaji per hari</th>
                         <th class="text-right">Aksi</th>
                     </tr>
                 </thead>
@@ -96,6 +97,7 @@
                     { data: 'dapur_label', name: 'dapur_label', orderable: false, searchable: false },
                     { data: 'status_badge', name: 'relawans.status', orderable: false, searchable: false },
                     { data: 'gaji_label', name: 'relawans.gaji_pokok', orderable: true, searchable: false },
+                    { data: 'gaji_harian_label', name: 'relawans.gaji_per_hari', orderable: true, searchable: false },
                     { data: 'aksi', name: 'aksi', orderable: false, searchable: false, className: 'text-right' },
                 ],
                 language: {

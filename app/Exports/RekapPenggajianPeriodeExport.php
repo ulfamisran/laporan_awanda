@@ -29,7 +29,7 @@ class RekapPenggajianPeriodeExport implements FromCollection, WithColumnFormatti
 
     public function headings(): array
     {
-        return ['Relawan', 'Posisi', 'Gaji pokok', 'Tunjangan', 'Potongan', 'Total', 'Status'];
+        return ['Relawan', 'Posisi', 'Metode', 'Hadir', 'Gaji pokok', 'Tunjangan', 'Potongan', 'Total', 'Status'];
     }
 
     /**
@@ -43,6 +43,8 @@ class RekapPenggajianPeriodeExport implements FromCollection, WithColumnFormatti
         return [
             $row->relawan?->nama_lengkap,
             $row->relawan?->posisiRelawan?->nama_posisi,
+            $row->metode_penggajian === 'kehadiran' ? 'Kehadiran' : 'Gaji pokok',
+            (int) $row->jumlah_hadir,
             (float) $row->gaji_pokok,
             $tunj,
             (float) $row->potongan,
@@ -56,20 +58,21 @@ class RekapPenggajianPeriodeExport implements FromCollection, WithColumnFormatti
         $rp = '"Rp" #,##0';
 
         return [
-            'C' => $rp,
             'D' => $rp,
             'E' => $rp,
             'F' => $rp,
+            'G' => $rp,
+            'H' => $rp,
         ];
     }
 
     public function styles(Worksheet $sheet): array
     {
-        $sheet->getStyle('A1:G1')->getFont()->setBold(true);
-        $sheet->getStyle('A1:G1')->getFill()
+        $sheet->getStyle('A1:I1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:I1')->getFill()
             ->setFillType(Fill::FILL_SOLID)
             ->getStartColor()->setARGB('FFE8F1F8');
-        foreach (range('A', 'G') as $col) {
+        foreach (range('A', 'I') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 

@@ -87,6 +87,10 @@
                     <dt class="text-xs font-semibold uppercase" style="color:#7fa8c9;">Gaji pokok</dt>
                     <dd class="text-sm font-semibold">{{ formatRupiah($relawan->gaji_pokok) }}</dd>
                 </div>
+                <div>
+                    <dt class="text-xs font-semibold uppercase" style="color:#7fa8c9;">Gaji per hari</dt>
+                    <dd class="text-sm font-semibold">{{ formatRupiah($relawan->gaji_per_hari) }}</dd>
+                </div>
                 @if ($relawan->keterangan)
                     <div class="sm:col-span-2">
                         <dt class="text-xs font-semibold uppercase" style="color:#7fa8c9;">Keterangan</dt>

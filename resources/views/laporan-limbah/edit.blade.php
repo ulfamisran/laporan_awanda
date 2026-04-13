@@ -6,7 +6,7 @@
     <div class="inst-form-page" style="max-width:52rem;">
         <a href="{{ route('laporan-limbah.harian.show', $harian) }}" class="inst-back">← Kembali</a>
         <h2 class="inst-form-title">Ubah laporan limbah harian</h2>
-        <p class="inst-form-lead text-sm" style="color:#4a6b7f;">{{ $harian->tanggal?->format('d/m/Y') }} — isi semua kategori.</p>
+        <p class="inst-form-lead text-sm" style="color:#4a6b7f;">{{ $harian->tanggal?->format('d/m/Y') }} — Anda bisa melengkapi kategori yang belum terisi.</p>
 
         <form method="POST" action="{{ route('laporan-limbah.harian.update', $harian) }}" enctype="multipart/form-data" class="space-y-6">
             @csrf
@@ -46,15 +46,15 @@
 
                     <div class="grid gap-4 sm:grid-cols-2">
                         <div>
-                            <label class="inst-label" for="jumlah_{{ $kid }}">Jumlah <span class="inst-required">*</span></label>
-                            <input type="number" step="0.01" min="0.01" name="kategori[{{ $kid }}][jumlah]" id="jumlah_{{ $kid }}" class="inst-input font-mono" required value="{{ old("kategori.$kid.jumlah", $d?->jumlah) }}">
+                            <label class="inst-label" for="jumlah_{{ $kid }}">Jumlah</label>
+                            <input type="number" step="0.01" min="0.01" name="kategori[{{ $kid }}][jumlah]" id="jumlah_{{ $kid }}" class="inst-input font-mono" value="{{ old("kategori.$kid.jumlah", $d?->jumlah) }}">
                             @error("kategori.$kid.jumlah")
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
                         <div>
-                            <label class="inst-label" for="satuan_{{ $kid }}">Satuan <span class="inst-required">*</span></label>
-                            <select name="kategori[{{ $kid }}][satuan]" id="satuan_{{ $kid }}" class="inst-select" required>
+                            <label class="inst-label" for="satuan_{{ $kid }}">Satuan</label>
+                            <select name="kategori[{{ $kid }}][satuan]" id="satuan_{{ $kid }}" class="inst-select">
                                 @foreach (\App\Enums\SatuanLimbah::cases() as $s)
                                     <option value="{{ $s->value }}" @selected(old("kategori.$kid.satuan", $d ? ($d->satuan instanceof \App\Enums\SatuanLimbah ? $d->satuan->value : (string) $d->satuan) : '') === $s->value)>{{ $s->label() }}</option>
                                 @endforeach
@@ -63,8 +63,8 @@
                     </div>
 
                     <div>
-                        <label class="inst-label" for="jenis_{{ $kid }}">Jenis penanganan <span class="inst-required">*</span></label>
-                        <select name="kategori[{{ $kid }}][jenis_penanganan]" id="jenis_{{ $kid }}" class="inst-select" required x-model="jenis">
+                        <label class="inst-label" for="jenis_{{ $kid }}">Jenis penanganan</label>
+                        <select name="kategori[{{ $kid }}][jenis_penanganan]" id="jenis_{{ $kid }}" class="inst-select" x-model="jenis">
                             @foreach (\App\Enums\JenisPenangananLimbah::cases() as $j)
                                 <option value="{{ $j->value }}" @selected($j0 === $j->value)>{{ $j->label() }}</option>
                             @endforeach

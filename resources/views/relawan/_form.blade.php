@@ -3,6 +3,7 @@
     $tl = old('tanggal_lahir', $relawan->tanggal_lahir?->format('d/m/Y'));
     $tb = old('tanggal_bergabung', $relawan->tanggal_bergabung?->format('d/m/Y'));
     $gajiOld = old('gaji_pokok', $relawan->exists ? number_format((float) $relawan->gaji_pokok, 0, ',', '.') : '');
+    $gajiHarianOld = old('gaji_per_hari', $relawan->exists ? number_format((float) $relawan->gaji_per_hari, 0, ',', '.') : '');
 @endphp
 
 <div class="space-y-5">
@@ -88,11 +89,17 @@
     </div>
 
     @if ($isSuper)
-        <div>
-            <label for="gaji_pokok" class="inst-label">Gaji pokok <span class="inst-required">*</span></label>
-            <input type="text" name="gaji_pokok" id="gaji_pokok" value="{{ $gajiOld }}" class="inst-input" required inputmode="numeric" autocomplete="off">
-            <p class="mt-1 text-xs" style="color:#7fa8c9;">Hanya Super Admin yang dapat mengatur gaji pokok.</p>
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+                <label for="gaji_pokok" class="inst-label">Gaji pokok <span class="inst-required">*</span></label>
+                <input type="text" name="gaji_pokok" id="gaji_pokok" value="{{ $gajiOld }}" class="inst-input" required inputmode="numeric" autocomplete="off">
+            </div>
+            <div>
+                <label for="gaji_per_hari" class="inst-label">Gaji per hari <span class="inst-required">*</span></label>
+                <input type="text" name="gaji_per_hari" id="gaji_per_hari" value="{{ $gajiHarianOld }}" class="inst-input" required inputmode="numeric" autocomplete="off">
+            </div>
         </div>
+        <p class="mt-1 text-xs" style="color:#7fa8c9;">Hanya Super Admin yang dapat mengatur nominal gaji.</p>
     @endif
 
     <div>

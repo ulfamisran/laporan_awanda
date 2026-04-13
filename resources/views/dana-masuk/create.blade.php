@@ -7,6 +7,7 @@
         <a href="{{ route('keuangan.masuk.index') }}" class="inst-back">← Kembali</a>
         <h2 class="inst-form-title">Tambah dana masuk</h2>
         <p class="inst-form-lead text-sm" style="color:#4a6b7f;">Kode: <span class="font-mono font-semibold">{{ $previewKode }}</span> (otomatis)</p>
+        @include('components.periode-aktif-badge')
         <div class="inst-form-card">
             <form method="POST" action="{{ route('keuangan.masuk.store') }}" enctype="multipart/form-data" class="space-y-5" id="form-dana-masuk">
                 @csrf

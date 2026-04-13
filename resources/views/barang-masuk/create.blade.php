@@ -7,10 +7,23 @@
         <a href="{{ route('stok.masuk.index') }}" class="inst-back">← Kembali</a>
         <h2 class="inst-form-title">Tambah barang masuk</h2>
         <p class="inst-form-lead text-sm" style="color:#4a6b7f;">Kode transaksi: <span class="font-mono font-semibold">{{ $previewKode }}</span> (otomatis saat simpan)</p>
+        @include('components.periode-aktif-badge')
         <div class="inst-form-card">
             <form method="POST" action="{{ route('stok.masuk.store') }}" enctype="multipart/form-data" class="space-y-5" id="form-masuk">
                 @csrf
                 <input type="hidden" name="profil_mbg_id" id="profil_mbg_hidden" value="{{ $profilId }}">
+
+                <div>
+                    <label for="order_barang_item_id" class="inst-label">Pilih item order barang (opsional)</label>
+                    <select name="order_barang_item_id" id="order_barang_item_id" class="inst-select">
+                        <option value="">Tidak dari order barang</option>
+                        @foreach ($orderItems as $it)
+                            <option value="{{ $it->id }}">
+                                {{ $it->orderBarang?->nomor_order }} — {{ $it->nama_barang }} ({{ number_format((float) $it->jumlah_barang, 2, ',', '.') }} {{ $it->satuan_barang }})
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
 
                 <div>
                     <label for="barang_id" class="inst-label">Barang <span class="inst-required">*</span></label>
@@ -68,6 +81,11 @@
                 </div>
 
                 <div>
+                    <label for="kondisi_penerimaan" class="inst-label">Kondisi penerimaan</label>
+                    <input type="text" name="kondisi_penerimaan" id="kondisi_penerimaan" class="inst-input" value="{{ old('kondisi_penerimaan') }}" placeholder="Contoh: Baik, kemasan utuh">
+                </div>
+
+                <div>
                     <label for="gambar" class="inst-label">Gambar (JPG/PNG/WebP, maks. 2MB)</label>
                     <input type="file" name="gambar" id="gambar" accept="image/jpeg,image/png,image/webp" class="inst-input @error('gambar') border-red-500 @enderror">
                     @error('gambar')
@@ -90,6 +108,7 @@
         (function () {
             const apiTpl = @json(url('/stok/api/barang')).replace(/\/$/, '') + '/';
             const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            const orderApiTpl = @json(route('stok.api.order-item', ['item' => 'ITEM_ID']));
 
             function formatRupiahDigits(raw) {
                 const digits = String(raw || '').replace(/\D/g, '');
@@ -155,6 +174,29 @@
                 jumlah?.addEventListener('input', updateTotal);
                 jQuery('#barang_id').on('change', function () {
                     loadBarang(this.value);
+                });
+                document.getElementById('order_barang_item_id')?.addEventListener('change', function () {
+                    const id = this.value;
+                    if (!id) return;
+                    fetch(orderApiTpl.replace('ITEM_ID', encodeURIComponent(id)), { headers: { Accept: 'application/json', 'X-CSRF-TOKEN': csrf } })
+                        .then((r) => r.json())
+                        .then((d) => {
+                            const barangSelect = document.getElementById('barang_id');
+                            if (barangSelect) {
+                                barangSelect.value = String(d.barang_id || '');
+                                if (window.jQuery) jQuery(barangSelect).trigger('change');
+                            }
+                            const satuan = document.getElementById('satuan');
+                            if (satuan) satuan.value = d.satuan_barang || '';
+                            const jumlah = document.getElementById('jumlah');
+                            if (jumlah) jumlah.value = d.jumlah_barang || '';
+                            const harga = document.getElementById('harga_satuan');
+                            if (harga) harga.value = formatRupiahDigits(Math.round(d.harga_barang || 0));
+                            const ket = document.getElementById('keterangan');
+                            if (ket && !ket.value) ket.value = `Penerimaan dari order ${d.nomor_order || '-'}${d.supplier ? ' - Supplier: ' + d.supplier : ''}`;
+                            updateTotal();
+                        })
+                        .catch(() => {});
                 });
                 const bid = document.getElementById('barang_id')?.value;
                 if (bid) loadBarang(bid);

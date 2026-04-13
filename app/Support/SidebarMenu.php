@@ -41,6 +41,7 @@ class SidebarMenu
                     ['label' => 'Kategori Dana Keluar', 'route' => 'master.kategori-dana-keluar.index', 'match' => ['master.kategori-dana-keluar.*']],
                     ['label' => 'Akun Dana', 'route' => 'master.akun-dana.index', 'match' => ['master.akun-dana.*']],
                     ['label' => 'Barang', 'route' => 'master.barang.index', 'match' => ['master.barang.*']],
+                    ['label' => 'Supplier', 'route' => 'master.supplier.index', 'match' => ['master.supplier.*']],
                     ['label' => 'Posisi Relawan', 'route' => 'master.posisi-relawan.index', 'match' => ['master.posisi-relawan.*']],
                     ['label' => 'Relawan', 'route' => 'master.relawan.index', 'match' => ['master.relawan.*']],
                 ],
@@ -52,6 +53,8 @@ class SidebarMenu
                 'icon' => 'boxes',
                 'children' => [
                     ['label' => 'Stok Awal', 'route' => 'stok.awal.index', 'match' => ['stok.awal.*']],
+                    ['label' => 'Order Barang', 'route' => 'stok.order.index', 'match' => ['stok.order.*']],
+                    ['label' => 'Penerimaan Barang', 'route' => 'stok.penerimaan.index', 'match' => ['stok.penerimaan.*']],
                     ['label' => 'Barang Masuk', 'route' => 'stok.masuk.index', 'match' => ['stok.masuk.*']],
                     ['label' => 'Barang Keluar', 'route' => 'stok.keluar.index', 'match' => ['stok.keluar.*']],
                     ['label' => 'Mutasi Stok', 'route' => 'stok.mutasi.index', 'match' => ['stok.mutasi.*']],

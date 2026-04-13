@@ -33,10 +33,12 @@ class UpdateRelawanRequest extends MbgFormRequest
             }
         }
 
-        $gaji = $this->input('gaji_pokok');
-        if (is_string($gaji)) {
-            $digits = preg_replace('/\D+/', '', $gaji);
-            $this->merge(['gaji_pokok' => $digits === '' ? '0' : $digits]);
+        foreach (['gaji_pokok', 'gaji_per_hari'] as $field) {
+            $raw = $this->input($field);
+            if (is_string($raw)) {
+                $digits = preg_replace('/\D+/', '', $raw);
+                $this->merge([$field => $digits === '' ? '0' : $digits]);
+            }
         }
     }
 
@@ -72,6 +74,7 @@ class UpdateRelawanRequest extends MbgFormRequest
             'tanggal_bergabung' => ['required', 'date'],
             'foto' => ['nullable', 'image', 'max:4096'],
             'gaji_pokok' => $gajiRules,
+            'gaji_per_hari' => $gajiRules,
             'status' => ['required', 'string', Rule::in(['aktif', 'nonaktif', 'cuti'])],
             'keterangan' => ['nullable', 'string', 'max:5000'],
             'crop_x' => ['nullable', 'integer', 'min:0'],
@@ -93,6 +96,7 @@ class UpdateRelawanRequest extends MbgFormRequest
             'tanggal_lahir' => 'tanggal lahir',
             'tanggal_bergabung' => 'tanggal bergabung',
             'gaji_pokok' => 'gaji pokok',
+            'gaji_per_hari' => 'gaji per hari',
         ];
     }
 }

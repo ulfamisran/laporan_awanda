@@ -19,7 +19,7 @@
         </div>
         <div class="flex flex-wrap gap-2">
             <a href="{{ route('penggajian.slip-pdf', $p) }}" target="_blank" class="inst-btn-secondary text-sm">Cetak slip (PDF)</a>
-            <a href="{{ route('penggajian.index', ['bulan' => $p->periode_bulan, 'tahun' => $p->periode_tahun]) }}" class="inst-btn-secondary text-sm">Kembali ke rekap</a>
+            <a href="{{ route('penggajian.index', ['mulai' => optional($p->periode_mulai)->toDateString(), 'selesai' => optional($p->periode_selesai)->toDateString()]) }}" class="inst-btn-secondary text-sm">Kembali ke rekap</a>
             @if ($canEditDraft)
                 <a href="{{ route('penggajian.edit', $p) }}" class="inst-btn-primary text-sm">Ubah komponen</a>
             @endif
@@ -42,7 +42,10 @@
                     </dd>
                 </div>
                 <div class="flex justify-between gap-4"><dt class="inst-td-muted">Dapur</dt><dd class="font-medium">{{ $p->profilMbg?->nama_dapur }}</dd></div>
-                <div class="flex justify-between gap-4"><dt class="inst-td-muted">Gaji pokok</dt><dd class="font-mono">{{ formatRupiah($p->gaji_pokok) }}</dd></div>
+                <div class="flex justify-between gap-4"><dt class="inst-td-muted">Metode</dt><dd class="font-semibold">{{ $p->metode_penggajian === 'kehadiran' ? 'Berdasarkan kehadiran' : 'Berdasarkan gaji pokok' }}</dd></div>
+                <div class="flex justify-between gap-4"><dt class="inst-td-muted">Jumlah hadir</dt><dd class="font-semibold">{{ $p->jumlah_hadir }} hari</dd></div>
+                <div class="flex justify-between gap-4"><dt class="inst-td-muted">Gaji per hari</dt><dd class="font-mono">{{ formatRupiah($p->relawan?->gaji_per_hari ?? 0) }}</dd></div>
+                <div class="flex justify-between gap-4"><dt class="inst-td-muted">Gaji pokok periode</dt><dd class="font-mono">{{ formatRupiah($p->gaji_pokok) }}</dd></div>
                 <div class="flex justify-between gap-4"><dt class="inst-td-muted">Tunj. transport</dt><dd class="font-mono">{{ formatRupiah($p->tunjangan_transport) }}</dd></div>
                 <div class="flex justify-between gap-4"><dt class="inst-td-muted">Tunj. makan</dt><dd class="font-mono">{{ formatRupiah($p->tunjangan_makan) }}</dd></div>
                 <div class="flex justify-between gap-4"><dt class="inst-td-muted">Tunj. lainnya</dt><dd class="font-mono">{{ formatRupiah($p->tunjangan_lainnya) }}</dd></div>

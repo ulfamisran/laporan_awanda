@@ -200,9 +200,7 @@ class LaporanLimbahController extends Controller
                 'created_by' => (int) $request->user()->getKey(),
             ]);
 
-            foreach ($kategoris as $k) {
-                $kid = (int) $k->id;
-                $row = $validated['kategori'][$kid];
+            foreach ($validated['kategori'] as $kid => $row) {
                 $file = $request->file("kategori.$kid.gambar");
                 $gambar = $this->simpanGambarLimbah($file);
                 LaporanLimbah::query()->create([
@@ -298,9 +296,8 @@ class LaporanLimbahController extends Controller
 
             $byKat = $harian->details->keyBy('kategori_limbah_id');
 
-            foreach ($kategoris as $k) {
-                $kid = (int) $k->id;
-                $row = $validated['kategori'][$kid];
+            foreach ($validated['kategori'] as $kid => $row) {
+                $kid = (int) $kid;
                 $existing = $byKat->get($kid);
                 $file = $request->file("kategori.$kid.gambar");
                 $gambar = ($file && $file->isValid())
@@ -629,14 +626,12 @@ class LaporanLimbahController extends Controller
 
         foreach ($kategoris as $k) {
             $id = (int) $k->id;
-            $rules["kategori.$id.jumlah"] = ['required', 'numeric', 'min:0.01', 'max:99999999.99'];
-            $rules["kategori.$id.satuan"] = ['required', 'string', 'in:'.$satIn];
-            $rules["kategori.$id.jenis_penanganan"] = ['required', 'string', 'in:'.$jenIn];
+            $rules["kategori.$id.jumlah"] = ['nullable', 'numeric', 'min:0.01', 'max:99999999.99'];
+            $rules["kategori.$id.satuan"] = ['nullable', 'string', 'in:'.$satIn];
+            $rules["kategori.$id.jenis_penanganan"] = ['nullable', 'string', 'in:'.$jenIn];
             $rules["kategori.$id.harga_jual"] = ['nullable', 'numeric', 'min:0'];
             $rules["kategori.$id.keterangan"] = ['nullable', 'string', 'max:5000'];
-            $rules["kategori.$id.gambar"] = $isUpdate
-                ? ['nullable', 'file', 'image', 'max:5120', 'mimes:jpeg,jpg,png,webp']
-                : ['required', 'file', 'image', 'max:5120', 'mimes:jpeg,jpg,png,webp'];
+            $rules["kategori.$id.gambar"] = ['nullable', 'file', 'image', 'max:5120', 'mimes:jpeg,jpg,png,webp'];
         }
 
         $validated = $request->validate($rules, [], [
@@ -646,29 +641,67 @@ class LaporanLimbahController extends Controller
         $existingHarian?->loadMissing('details');
         $byKat = $existingHarian?->details->keyBy('kategori_limbah_id');
 
+        $selectedKategori = [];
         foreach ($kategoris as $k) {
             $id = (int) $k->id;
+            $row = $validated['kategori'][$id] ?? [];
             $file = $request->file("kategori.$id.gambar");
-            if ($isUpdate && (! $file || ! $file->isValid())) {
-                $ex = $byKat?->get($id);
-                if (! $ex?->gambar) {
-                    throw ValidationException::withMessages([
-                        "kategori.$id.gambar" => 'Foto limbah wajib diisi untuk kategori ini.',
-                    ]);
-                }
+            $hasAny = (
+                ($row['jumlah'] ?? null) !== null ||
+                ($row['satuan'] ?? null) !== null ||
+                ($row['jenis_penanganan'] ?? null) !== null ||
+                ($row['harga_jual'] ?? null) !== null ||
+                (($row['keterangan'] ?? null) !== null && trim((string) $row['keterangan']) !== '') ||
+                ($file && $file->isValid())
+            );
+            if (! $hasAny) {
+                continue;
             }
 
-            if (($validated['kategori'][$id]['jenis_penanganan'] ?? '') === JenisPenangananLimbah::Dijual->value) {
-                $extra = $request->validate([
-                    "kategori.$id.harga_jual" => ['required', 'numeric', 'min:0'],
+            if (($row['jumlah'] ?? null) === null) {
+                throw ValidationException::withMessages([
+                    "kategori.$id.jumlah" => 'Jumlah wajib diisi jika kategori ini dicatat.',
                 ]);
-                $validated['kategori'][$id]['harga_jual'] = data_get($extra, "kategori.$id.harga_jual");
-            } else {
-                $validated['kategori'][$id]['harga_jual'] = null;
             }
+            if (($row['satuan'] ?? null) === null) {
+                throw ValidationException::withMessages([
+                    "kategori.$id.satuan" => 'Satuan wajib diisi jika kategori ini dicatat.',
+                ]);
+            }
+            if (($row['jenis_penanganan'] ?? null) === null) {
+                throw ValidationException::withMessages([
+                    "kategori.$id.jenis_penanganan" => 'Jenis penanganan wajib diisi jika kategori ini dicatat.',
+                ]);
+            }
+
+            $ex = $byKat?->get($id);
+            if ((! $file || ! $file->isValid()) && (! $isUpdate || ! $ex?->gambar)) {
+                throw ValidationException::withMessages([
+                    "kategori.$id.gambar" => 'Foto limbah wajib diisi untuk kategori yang dicatat.',
+                ]);
+            }
+
+            if (($row['jenis_penanganan'] ?? '') === JenisPenangananLimbah::Dijual->value) {
+                if (($row['harga_jual'] ?? null) === null) {
+                    throw ValidationException::withMessages([
+                        "kategori.$id.harga_jual" => 'Harga jual wajib diisi untuk limbah yang dijual.',
+                    ]);
+                }
+            } else {
+                $row['harga_jual'] = null;
+            }
+
+            $selectedKategori[$id] = $row;
+        }
+
+        if ($selectedKategori === []) {
+            throw ValidationException::withMessages([
+                'kategori' => 'Isi minimal 1 kategori limbah terlebih dahulu.',
+            ]);
         }
 
         $validated['tanggal'] = $this->parseTanggal($validated['tanggal'])->toDateString();
+        $validated['kategori'] = $selectedKategori;
 
         return $validated;
     }
