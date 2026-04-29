@@ -54,6 +54,15 @@ class PenggajianController extends Controller
             ]))
             ->map(function ($group) {
                 $first = $group->first();
+                $mulai = optional($first->periode_mulai)->toDateString();
+                $selesai = optional($first->periode_selesai)->toDateString();
+                $bulan = (int) ($first->periode_bulan ?? 0);
+                $tahun = (int) ($first->periode_tahun ?? 0);
+                if (($mulai === null || $mulai === '' || $selesai === null || $selesai === '') && $bulan > 0 && $tahun > 0) {
+                    $anchor = Carbon::create($tahun, $bulan, 1);
+                    $mulai = $mulai ?: $anchor->copy()->startOfMonth()->toDateString();
+                    $selesai = $selesai ?: $anchor->copy()->endOfMonth()->toDateString();
+                }
                 $statuses = $group
                     ->map(fn (Penggajian $row) => (string) ($row->status?->value ?? $row->status))
                     ->unique()
@@ -61,8 +70,8 @@ class PenggajianController extends Controller
                 $status = $statuses->count() === 1 ? (string) $statuses->first() : 'campuran';
 
                 return [
-                    'periode_mulai' => optional($first->periode_mulai)->toDateString(),
-                    'periode_selesai' => optional($first->periode_selesai)->toDateString(),
+                    'periode_mulai' => $mulai,
+                    'periode_selesai' => $selesai,
                     'periode_label' => $first->periode_label,
                     'metode_penggajian' => $first->metode_penggajian ?: 'gaji_pokok',
                     'status' => $status,
