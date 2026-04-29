@@ -236,6 +236,7 @@ class PenggajianController extends Controller
                 'mulai' => ['required', 'date'],
                 'selesai' => ['required', 'date', 'after_or_equal:mulai'],
             ]);
+            $mulaiCarbon = Carbon::parse($mulai);
 
             $previewRelawans = Relawan::query()
                 ->aktif()
@@ -247,8 +248,8 @@ class PenggajianController extends Controller
             $existingRelawanIds = Penggajian::query()
                 ->where('profil_mbg_id', $profilId)
                 ->where('periode_id', PeriodeTenant::id())
-                ->whereDate('periode_mulai', $mulai)
-                ->whereDate('periode_selesai', $selesai)
+                ->where('periode_bulan', (int) $mulaiCarbon->month)
+                ->where('periode_tahun', (int) $mulaiCarbon->year)
                 ->pluck('relawan_id');
         }
 
@@ -308,8 +309,8 @@ class PenggajianController extends Controller
                 ->where('relawan_id', $rel->getKey())
                 ->where('profil_mbg_id', $profilId)
                 ->where('periode_id', PeriodeTenant::id())
-                ->whereDate('periode_mulai', $mulai->toDateString())
-                ->whereDate('periode_selesai', $selesai->toDateString())
+                ->where('periode_bulan', (int) $mulai->month)
+                ->where('periode_tahun', (int) $mulai->year)
                 ->exists();
 
             if ($exists) {
@@ -407,8 +408,8 @@ class PenggajianController extends Controller
             ->where('relawan_id', $rel->getKey())
             ->where('profil_mbg_id', $profilId)
             ->where('periode_id', PeriodeTenant::id())
-            ->whereDate('periode_mulai', $mulai->toDateString())
-            ->whereDate('periode_selesai', $selesai->toDateString())
+            ->where('periode_bulan', (int) $mulai->month)
+            ->where('periode_tahun', (int) $mulai->year)
             ->exists();
 
         if ($exists) {

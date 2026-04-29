@@ -52,7 +52,7 @@
         @endphp
         @if ($adaExisting)
             <div class="mb-4 rounded-xl border px-4 py-3 text-sm" style="border-color:#fcd34d;background:#fffbeb;color:#92400e;">
-                <strong>Peringatan:</strong> {{ $existingRelawanIds->count() }} relawan sudah memiliki penggajian untuk periode ini dan akan dilewati saat generate.
+                <strong>Peringatan:</strong> {{ $existingRelawanIds->count() }} relawan sudah memiliki penggajian pada bulan/periode aktif ini dan akan dilewati saat generate.
             </div>
         @endif
 
@@ -110,7 +110,7 @@
                 <button type="submit" class="inst-btn-primary">
                 Generate penggajian bulk
                 </button>
-                <p class="mt-2 text-xs inst-td-muted">Isi jumlah hadir per relawan. Record duplikat (relawan + rentang tanggal) akan dilewati.</p>
+                <p class="mt-2 text-xs inst-td-muted">Isi jumlah hadir per relawan. Record duplikat (relawan + bulan + tahun pada periode aktif) akan dilewati.</p>
             </div>
         </form>
     @elseif(request('preview'))

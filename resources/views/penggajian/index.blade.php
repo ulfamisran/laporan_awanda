@@ -14,7 +14,7 @@
             <p class="inst-page-desc">Tabel batch penggajian per periode dan metode.</p>
         </div>
         <div class="flex flex-wrap gap-2">
-            <a href="{{ route('penggajian.create', ['preview' => 1]) }}" class="inst-btn-primary shrink-0">Generate penggajian</a>
+            <a href="{{ route('penggajian.create') }}" class="inst-btn-primary shrink-0">Generate penggajian</a>
         </div>
     </div>
 
