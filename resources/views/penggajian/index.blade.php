@@ -18,8 +18,8 @@
         </div>
     </div>
 
-    <form method="get" action="{{ route('penggajian.index') }}" class="inst-filter-panel mb-4 space-y-3">
-        <div class="flex flex-wrap gap-4">
+    <form method="get" action="{{ route('penggajian.index') }}" class="inst-filter-panel mb-4" id="form-filter-penggajian">
+        <div class="flex flex-wrap items-end justify-between gap-4">
             @if (! $isAdminDapur)
                 <div>
                     <label for="f-status" class="inst-label-filter">Status</label>
@@ -31,8 +31,17 @@
                     </select>
                 </div>
             @endif
+            <div class="min-w-[240px] flex-1 sm:max-w-sm">
+                <label for="f-search" class="inst-label-filter">Cari data</label>
+                <input
+                    id="f-search"
+                    type="text"
+                    class="inst-input mt-2 w-full"
+                    placeholder="Cari periode, metode, status..."
+                    autocomplete="off"
+                >
+            </div>
         </div>
-        <button type="submit" class="inst-btn-secondary text-sm">Terapkan filter</button>
     </form>
 
     <div class="inst-panel overflow-hidden p-4 sm:p-6">
@@ -50,7 +59,7 @@
                 </thead>
                 <tbody>
                     @forelse ($batches as $batch)
-                        <tr>
+                        <tr class="batch-row">
                             <td class="font-medium">{{ $batch['periode_label'] }}</td>
                             <td>{{ $batch['metode_penggajian'] === 'kehadiran' ? 'Berdasarkan kehadiran' : 'Berdasarkan gaji pokok' }}</td>
                             <td>
@@ -108,10 +117,13 @@
                             </td>
                         </tr>
                     @empty
-                        <tr>
+                        <tr class="batch-empty-row">
                             <td colspan="6" class="inst-td-muted py-8 text-center">Belum ada batch penggajian.</td>
                         </tr>
                     @endforelse
+                    <tr class="batch-no-match-row hidden">
+                        <td colspan="6" class="inst-td-muted py-8 text-center">Tidak ada data yang cocok.</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -120,6 +132,32 @@
 
 @push('scripts')
     <script>
-        if (window.lucide) lucide.createIcons();
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.lucide) lucide.createIcons();
+
+            const form = document.getElementById('form-filter-penggajian');
+            const status = document.getElementById('f-status');
+            const search = document.getElementById('f-search');
+            const rows = Array.from(document.querySelectorAll('.batch-row'));
+            const emptyRow = document.querySelector('.batch-empty-row');
+            const noMatchRow = document.querySelector('.batch-no-match-row');
+
+            status?.addEventListener('change', function () {
+                form?.submit();
+            });
+
+            if (!search || rows.length === 0) return;
+            search.addEventListener('input', function () {
+                const keyword = String(this.value || '').trim().toLowerCase();
+                let visibleCount = 0;
+                rows.forEach((row) => {
+                    const visible = keyword === '' || row.textContent.toLowerCase().includes(keyword);
+                    row.classList.toggle('hidden', !visible);
+                    if (visible) visibleCount++;
+                });
+                if (emptyRow) emptyRow.classList.add('hidden');
+                if (noMatchRow) noMatchRow.classList.toggle('hidden', visibleCount > 0);
+            });
+        });
     </script>
 @endpush

@@ -34,4 +34,9 @@ class OrderBarang extends Model
     {
         return $this->belongsTo(ProfilMbg::class, 'profil_mbg_id');
     }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
 }

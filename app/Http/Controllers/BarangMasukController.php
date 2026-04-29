@@ -48,20 +48,20 @@ class BarangMasukController extends Controller
         return DataTables::eloquent($query)
             ->addIndexColumn()
             ->editColumn('tanggal', fn (BarangMasuk $r) => $r->tanggal?->format('d/m/Y') ?? '')
-            ->addColumn('barang_cell', fn (BarangMasuk $r) => e($r->barang?->kode_barang.' — '.$r->barang?->nama_barang))
-            ->addColumn('dapur_cell', fn (BarangMasuk $r) => e($r->profilMbg?->nama_dapur ?? '—'))
-            ->addColumn('jumlah_cell', fn (BarangMasuk $r) => '<span class="font-mono">'.e(number_format((float) $r->jumlah, 2, ',', '.')).' '.e($r->satuan).'</span>')
-            ->addColumn('total_cell', fn (BarangMasuk $r) => formatRupiah($r->total_harga))
-            ->addColumn('sumber_label', fn (BarangMasuk $r) => e($r->sumber?->label() ?? '—'))
+            ->addColumn('kode_barang_cell', fn (BarangMasuk $r) => e($r->barang?->kode_barang ?? '—'))
+            ->addColumn('nama_barang_cell', fn (BarangMasuk $r) => e($r->barang?->nama_barang ?? '—'))
+            ->addColumn('satuan_cell', fn (BarangMasuk $r) => e($r->satuan ?: '—'))
+            ->addColumn('jumlah_cell', fn (BarangMasuk $r) => e(number_format((float) $r->jumlah, 2, ',', '.')))
+            ->addColumn('harga_cell', fn (BarangMasuk $r) => formatRupiah($r->harga_satuan))
             ->addColumn('aksi', function (BarangMasuk $r) {
-                $show = '<a href="'.e(route('stok.masuk.show', $r)).'" class="text-xs font-semibold" style="color:#1a4a6b;">Detail</a>';
-                $edit = '<a href="'.e(route('stok.masuk.edit', $r)).'" class="ml-3 text-xs font-semibold" style="color:#4a9b7a;">Ubah</a>';
+                $show = '<a href="'.e(route('stok.masuk.show', $r)).'" class="font-semibold" style="color:#1a4a6b;">Detail</a>';
+                $edit = '<a href="'.e(route('stok.masuk.edit', $r)).'" class="ml-3 font-semibold" style="color:#4a9b7a;">Ubah</a>';
                 $hapus = '';
                 if ($this->userCanDeleteStokRecord($r)) {
                     $hapus = '<form method="POST" action="'.e(route('stok.masuk.destroy', $r)).'" class="ml-3 inline form-hapus-stok">'
                         .csrf_field()
                         .method_field('DELETE')
-                        .'<button type="submit" class="text-xs font-semibold" style="color:#c0392b;">Hapus</button>'
+                        .'<button type="submit" class="font-semibold" style="color:#c0392b;">Hapus</button>'
                         .'</form>';
                 }
 

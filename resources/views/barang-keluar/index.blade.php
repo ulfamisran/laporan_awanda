@@ -24,9 +24,9 @@
                         <th>Kode</th>
                         <th>Tanggal</th>
                         <th>Barang</th>
-                        <th>Cabang</th>
                         <th>Jumlah</th>
                         <th>Tujuan</th>
+                        <th>Input oleh</th>
                         <th class="text-right">Aksi</th>
                     </tr>
                 </thead>
@@ -34,6 +34,69 @@
         </div>
     </div>
 @endsection
+
+@push('styles')
+    <style>
+        #tabel-keluar_wrapper .dataTables_length {
+            float: left !important;
+            margin-bottom: 0.5rem;
+        }
+
+        #tabel-keluar_wrapper .dataTables_filter {
+            float: right !important;
+            text-align: right !important;
+            margin-bottom: 0.5rem;
+        }
+
+        #tabel-keluar_wrapper .dataTables_info {
+            float: left !important;
+            clear: both;
+            padding-top: 0.65rem !important;
+        }
+
+        #tabel-keluar_wrapper .dataTables_paginate {
+            float: right !important;
+            text-align: right !important;
+            padding-top: 0.35rem !important;
+        }
+
+        #tabel-keluar_wrapper .dataTables_length,
+        #tabel-keluar_wrapper .dataTables_filter {
+            font-size: 0.8125rem !important;
+        }
+
+        #tabel-keluar_wrapper .dataTables_info,
+        #tabel-keluar_wrapper .dataTables_paginate,
+        #tabel-keluar_wrapper .dataTables_paginate .paginate_button {
+            font-size: 0.75rem !important;
+        }
+
+        #tabel-keluar_wrapper .dataTables_paginate .paginate_button.previous,
+        #tabel-keluar_wrapper .dataTables_paginate .paginate_button.next {
+            border: 1px solid #d4e8f4 !important;
+            border-radius: 0.375rem !important;
+            background: #ffffff !important;
+            color: #1a4a6b !important;
+            padding: 0.2rem 0.6rem !important;
+        }
+
+        #tabel-keluar_wrapper .dataTables_paginate .paginate_button.previous:hover,
+        #tabel-keluar_wrapper .dataTables_paginate .paginate_button.next:hover {
+            background: #f0f6fb !important;
+            border-color: #c5dce8 !important;
+        }
+
+        #tabel-keluar_wrapper .dataTables_paginate .paginate_button.current {
+            border: none !important;
+            background: transparent !important;
+            color: #7fa8c9 !important;
+            box-shadow: none !important;
+            pointer-events: none;
+            cursor: default !important;
+            padding: 0.2rem 0.5rem !important;
+        }
+    </style>
+@endpush
 
 @push('scripts')
     <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
@@ -54,9 +117,9 @@
                     { data: 'kode_transaksi', name: 'barang_keluar.kode_transaksi' },
                     { data: 'tanggal', name: 'barang_keluar.tanggal' },
                     { data: 'barang_cell', orderable: false, searchable: false },
-                    { data: 'dapur_cell', orderable: false, searchable: false },
                     { data: 'jumlah_cell', orderable: false, searchable: false },
                     { data: 'tujuan_label', orderable: false, searchable: false },
+                    { data: 'creator_name', orderable: false, searchable: false },
                     { data: 'aksi', orderable: false, searchable: false, className: 'text-right' },
                 ],
                 language: { url: 'https://cdn.datatables.net/plug-ins/1.13.8/i18n/id.json' },

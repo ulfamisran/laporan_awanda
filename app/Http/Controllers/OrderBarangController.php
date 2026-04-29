@@ -20,6 +20,7 @@ class OrderBarangController extends Controller
     public function index(Request $request): View
     {
         $items = OrderBarang::query()
+            ->with('creator')
             ->withCount('items')
             ->where('profil_mbg_id', ProfilMbgTenant::id())
             ->where('periode_id', PeriodeTenant::id())

@@ -22,6 +22,7 @@
                         <th>Nomor order</th>
                         <th>Tanggal order</th>
                         <th>Jumlah barang</th>
+                        <th>Input oleh</th>
                         <th class="text-right">Aksi</th>
                     </tr>
                 </thead>
@@ -31,6 +32,7 @@
                             <td class="font-mono text-xs font-semibold">{{ $row->nomor_order }}</td>
                             <td>{{ $row->tanggal_order?->format('d/m/Y') }}</td>
                             <td>{{ number_format((float) $row->items_count, 0, ',', '.') }} item</td>
+                            <td>{{ $row->creator?->name ?? '—' }}</td>
                             <td class="text-right">
                                 <div class="inline-flex items-center gap-3">
                                     <a href="{{ route('stok.order.show', $row) }}" class="text-xs font-semibold" style="color:#1a4a6b;">Detail</a>
@@ -40,7 +42,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="py-8 text-center text-sm" style="color:#7fa8c9;">Belum ada order barang.</td>
+                            <td colspan="5" class="py-8 text-center text-sm" style="color:#7fa8c9;">Belum ada order barang.</td>
                         </tr>
                     @endforelse
                 </tbody>

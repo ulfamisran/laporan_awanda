@@ -67,6 +67,36 @@
     </div>
 @endsection
 
+@push('styles')
+    <style>
+        .select2-container--default .select2-selection--single {
+            height: 42px;
+            border: 1px solid #d4e8f4;
+            border-radius: 0.5rem;
+            background-color: #ffffff;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 40px;
+            color: #1a4a6b;
+            padding-left: 1rem;
+            padding-right: 2rem;
+            font-size: 0.875rem;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 40px;
+            right: 0.5rem;
+        }
+
+        .select2-container--default.select2-container--focus .select2-selection--single {
+            border-color: #4a9b7a;
+            box-shadow: 0 0 0 1px #4a9b7a;
+        }
+    </style>
+@endpush
+
 @push('scripts')
     <script>
         (function () {

@@ -22,15 +22,16 @@
         .label { width: 115px; }
         .total-row { margin-top: 4px; font-weight: bold; }
         .total-box { border: 1px solid #6b7280; padding: 2px 6px; text-align: center; margin-top: 2px; }
-        .ttd { margin-top: 8px; display: table; width: 100%; }
+        .ttd { margin-top: 2px; display: table; width: 100%; }
         .ttd-col { display: table-cell; width: 50%; text-align: center; }
+        .ttd-col p { margin: 0; }
         .ttd-line { margin: 22px auto 0; width: 70%; border-top: 1px dotted #6b7280; }
         .ttd-name { margin-top: 0; }
         .page-break { page-break-after: always; }
     </style>
 </head>
 <body>
-    @foreach ($rows->chunk(3) as $chunkIndex => $chunkRows)
+    @foreach ($rows->chunk(4) as $chunkIndex => $chunkRows)
         <div class="page">
             @foreach ($chunkRows as $p)
                 <div class="kwitansi">

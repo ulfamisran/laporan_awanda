@@ -24,8 +24,8 @@
         @endif
     </div>
 
-    <form method="GET" action="{{ route('stok.arus.index') }}" class="inst-panel mb-6 space-y-4 p-4 sm:p-6">
-        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <form method="GET" action="{{ route('stok.arus.index') }}" class="inst-panel mb-6 p-4 sm:p-6">
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5 lg:items-end">
             <div>
                 <label for="f_kategori" class="inst-label-filter">Kategori</label>
                 <select name="kategori_barang_id" id="f_kategori" class="inst-select mt-2">
@@ -52,8 +52,10 @@
                 <label for="f_sampai" class="inst-label-filter">Sampai</label>
                 <input type="date" name="sampai" id="f_sampai" class="inst-input mt-2" value="{{ $sampai->toDateString() }}">
             </div>
+            <div class="flex items-end">
+                <button type="submit" class="inst-btn-primary w-full lg:w-auto">Tampilkan</button>
+            </div>
         </div>
-        <button type="submit" class="inst-btn-primary">Tampilkan</button>
     </form>
 
     @if ($barangId > 0 && $barang)
@@ -112,6 +114,36 @@
         </div>
     @endif
 @endsection
+
+@push('styles')
+    <style>
+        #f_barang + .select2-container .select2-selection--single {
+            height: 42px;
+            border: 1px solid #d4e8f4;
+            border-radius: 0.5rem;
+            background-color: #ffffff;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        #f_barang + .select2-container .select2-selection--single .select2-selection__rendered {
+            line-height: 40px;
+            color: #1a4a6b;
+            padding-left: 1rem;
+            padding-right: 2rem;
+            font-size: 0.875rem;
+        }
+
+        #f_barang + .select2-container .select2-selection--single .select2-selection__arrow {
+            height: 40px;
+            right: 0.5rem;
+        }
+
+        #f_barang + .select2-container.select2-container--focus .select2-selection--single {
+            border-color: #4a9b7a;
+            box-shadow: 0 0 0 1px #4a9b7a;
+        }
+    </style>
+@endpush
 
 @push('scripts')
     @if ($barangId > 0 && $barang && count($chartLabels))

@@ -27,11 +27,11 @@
                         <th>No</th>
                         <th>Kode</th>
                         <th>Tanggal</th>
-                        <th>Barang</th>
-                        <th>Cabang</th>
-                        <th>Jumlah</th>
-                        <th>Total</th>
-                        <th>Sumber</th>
+                        <th>Kode barang</th>
+                        <th>Nama barang</th>
+                        <th>Satuan</th>
+                        <th>Jumlah masuk</th>
+                        <th>Harga</th>
                         <th class="text-right">Aksi</th>
                     </tr>
                 </thead>
@@ -42,6 +42,38 @@
 
 @push('styles')
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css">
+    <style>
+        #tabel-masuk_wrapper .dataTables_info,
+        #tabel-masuk_wrapper .dataTables_paginate,
+        #tabel-masuk_wrapper .dataTables_paginate .paginate_button {
+            font-size: 0.75rem !important;
+        }
+
+        #tabel-masuk_wrapper .dataTables_paginate .paginate_button.previous,
+        #tabel-masuk_wrapper .dataTables_paginate .paginate_button.next {
+            border: 1px solid #d4e8f4 !important;
+            border-radius: 0.375rem !important;
+            background: #ffffff !important;
+            color: #1a4a6b !important;
+            padding: 0.2rem 0.6rem !important;
+        }
+
+        #tabel-masuk_wrapper .dataTables_paginate .paginate_button.previous:hover,
+        #tabel-masuk_wrapper .dataTables_paginate .paginate_button.next:hover {
+            background: #f0f6fb !important;
+            border-color: #c5dce8 !important;
+        }
+
+        #tabel-masuk_wrapper .dataTables_paginate .paginate_button.current {
+            border: none !important;
+            background: transparent !important;
+            color: #7fa8c9 !important;
+            box-shadow: none !important;
+            pointer-events: none;
+            cursor: default !important;
+            padding: 0.2rem 0.5rem !important;
+        }
+    </style>
 @endpush
 
 @push('scripts')
@@ -62,11 +94,11 @@
                     { data: 'DT_RowIndex', orderable: false, searchable: false, width: '48px' },
                     { data: 'kode_transaksi', name: 'barang_masuk.kode_transaksi' },
                     { data: 'tanggal', name: 'barang_masuk.tanggal' },
-                    { data: 'barang_cell', orderable: false, searchable: false },
-                    { data: 'dapur_cell', orderable: false, searchable: false },
+                    { data: 'kode_barang_cell', orderable: false, searchable: false },
+                    { data: 'nama_barang_cell', orderable: false, searchable: false },
+                    { data: 'satuan_cell', orderable: false, searchable: false },
                     { data: 'jumlah_cell', orderable: false, searchable: false },
-                    { data: 'total_cell', name: 'barang_masuk.total_harga', searchable: false },
-                    { data: 'sumber_label', orderable: false, searchable: false },
+                    { data: 'harga_cell', name: 'barang_masuk.harga_satuan', searchable: false },
                     { data: 'aksi', orderable: false, searchable: false, className: 'text-right' },
                 ],
                 language: { url: 'https://cdn.datatables.net/plug-ins/1.13.8/i18n/id.json' },

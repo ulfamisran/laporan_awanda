@@ -76,7 +76,7 @@
                             @else
                                 <th class="text-right">Gaji pokok</th>
                             @endif
-                            <th>Status periode</th>
+                            <th class="text-right">Status gaji</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -94,7 +94,7 @@
                                 @else
                                     <td class="text-right font-mono">{{ formatRupiah($r->gaji_pokok) }}</td>
                                 @endif
-                                <td>
+                                <td class="text-right">
                                     @if ($sudah)
                                         <span class="text-xs font-semibold" style="color:#c0392b;">Sudah ada</span>
                                     @else
@@ -108,7 +108,7 @@
             </div>
             <div class="mt-5">
                 <button type="submit" class="inst-btn-primary">
-                Generate penggajian bulk
+                Generate penggajian (Bulk)
                 </button>
                 <p class="mt-2 text-xs inst-td-muted">Isi jumlah hadir per relawan. Record duplikat (relawan + bulan + tahun pada periode aktif) akan dilewati.</p>
             </div>
@@ -128,7 +128,7 @@
             <input type="hidden" name="tanggal_bayar_create" value="{{ $tanggalBayarCreate }}">
             <div>
                 <label for="relawan_id" class="inst-label">Relawan</label>
-                <select id="relawan_id" name="relawan_id" class="inst-select mt-1 w-full" required>
+                <select id="relawan_id" name="relawan_id" class="inst-select select2-relawan mt-1 w-full" required>
                     <option value="">— Pilih —</option>
                     @foreach (\App\Models\Relawan::query()->aktif()->byDapur($profilId)->orderBy('nama_lengkap')->get() as $r)
                         <option value="{{ $r->id }}">{{ $r->nama_lengkap }} — {{ $r->posisiRelawan?->nama_posisi }}</option>
@@ -144,6 +144,36 @@
     </div>
 @endsection
 
+@push('styles')
+    <style>
+        #relawan_id + .select2-container .select2-selection--single {
+            height: 42px;
+            border: 1px solid #d4e8f4;
+            border-radius: 0.5rem;
+            background-color: #ffffff;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        #relawan_id + .select2-container .select2-selection--single .select2-selection__rendered {
+            line-height: 40px;
+            color: #1a4a6b;
+            padding-left: 1rem;
+            padding-right: 2rem;
+            font-size: 0.875rem;
+        }
+
+        #relawan_id + .select2-container .select2-selection--single .select2-selection__arrow {
+            height: 40px;
+            right: 0.5rem;
+        }
+
+        #relawan_id + .select2-container.select2-container--focus .select2-selection--single {
+            border-color: #4a9b7a;
+            box-shadow: 0 0 0 1px #4a9b7a;
+        }
+    </style>
+@endpush
+
 @push('scripts')
     <script>
         (function () {
@@ -157,6 +187,14 @@
             }
             if (statusEl) statusEl.addEventListener('change', syncStatusCreate);
             syncStatusCreate();
+
+            if (window.jQuery && jQuery.fn.select2) {
+                jQuery('.select2-relawan').each(function () {
+                    if (!jQuery(this).data('select2')) {
+                        jQuery(this).select2({ width: '100%', language: { noResults: () => 'Tidak ada hasil' } });
+                    }
+                });
+            }
         })();
         if (window.lucide) lucide.createIcons();
     </script>

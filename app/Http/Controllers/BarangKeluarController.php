@@ -43,9 +43,9 @@ class BarangKeluarController extends Controller
             ->addIndexColumn()
             ->editColumn('tanggal', fn (BarangKeluar $r) => $r->tanggal?->format('d/m/Y') ?? '')
             ->addColumn('barang_cell', fn (BarangKeluar $r) => e($r->barang?->kode_barang.' — '.$r->barang?->nama_barang))
-            ->addColumn('dapur_cell', fn (BarangKeluar $r) => e($r->profilMbg?->nama_dapur ?? '—'))
             ->addColumn('jumlah_cell', fn (BarangKeluar $r) => '<span class="font-mono">'.e(number_format((float) $r->jumlah, 2, ',', '.')).' '.e($r->satuan).'</span>')
             ->addColumn('tujuan_label', fn (BarangKeluar $r) => e($r->tujuan_penggunaan?->label() ?? '—'))
+            ->addColumn('creator_name', fn (BarangKeluar $r) => e($r->creator?->name ?? '—'))
             ->addColumn('aksi', function (BarangKeluar $r) {
                 $show = '<a href="'.e(route('stok.keluar.show', $r)).'" class="text-xs font-semibold" style="color:#1a4a6b;">Detail</a>';
                 $edit = '<a href="'.e(route('stok.keluar.edit', $r)).'" class="ml-3 text-xs font-semibold" style="color:#4a9b7a;">Ubah</a>';

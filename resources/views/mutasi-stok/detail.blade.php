@@ -8,6 +8,11 @@
             <a href="{{ route('stok.mutasi.index') }}" class="inst-back">← Rekap mutasi</a>
             <h2 class="inst-page-title mt-2">Riwayat mutasi</h2>
             <p class="font-mono text-sm" style="color:#4a6b7f;">{{ $barang->kode_barang }} — {{ $barang->nama_barang }}</p>
+            <p class="mt-1 text-sm" style="color:#4a6b7f;">
+                Nama barang: <span class="font-semibold">{{ $barang->nama_barang }}</span>
+                <span class="mx-2">|</span>
+                Satuan: <span class="font-semibold">{{ $barang->satuan?->label() ?? '—' }}</span>
+            </p>
         </div>
     </div>
 
@@ -19,9 +24,9 @@
                         <th>Tanggal</th>
                         <th>Jenis</th>
                         <th>Kode</th>
-                        <th class="text-right">Jumlah</th>
-                        <th class="text-right">Saldo</th>
-                        <th>Keterangan</th>
+                        <th>Jumlah</th>
+                        <th>Saldo</th>
+                        <th class="pl-6">Keterangan</th>
                         <th>Input oleh</th>
                     </tr>
                 </thead>
@@ -38,7 +43,7 @@
                             <td>{{ $tgl }}</td>
                             <td>{{ $r['label'] ?? '—' }}</td>
                             <td class="font-mono text-xs">{{ $r['kode'] ?? '—' }}</td>
-                            <td class="text-right font-mono {{ $qtyClass }}">
+                            <td class="font-mono {{ $qtyClass }}">
                                 @if ($qty > 0)
                                     +{{ number_format((float) $r['jumlah'], 2, ',', '.') }}
                                 @elseif ($qty < 0)
@@ -47,8 +52,8 @@
                                     —
                                 @endif
                             </td>
-                            <td class="text-right font-mono font-semibold">{{ number_format((float) ($r['saldo'] ?? 0), 2, ',', '.') }}</td>
-                            <td class="max-w-xs truncate text-sm">{{ $r['keterangan'] ?? '—' }}</td>
+                            <td class="font-mono font-semibold">{{ number_format((float) ($r['saldo'] ?? 0), 2, ',', '.') }}</td>
+                            <td class="max-w-xs truncate pl-6 text-sm">{{ $r['keterangan'] ?? '—' }}</td>
                             <td class="text-sm">{{ $r['oleh'] ?? '—' }}</td>
                         </tr>
                     @empty

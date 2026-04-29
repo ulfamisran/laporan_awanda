@@ -15,6 +15,15 @@
     </div>
 
     <div class="inst-panel overflow-hidden p-4 sm:p-6">
+        <div class="mb-4">
+            <input
+                type="text"
+                id="search-mutasi-stok"
+                class="inst-input"
+                placeholder="Cari barang, kategori, atau status..."
+                autocomplete="off"
+            >
+        </div>
         <div class="overflow-x-auto">
             <table class="inst-table">
                 <thead>
@@ -25,10 +34,10 @@
                         <th class="text-right">Total masuk</th>
                         <th class="text-right">Total keluar</th>
                         <th class="text-right">Stok saat ini</th>
-                        <th>Status</th>
+                        <th class="pl-6 text-right">Status</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="mutasi-stok-body">
                     @forelse ($rows as $b)
                         @php
                             $awal = (float) ($b->jumlah_awal ?? 0);
@@ -39,7 +48,7 @@
                             $below = $stok < $min;
                             $detailUrl = route('stok.mutasi.detail', ['barang' => $b]);
                         @endphp
-                        <tr class="cursor-pointer transition hover:bg-slate-50 {{ $below ? 'bg-rose-50/80' : '' }}"
+                        <tr class="mutasi-stok-row cursor-pointer transition hover:bg-slate-50 {{ $below ? 'bg-rose-50/80' : '' }}"
                             onclick="window.location.href='{{ $detailUrl }}'">
                             <td>
                                 <span class="font-mono text-xs" style="color:#7fa8c9;">{{ $b->kode_barang }}</span><br>
@@ -51,7 +60,7 @@
                             <td class="text-right font-mono">{{ number_format($masuk, 2, ',', '.') }}</td>
                             <td class="text-right font-mono">{{ number_format($keluar, 2, ',', '.') }}</td>
                             <td class="text-right font-mono font-semibold">{{ number_format($stok, 2, ',', '.') }}</td>
-                            <td>
+                            <td class="pl-6 text-right">
                                 @if ($below)
                                     <span class="inline-flex rounded-full px-2 py-0.5 text-xs font-semibold" style="background:#fee2e2;color:#b91c1c;">Di bawah minimum</span>
                                 @else
@@ -60,13 +69,45 @@
                             </td>
                         </tr>
                     @empty
-                        <tr>
+                        <tr class="mutasi-empty-row">
                             <td colspan="7" class="py-8 text-center text-sm" style="color:#7fa8c9;">Tidak ada data barang aktif.</td>
                         </tr>
                     @endforelse
+                    <tr class="mutasi-no-match-row hidden">
+                        <td colspan="7" class="py-8 text-center text-sm" style="color:#7fa8c9;">Tidak ada data yang cocok.</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
         <p class="mt-3 text-xs" style="color:#7fa8c9;">Klik baris untuk melihat riwayat transaksi.</p>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        (function () {
+            document.addEventListener('DOMContentLoaded', function () {
+                const input = document.getElementById('search-mutasi-stok');
+                const rows = Array.from(document.querySelectorAll('.mutasi-stok-row'));
+                const emptyRow = document.querySelector('.mutasi-empty-row');
+                const noMatchRow = document.querySelector('.mutasi-no-match-row');
+
+                if (!input || rows.length === 0) return;
+
+                input.addEventListener('input', function () {
+                    const keyword = String(this.value || '').trim().toLowerCase();
+                    let visibleCount = 0;
+
+                    rows.forEach((row) => {
+                        const visible = keyword === '' || row.textContent.toLowerCase().includes(keyword);
+                        row.classList.toggle('hidden', !visible);
+                        if (visible) visibleCount++;
+                    });
+
+                    if (emptyRow) emptyRow.classList.add('hidden');
+                    if (noMatchRow) noMatchRow.classList.toggle('hidden', visibleCount > 0);
+                });
+            });
+        })();
+    </script>
+@endpush
