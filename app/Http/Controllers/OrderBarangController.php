@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\SatuanBarang;
+use App\Enums\StatusAktif;
 use App\Models\Barang;
+use App\Models\KategoriBarang;
 use App\Models\OrderBarang;
 use App\Models\ProfilMbg;
 use App\Models\Supplier;
@@ -33,36 +36,22 @@ class OrderBarangController extends Controller
 
     public function create(): View
     {
-        $barangs = Barang::query()->orderBy('nama_barang')->get(['id', 'kode_barang', 'nama_barang', 'harga_satuan', 'satuan']);
-        $suppliers = Supplier::query()->orderBy('nama_supplier')->get(['id', 'nama_supplier']);
-
         return view('order-barang.create', [
-            'barangs' => $barangs,
-            'suppliers' => $suppliers,
+            'isEdit' => false,
+            'pageTitle' => 'Buat Order Barang',
+            'heading' => 'Buat order barang',
+            'formAction' => route('stok.order.store'),
+            'formMethod' => 'POST',
+            'submitLabel' => 'Simpan order',
             'previewNomorOrder' => $this->previewNextNomorOrder(),
+            'initialItems' => old('items', []),
+            'tanggalOrder' => old('tanggal_order', now()->toDateString()),
         ]);
     }
 
     public function store(Request $request): RedirectResponse
     {
-        $data = $request->validate([
-            'tanggal_order' => ['required', 'date'],
-            'items' => ['required', 'array', 'min:1'],
-            'items.*.barang_id' => ['required', 'integer', 'exists:barang,id'],
-            'items.*.harga_barang' => ['required', 'numeric', 'min:0'],
-            'items.*.jumlah_barang' => ['required', 'numeric', 'min:0.01'],
-            'items.*.satuan_barang' => ['required', 'string', 'max:32'],
-            'items.*.supplier_id' => ['nullable', 'integer', 'exists:suppliers,id'],
-            'items.*.jumlah_hari_pemakaian' => ['required', 'integer', 'min:0', 'max:3650'],
-        ], [], [
-            'tanggal_order' => 'tanggal order',
-            'items.*.barang_id' => 'barang',
-            'items.*.harga_barang' => 'harga barang',
-            'items.*.jumlah_barang' => 'jumlah barang',
-            'items.*.satuan_barang' => 'satuan barang',
-            'items.*.supplier_id' => 'supplier',
-            'items.*.jumlah_hari_pemakaian' => 'jumlah hari pemakaian',
-        ]);
+        $data = $this->validatePayload($request);
 
         DB::transaction(function () use ($request, $data): void {
             $order = OrderBarang::query()->create([
@@ -73,32 +62,66 @@ class OrderBarangController extends Controller
                 'created_by' => (int) $request->user()->getKey(),
             ]);
 
-            $barangMap = Barang::query()
-                ->whereIn('id', collect($data['items'])->pluck('barang_id')->all())
-                ->get(['id', 'nama_barang'])
-                ->keyBy('id');
-
-            foreach ($data['items'] as $row) {
-                $barang = $barangMap->get((int) $row['barang_id']);
-                if (! $barang) {
-                    continue;
-                }
-
-                $order->items()->create([
-                    'barang_id' => (int) $row['barang_id'],
-                    'supplier_id' => $row['supplier_id'] ? (int) $row['supplier_id'] : null,
-                    'nama_barang' => $barang->nama_barang,
-                    'harga_barang' => (float) $row['harga_barang'],
-                    'jumlah_barang' => (float) $row['jumlah_barang'],
-                    'satuan_barang' => (string) $row['satuan_barang'],
-                    'jumlah_hari_pemakaian' => (int) $row['jumlah_hari_pemakaian'],
-                ]);
-            }
+            $this->syncOrderItems($order, $data['items']);
         });
 
         return redirect()
             ->route('stok.order.index')
             ->with('success', 'Order barang berhasil disimpan.');
+    }
+
+    public function edit(OrderBarang $order): View
+    {
+        $this->ensureAccessible($order);
+        $order->load('items.supplier');
+
+        $initialItems = old('items', $order->items->map(function ($item): array {
+            return [
+                'nama_barang' => $item->nama_barang,
+                'harga_barang' => number_format((float) $item->harga_barang, 0, '', ''),
+                'jumlah_barang' => number_format((float) $item->jumlah_barang, 2, '.', ''),
+                'satuan_barang' => $item->satuan_barang,
+                'supplier_nama' => $item->supplier_nama ?? $item->supplier?->nama_supplier ?? '',
+                'jumlah_hari_pemakaian' => (int) $item->jumlah_hari_pemakaian,
+            ];
+        })->values()->all());
+
+        return view('order-barang.create', [
+            'isEdit' => true,
+            'pageTitle' => 'Update Order Barang',
+            'heading' => 'Update order barang',
+            'formAction' => route('stok.order.update', $order),
+            'formMethod' => 'PUT',
+            'submitLabel' => 'Update order',
+            'previewNomorOrder' => $order->nomor_order,
+            'initialItems' => $initialItems,
+            'tanggalOrder' => old('tanggal_order', optional($order->tanggal_order)->toDateString()),
+        ]);
+    }
+
+    public function update(Request $request, OrderBarang $order): RedirectResponse
+    {
+        $this->ensureAccessible($order);
+        $data = $this->validatePayload($request);
+
+        if ($order->items()->whereHas('penerimaan')->exists()) {
+            return back()
+                ->withInput()
+                ->withErrors(['items' => 'Order ini sudah dipakai pada penerimaan barang, sehingga tidak bisa diubah.']);
+        }
+
+        DB::transaction(function () use ($order, $data): void {
+            $order->update([
+                'tanggal_order' => $data['tanggal_order'],
+            ]);
+
+            $order->items()->delete();
+            $this->syncOrderItems($order, $data['items']);
+        });
+
+        return redirect()
+            ->route('stok.order.index')
+            ->with('success', 'Order barang berhasil diperbarui.');
     }
 
     public function show(OrderBarang $order): View
@@ -122,7 +145,9 @@ class OrderBarangController extends Controller
             'logoDataUri' => $logoDataUri,
         ])->setPaper('a4', 'portrait');
 
-        return $pdf->stream('nota-order-'.$order->nomor_order.'.pdf');
+        $safeNomorOrder = str_replace(['/', '\\'], '-', (string) $order->nomor_order);
+
+        return $pdf->stream('nota-order-'.$safeNomorOrder.'.pdf');
     }
 
     private function ensureAccessible(OrderBarang $order): void
@@ -134,36 +159,127 @@ class OrderBarangController extends Controller
 
     private function previewNextNomorOrder(): string
     {
-        $prefix = 'ORD-'.now()->format('Ymd').'-';
+        $suffix = '/SPPG/PL/'.now()->format('m/Y');
         $last = OrderBarang::query()
-            ->where('nomor_order', 'like', $prefix.'%')
+            ->where('nomor_order', 'like', '%'.$suffix)
             ->orderByDesc('nomor_order')
             ->value('nomor_order');
         $next = 1;
-        if ($last && preg_match('/-(\d{3})$/', (string) $last, $m)) {
+        if ($last && preg_match('/^(\d{3})\/SPPG\/PL\/\d{2}\/\d{4}$/', (string) $last, $m)) {
             $next = (int) $m[1] + 1;
         }
 
-        return $prefix.str_pad((string) $next, 3, '0', STR_PAD_LEFT);
+        return str_pad((string) $next, 3, '0', STR_PAD_LEFT).$suffix;
     }
 
     private function generateNomorOrder(): string
     {
         return DB::transaction(function (): string {
-            $prefix = 'ORD-'.now()->format('Ymd').'-';
+            $suffix = '/SPPG/PL/'.now()->format('m/Y');
             $last = OrderBarang::query()
-                ->where('nomor_order', 'like', $prefix.'%')
+                ->where('nomor_order', 'like', '%'.$suffix)
                 ->lockForUpdate()
                 ->orderByDesc('nomor_order')
                 ->value('nomor_order');
 
             $next = 1;
-            if ($last && preg_match('/-(\d{3})$/', (string) $last, $m)) {
+            if ($last && preg_match('/^(\d{3})\/SPPG\/PL\/\d{2}\/\d{4}$/', (string) $last, $m)) {
                 $next = (int) $m[1] + 1;
             }
 
-            return $prefix.str_pad((string) $next, 3, '0', STR_PAD_LEFT);
+            return str_pad((string) $next, 3, '0', STR_PAD_LEFT).$suffix;
         });
+    }
+
+    private function validatePayload(Request $request): array
+    {
+        return $request->validate([
+            'tanggal_order' => ['required', 'date'],
+            'items' => ['required', 'array', 'min:1'],
+            'items.*.nama_barang' => ['required', 'string', 'max:255'],
+            'items.*.harga_barang' => ['required', 'numeric', 'min:0'],
+            'items.*.jumlah_barang' => ['required', 'numeric', 'min:0.01'],
+            'items.*.satuan_barang' => ['required', 'string', 'max:32'],
+            'items.*.supplier_nama' => ['nullable', 'string', 'max:255'],
+            'items.*.jumlah_hari_pemakaian' => ['required', 'integer', 'min:0', 'max:3650'],
+        ], [], [
+            'tanggal_order' => 'tanggal order',
+            'items.*.nama_barang' => 'nama barang',
+            'items.*.harga_barang' => 'harga barang',
+            'items.*.jumlah_barang' => 'jumlah barang',
+            'items.*.satuan_barang' => 'satuan barang',
+            'items.*.supplier_nama' => 'nama supplier',
+            'items.*.jumlah_hari_pemakaian' => 'pemakaian (hari)',
+        ]);
+    }
+
+    private function syncOrderItems(OrderBarang $order, array $rows): void
+    {
+        foreach ($rows as $row) {
+            $barang = $this->resolveBarang((string) $row['nama_barang'], (float) $row['harga_barang']);
+            $supplier = $this->resolveSupplier($row['supplier_nama'] ?? null);
+
+            $order->items()->create([
+                'barang_id' => (int) $barang->getKey(),
+                'supplier_id' => $supplier?->getKey(),
+                'nama_barang' => $barang->nama_barang,
+                'supplier_nama' => $supplier?->nama_supplier ?? null,
+                'harga_barang' => (float) $row['harga_barang'],
+                'jumlah_barang' => (float) $row['jumlah_barang'],
+                'satuan_barang' => (string) $row['satuan_barang'],
+                'jumlah_hari_pemakaian' => (int) ($row['jumlah_hari_pemakaian'] ?? 0),
+            ]);
+        }
+    }
+
+    private function resolveBarang(string $namaBarang, float $hargaBarang): Barang
+    {
+        $nama = trim($namaBarang);
+
+        $existing = Barang::query()
+            ->whereRaw('LOWER(nama_barang) = ?', [mb_strtolower($nama)])
+            ->first();
+
+        if ($existing) {
+            return $existing;
+        }
+
+        $kategoriDefault = KategoriBarang::query()->firstOrCreate(
+            ['nama_kategori' => 'Umum'],
+            ['deskripsi' => 'Kategori default dari input order barang.']
+        );
+
+        return Barang::query()->create([
+            'nama_barang' => $nama,
+            'kategori_barang_id' => (int) $kategoriDefault->getKey(),
+            // Satuan master barang harus mengikuti enum; satuan bebas tetap disimpan di order item.
+            'satuan' => SatuanBarang::Lainnya->value,
+            'harga_satuan' => $hargaBarang,
+            'stok_minimum' => 0,
+            'status' => StatusAktif::Aktif->value,
+        ]);
+    }
+
+    private function resolveSupplier(?string $supplierNama): ?Supplier
+    {
+        $nama = trim((string) $supplierNama);
+        if ($nama === '') {
+            return null;
+        }
+
+        $existing = Supplier::query()
+            ->whereRaw('LOWER(nama_supplier) = ?', [mb_strtolower($nama)])
+            ->first();
+
+        if ($existing) {
+            return $existing;
+        }
+
+        return Supplier::query()->create([
+            'nama_supplier' => $nama,
+            'no_hp' => '-',
+            'alamat' => '-',
+        ]);
     }
 
     private function profilLogoDataUriForPdf(?ProfilMbg $profil): ?string

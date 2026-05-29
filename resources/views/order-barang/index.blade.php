@@ -36,6 +36,7 @@
                             <td class="text-right">
                                 <div class="inline-flex items-center gap-3">
                                     <a href="{{ route('stok.order.show', $row) }}" class="text-xs font-semibold" style="color:#1a4a6b;">Detail</a>
+                                    <a href="{{ route('stok.order.edit', $row) }}" class="text-xs font-semibold" style="color:#d97706;">Update</a>
                                     <a href="{{ route('stok.order.cetak-nota', $row) }}" target="_blank" rel="noopener" class="text-xs font-semibold" style="color:#4a9b7a;">Cetak nota</a>
                                 </div>
                             </td>

@@ -30,7 +30,6 @@
                         <th>Jumlah</th>
                         <th>Satuan</th>
                         <th>Supplier</th>
-                        <th>Hari pakai</th>
                         <th>Total</th>
                     </tr>
                 </thead>
@@ -41,8 +40,7 @@
                             <td>{{ formatRupiah($item->harga_barang) }}</td>
                             <td class="font-mono">{{ number_format((float) $item->jumlah_barang, 2, ',', '.') }}</td>
                             <td>{{ $item->satuan_barang }}</td>
-                            <td>{{ $item->supplier?->nama_supplier ?? '-' }}</td>
-                            <td>{{ $item->jumlah_hari_pemakaian }} hari</td>
+                            <td>{{ $item->supplier_nama ?? $item->supplier?->nama_supplier ?? '-' }}</td>
                             <td>{{ formatRupiah((float) $item->harga_barang * (float) $item->jumlah_barang) }}</td>
                         </tr>
                     @endforeach

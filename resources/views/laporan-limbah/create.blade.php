@@ -33,9 +33,8 @@
             @foreach ($kategoris as $k)
                 @php
                     $kid = $k->id;
-                    $j0 = old("kategori.$kid.jenis_penanganan", \App\Enums\JenisPenangananLimbah::Dibuang->value);
                 @endphp
-                <div class="inst-form-card space-y-4" x-data="{ jenis: '{{ $j0 }}' }">
+                <div class="inst-form-card space-y-4">
                     <h3 class="text-sm font-bold uppercase tracking-wide" style="color:#1a4a6b;">{{ $k->nama_kategori }}</h3>
 
                     <div class="grid gap-4 sm:grid-cols-2">
@@ -54,20 +53,6 @@
                                 @endforeach
                             </select>
                         </div>
-                    </div>
-
-                    <div>
-                        <label class="inst-label" for="jenis_{{ $kid }}">Jenis penanganan</label>
-                        <select name="kategori[{{ $kid }}][jenis_penanganan]" id="jenis_{{ $kid }}" class="inst-select" x-model="jenis">
-                            @foreach (\App\Enums\JenisPenangananLimbah::cases() as $j)
-                                <option value="{{ $j->value }}" @selected($j0 === $j->value)>{{ $j->label() }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div x-show="jenis === '{{ \App\Enums\JenisPenangananLimbah::Dijual->value }}'" x-cloak>
-                        <label class="inst-label" for="harga_{{ $kid }}">Harga jual (Rp) <span class="inst-required">*</span></label>
-                        <input type="number" step="0.01" min="0" name="kategori[{{ $kid }}][harga_jual]" id="harga_{{ $kid }}" class="inst-input font-mono" value="{{ old("kategori.$kid.harga_jual") }}" :required="jenis === '{{ \App\Enums\JenisPenangananLimbah::Dijual->value }}'">
                     </div>
 
                     <div>

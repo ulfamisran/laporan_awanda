@@ -156,7 +156,7 @@ class PenerimaanBarangController extends Controller
                     'nomor_order' => $item->orderBarang?->nomor_order ?? '-',
                     'tanggal_order' => $item->orderBarang?->tanggal_order?->format('d/m/Y') ?? '-',
                     'barang' => $item->nama_barang,
-                    'supplier' => $item->supplier?->nama_supplier ?? '-',
+                    'supplier' => $item->supplier_nama ?? $item->supplier?->nama_supplier ?? '-',
                     'qty_order' => number_format((float) $item->jumlah_barang, 2, ',', '.').' '.$item->satuan_barang,
                     'qty_diterima' => number_format((float) ($item->qty_diterima ?? 0), 2, ',', '.').' '.$item->satuan_barang,
                     'sisa' => number_format(max((float) $item->jumlah_barang - (float) ($item->qty_diterima ?? 0), 0), 2, ',', '.').' '.$item->satuan_barang,

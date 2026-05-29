@@ -37,22 +37,13 @@
 
     <form method="get" action="{{ route('laporan-limbah.index') }}" class="inst-filter-panel mb-4">
         <input type="hidden" id="f-profil" value="{{ $profilIdDefault }}">
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div class="min-w-0">
                 <label for="f-kat" class="inst-label-filter">Kategori</label>
                 <select id="f-kat" name="kategori_limbah_id" class="inst-select mt-2 w-full min-w-0 select2">
                     <option value="">Semua</option>
                     @foreach ($kategoris as $k)
                         <option value="{{ $k->id }}" @selected((string) request('kategori_limbah_id') === (string) $k->id)>{{ $k->nama_kategori }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="min-w-0">
-                <label for="f-jenis" class="inst-label-filter">Penanganan</label>
-                <select id="f-jenis" name="jenis_penanganan" class="inst-select mt-2 w-full min-w-0">
-                    <option value="">Semua</option>
-                    @foreach (\App\Enums\JenisPenangananLimbah::cases() as $jen)
-                        <option value="{{ $jen->value }}" @selected(request('jenis_penanganan') === $jen->value)>{{ $jen->label() }}</option>
                     @endforeach
                 </select>
             </div>
@@ -158,7 +149,6 @@
                     data: function (d) {
                         d.profil_mbg_id = document.getElementById('f-profil')?.value || '';
                         d.kategori_limbah_id = document.getElementById('f-kat')?.value || '';
-                        d.jenis_penanganan = document.getElementById('f-jenis')?.value || '';
                         d.tanggal_dari = document.getElementById('f-dari')?.value || '';
                         d.tanggal_sampai = document.getElementById('f-sampai')?.value || '';
                     },
@@ -168,7 +158,6 @@
                 language: { url: 'https://cdn.datatables.net/plug-ins/1.13.8/i18n/id.json' },
             });
             document.getElementById('f-kat')?.addEventListener('change', () => table.ajax.reload());
-            document.getElementById('f-jenis')?.addEventListener('change', () => table.ajax.reload());
             document.getElementById('f-dari')?.addEventListener('change', () => table.ajax.reload());
             document.getElementById('f-sampai')?.addEventListener('change', () => table.ajax.reload());
             if (window.jQuery && jQuery.fn.select2) {

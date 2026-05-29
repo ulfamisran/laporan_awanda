@@ -46,7 +46,7 @@
                             <td class="font-mono text-xs font-semibold">{{ $item->orderBarang?->nomor_order }}</td>
                             <td>{{ $item->orderBarang?->tanggal_order?->format('d/m/Y') }}</td>
                             <td>{{ $item->nama_barang }}</td>
-                            <td>{{ $item->supplier?->nama_supplier ?? '-' }}</td>
+                            <td>{{ $item->supplier_nama ?? $item->supplier?->nama_supplier ?? '-' }}</td>
                             <td class="font-mono">{{ number_format((float) $item->jumlah_barang, 2, ',', '.') }} {{ $item->satuan_barang }}</td>
                             <td class="font-mono">{{ number_format($diterima, 2, ',', '.') }} {{ $item->satuan_barang }}</td>
                             <td class="font-mono font-semibold" style="color:#c0392b;">{{ number_format($sisa, 2, ',', '.') }} {{ $item->satuan_barang }}</td>

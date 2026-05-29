@@ -48,9 +48,6 @@ class LaporanLimbahController extends Controller
         if ($request->filled('kategori_limbah_id')) {
             $summaryQuery->where('kategori_limbah_id', $request->integer('kategori_limbah_id'));
         }
-        if ($request->filled('jenis_penanganan')) {
-            $summaryQuery->where('jenis_penanganan', $request->string('jenis_penanganan')->toString());
-        }
 
         $summaryRows = $summaryQuery->get();
         $totalVolumeKg = (float) $summaryRows->sum(fn (LaporanLimbah $r) => $r->volumeKgEstimate());
@@ -94,10 +91,6 @@ class LaporanLimbahController extends Controller
         if ($request->filled('kategori_limbah_id')) {
             $kid = $request->integer('kategori_limbah_id');
             $query->whereHas('details', fn (Builder $d) => $d->where('kategori_limbah_id', $kid));
-        }
-        if ($request->filled('jenis_penanganan')) {
-            $jen = $request->string('jenis_penanganan')->toString();
-            $query->whereHas('details', fn (Builder $d) => $d->where('jenis_penanganan', $jen));
         }
         if ($request->filled('tanggal_dari')) {
             $query->whereDate('tanggal', '>=', $request->string('tanggal_dari')->toString());
@@ -212,8 +205,8 @@ class LaporanLimbahController extends Controller
                     'tanggal' => $tanggalStr,
                     'jumlah' => $row['jumlah'],
                     'satuan' => $row['satuan'],
-                    'jenis_penanganan' => $row['jenis_penanganan'],
-                    'harga_jual' => $row['harga_jual'] ?? null,
+                    'jenis_penanganan' => JenisPenangananLimbah::Dibuang->value,
+                    'harga_jual' => null,
                     'keterangan' => $row['keterangan'] ?? null,
                     'gambar' => $gambar,
                     'created_by' => (int) $request->user()->getKey(),
@@ -313,8 +306,8 @@ class LaporanLimbahController extends Controller
                     'tanggal' => $tanggalStr,
                     'jumlah' => $row['jumlah'],
                     'satuan' => $row['satuan'],
-                    'jenis_penanganan' => $row['jenis_penanganan'],
-                    'harga_jual' => $row['harga_jual'] ?? null,
+                    'jenis_penanganan' => JenisPenangananLimbah::Dibuang->value,
+                    'harga_jual' => null,
                     'keterangan' => $row['keterangan'] ?? null,
                     'gambar' => $gambar,
                 ];
@@ -459,10 +452,6 @@ class LaporanLimbahController extends Controller
         if ($request->filled('kategori_limbah_id')) {
             $kid = $request->integer('kategori_limbah_id');
             $query->whereHas('details', fn (Builder $d) => $d->where('kategori_limbah_id', $kid));
-        }
-        if ($request->filled('jenis_penanganan')) {
-            $jen = $request->string('jenis_penanganan')->toString();
-            $query->whereHas('details', fn (Builder $d) => $d->where('jenis_penanganan', $jen));
         }
         if ($request->filled('tanggal_dari')) {
             $query->whereDate('tanggal', '>=', $request->string('tanggal_dari')->toString());
@@ -617,8 +606,6 @@ class LaporanLimbahController extends Controller
     private function validatedDailyBatch(Request $request, Collection $kategoris, bool $isUpdate, ?LaporanLimbahHarian $existingHarian): array
     {
         $satIn = implode(',', array_column(SatuanLimbah::cases(), 'value'));
-        $jenIn = implode(',', array_column(JenisPenangananLimbah::cases(), 'value'));
-
         $rules = [
             'tanggal' => ['required', 'string'],
             'menu_makanan' => ['required', 'string', 'max:1000'],
@@ -628,8 +615,6 @@ class LaporanLimbahController extends Controller
             $id = (int) $k->id;
             $rules["kategori.$id.jumlah"] = ['nullable', 'numeric', 'min:0.01', 'max:99999999.99'];
             $rules["kategori.$id.satuan"] = ['nullable', 'string', 'in:'.$satIn];
-            $rules["kategori.$id.jenis_penanganan"] = ['nullable', 'string', 'in:'.$jenIn];
-            $rules["kategori.$id.harga_jual"] = ['nullable', 'numeric', 'min:0'];
             $rules["kategori.$id.keterangan"] = ['nullable', 'string', 'max:5000'];
             $rules["kategori.$id.gambar"] = ['nullable', 'file', 'image', 'max:5120', 'mimes:jpeg,jpg,png,webp'];
         }
@@ -649,8 +634,6 @@ class LaporanLimbahController extends Controller
             $hasAny = (
                 ($row['jumlah'] ?? null) !== null ||
                 ($row['satuan'] ?? null) !== null ||
-                ($row['jenis_penanganan'] ?? null) !== null ||
-                ($row['harga_jual'] ?? null) !== null ||
                 (($row['keterangan'] ?? null) !== null && trim((string) $row['keterangan']) !== '') ||
                 ($file && $file->isValid())
             );
@@ -668,12 +651,6 @@ class LaporanLimbahController extends Controller
                     "kategori.$id.satuan" => 'Satuan wajib diisi jika kategori ini dicatat.',
                 ]);
             }
-            if (($row['jenis_penanganan'] ?? null) === null) {
-                throw ValidationException::withMessages([
-                    "kategori.$id.jenis_penanganan" => 'Jenis penanganan wajib diisi jika kategori ini dicatat.',
-                ]);
-            }
-
             $ex = $byKat?->get($id);
             if ((! $file || ! $file->isValid()) && (! $isUpdate || ! $ex?->gambar)) {
                 throw ValidationException::withMessages([
@@ -681,15 +658,7 @@ class LaporanLimbahController extends Controller
                 ]);
             }
 
-            if (($row['jenis_penanganan'] ?? '') === JenisPenangananLimbah::Dijual->value) {
-                if (($row['harga_jual'] ?? null) === null) {
-                    throw ValidationException::withMessages([
-                        "kategori.$id.harga_jual" => 'Harga jual wajib diisi untuk limbah yang dijual.',
-                    ]);
-                }
-            } else {
-                $row['harga_jual'] = null;
-            }
+            $row['harga_jual'] = null;
 
             $selectedKategori[$id] = $row;
         }

@@ -51,7 +51,7 @@
         </div>
 
         <div class="top">
-            <h1>Nota Pemesanan Operasional</h1>
+            <h1>Nota Pesanan</h1>
             <p>No. {{ $order->nomor_order }}</p>
         </div>
 
@@ -61,13 +61,22 @@
         </div>
 
         <table>
+            <colgroup>
+                <col style="width: 5%;">
+                <col style="width: 30%;">
+                <col style="width: 13%;">
+                <col style="width: 14%;">
+                <col style="width: 16%;">
+                <col style="width: 14%;">
+                <col style="width: 8%;">
+            </colgroup>
             <thead>
                 <tr>
                     <th>No</th>
                     <th>Uraian Jenis Bahan Makanan</th>
                     <th>Kuantitas</th>
                     <th>Harga</th>
-                    <th>Jumlah</th>
+                    <th>Sub Total</th>
                     <th>Supplier</th>
                     <th>Pemakaian</th>
                 </tr>
@@ -81,25 +90,25 @@
                         <td class="center">{{ $idx + 1 }}</td>
                         <td>{{ $item->nama_barang }}</td>
                         <td class="center">{{ rtrim(rtrim(number_format((float) $item->jumlah_barang, 2, ',', '.'), '0'), ',') }} {{ $item->satuan_barang }}</td>
-                        <td class="right">Rp{{ number_format((float) $item->harga_barang, 0, ',', '.') }}</td>
-                        <td class="right">Rp{{ number_format($total, 0, ',', '.') }}</td>
-                        <td>{{ $item->supplier?->nama_supplier ?? '-' }}</td>
-                        <td class="center">{{ $item->jumlah_hari_pemakaian }} hari</td>
+                        <td class="right">Rp. {{ number_format((float) $item->harga_barang, 0, ',', '.') }}</td>
+                        <td class="right">Rp. {{ number_format($total, 0, ',', '.') }}</td>
+                        <td>{{ $item->supplier_nama ?? $item->supplier?->nama_supplier ?? '-' }}</td>
+                        <td class="center">{{ (int) $item->jumlah_hari_pemakaian }} hari</td>
                     </tr>
                 @endforeach
                 <tr>
                     <td colspan="4" class="right"><strong>Total</strong></td>
-                    <td class="right"><strong>Rp{{ number_format($grandTotal, 0, ',', '.') }}</strong></td>
+                    <td class="right"><strong>Rp. {{ number_format($grandTotal, 0, ',', '.') }}</strong></td>
                     <td colspan="2"></td>
                 </tr>
             </tbody>
         </table>
 
         <div class="sign">
-            <p>{{ $order->profilMbg?->kabupaten ?? 'Sidrap' }}, {{ $order->tanggal_order?->translatedFormat('d F Y') }}</p>
+            <p>{{ $profil?->tempat_pelaporan ?? $order->profilMbg?->tempat_pelaporan ?? '-' }}, {{ $order->tanggal_order?->translatedFormat('d F Y') }}</p>
             <p>Kepala Satuan Pelayanan Pemenuhan Gizi</p>
             <br><br><br>
-            <p><strong>{{ $order->profilMbg?->nama_pimpinan ?? '-' }}</strong></p>
+            <p><strong>{{ $profil?->penanggung_jawab ?? $order->profilMbg?->penanggung_jawab ?? '-' }}</strong></p>
         </div>
     </div>
 </body>

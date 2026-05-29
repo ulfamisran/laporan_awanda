@@ -12,7 +12,7 @@
             <div class="mb-5 rounded-lg border p-3 text-sm" style="border-color:#d4e8f4;background:#f8fbfd;">
                 <p><span class="font-semibold">Nomor order:</span> <span class="font-mono">{{ $item->orderBarang?->nomor_order }}</span></p>
                 <p><span class="font-semibold">Barang:</span> {{ $item->nama_barang }}</p>
-                <p><span class="font-semibold">Supplier:</span> {{ $item->supplier?->nama_supplier ?? '-' }}</p>
+                <p><span class="font-semibold">Supplier:</span> {{ $item->supplier_nama ?? $item->supplier?->nama_supplier ?? '-' }}</p>
                 <p><span class="font-semibold">Qty order:</span> {{ number_format((float) $item->jumlah_barang, 2, ',', '.') }} {{ $item->satuan_barang }}</p>
                 <p><span class="font-semibold">Sudah diterima:</span> {{ number_format($qtyDiterima, 2, ',', '.') }} {{ $item->satuan_barang }}</p>
                 <p><span class="font-semibold">Sisa:</span> {{ number_format($sisaQty, 2, ',', '.') }} {{ $item->satuan_barang }}</p>
