@@ -10,7 +10,7 @@
         <h1 class="mt-6 text-2xl font-bold tracking-tight text-white sm:text-3xl" style="font-family:'Plus Jakarta Sans',sans-serif;">
             {{ config('app.name') }}
         </h1>
-        <p class="mt-2 text-sm" style="color:#b8d4e8;">Sistem Pengelolaan Dapur MBG</p>
+        <p class="mt-2 text-sm" style="color:#b8d4e8;">Semoga Cepat Beres</p>
     </div>
 @endsection
 

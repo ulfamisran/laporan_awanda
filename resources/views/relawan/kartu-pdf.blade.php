@@ -58,7 +58,7 @@
                 <p class="meta"><strong>NIK</strong> {{ $relawan->nik }}</p>
                 <p class="meta"><strong>Posisi</strong> {{ $relawan->posisiRelawan?->nama_posisi ?? '—' }}</p>
                 <p class="meta"><strong>Dapur</strong> {{ $relawan->profilMbg?->nama_dapur ?? '—' }}</p>
-                <p class="brand">Sistem Pengelolaan Dapur MBG</p>
+                <p class="brand">Semoga Cepat Beres</p>
             </div>
             <div class="cell" style="width: 108px; text-align: center;">
                 @if (! empty($qrDataUri))
