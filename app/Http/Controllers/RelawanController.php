@@ -91,17 +91,7 @@ class RelawanController extends Controller
     {
         $this->authorizeRelawanWrite();
 
-        $data = $request->validated();
-        unset($data['foto'], $data['crop_x'], $data['crop_y'], $data['crop_w'], $data['crop_h']);
-
-        if (! $request->user()?->hasRole('super_admin')) {
-            $data['gaji_pokok'] = 0;
-            $data['gaji_per_hari'] = 0;
-        }
-
-        if ($request->hasFile('foto')) {
-            $data['foto'] = $this->simpanFotoRelawan($request->file('foto'), $request);
-        }
+        $data = array_merge($this->defaultRelawanFields(), $request->validated());
 
         Relawan::query()->create($data);
 
@@ -220,6 +210,29 @@ class RelawanController extends Controller
         ])->setPaper([0, 0, 320, 204], 'landscape');
 
         return $pdf->stream('kartu-relawan-'.$relawan->nik.'.pdf');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function defaultRelawanFields(): array
+    {
+        return [
+            'nik' => $this->generatePlaceholderNik(),
+            'no_hp' => '-',
+            'alamat' => '-',
+            'tanggal_lahir' => '2000-01-01',
+            'tanggal_bergabung' => now()->toDateString(),
+        ];
+    }
+
+    private function generatePlaceholderNik(): string
+    {
+        do {
+            $nik = '9'.str_pad((string) random_int(0, 999999999999999), 15, '0', STR_PAD_LEFT);
+        } while (Relawan::withTrashed()->where('nik', $nik)->exists());
+
+        return $nik;
     }
 
     private function filteredRelawanQuery(Request $request): EloquentBuilder

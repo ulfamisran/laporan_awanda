@@ -613,7 +613,7 @@ class LaporanLimbahController extends Controller
 
         foreach ($kategoris as $k) {
             $id = (int) $k->id;
-            $rules["kategori.$id.jumlah"] = ['nullable', 'numeric', 'min:0.01', 'max:99999999.99'];
+            $rules["kategori.$id.jumlah"] = ['nullable', 'numeric', 'min:0', 'max:99999999.99'];
             $rules["kategori.$id.satuan"] = ['nullable', 'string', 'in:'.$satIn];
             $rules["kategori.$id.keterangan"] = ['nullable', 'string', 'max:5000'];
             $rules["kategori.$id.gambar"] = ['nullable', 'file', 'image', 'max:5120', 'mimes:jpeg,jpg,png,webp'];
@@ -622,9 +622,6 @@ class LaporanLimbahController extends Controller
         $validated = $request->validate($rules, [], [
             'menu_makanan' => 'menu makanan',
         ]);
-
-        $existingHarian?->loadMissing('details');
-        $byKat = $existingHarian?->details->keyBy('kategori_limbah_id');
 
         $selectedKategori = [];
         foreach ($kategoris as $k) {
@@ -649,12 +646,6 @@ class LaporanLimbahController extends Controller
             if (($row['satuan'] ?? null) === null) {
                 throw ValidationException::withMessages([
                     "kategori.$id.satuan" => 'Satuan wajib diisi jika kategori ini dicatat.',
-                ]);
-            }
-            $ex = $byKat?->get($id);
-            if ((! $file || ! $file->isValid()) && (! $isUpdate || ! $ex?->gambar)) {
-                throw ValidationException::withMessages([
-                    "kategori.$id.gambar" => 'Foto limbah wajib diisi untuk kategori yang dicatat.',
                 ]);
             }
 

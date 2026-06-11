@@ -40,7 +40,7 @@
                     <div class="grid gap-4 sm:grid-cols-2">
                         <div>
                             <label class="inst-label" for="jumlah_{{ $kid }}">Jumlah</label>
-                            <input type="number" step="0.01" min="0.01" name="kategori[{{ $kid }}][jumlah]" id="jumlah_{{ $kid }}" class="inst-input font-mono" value="{{ old("kategori.$kid.jumlah") }}">
+                            <input type="number" step="0.01" min="0" name="kategori[{{ $kid }}][jumlah]" id="jumlah_{{ $kid }}" class="inst-input font-mono" value="{{ old("kategori.$kid.jumlah") }}">
                             @error("kategori.$kid.jumlah")
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
@@ -61,7 +61,7 @@
                         @error("kategori.$kid.gambar")
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
-                        <p class="mt-1 text-xs" style="color:#7fa8c9;">JPG, PNG, atau WebP, maks. 5MB.</p>
+                        <p class="mt-1 text-xs" style="color:#7fa8c9;">Opsional. JPG, PNG, atau WebP, maks. 5MB.</p>
                     </div>
 
                     <div>
