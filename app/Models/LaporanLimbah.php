@@ -30,10 +30,6 @@ class LaporanLimbah extends Model
         'created_by',
     ];
 
-    protected $appends = [
-        'gambar_url',
-    ];
-
     protected function casts(): array
     {
         return [
@@ -106,8 +102,7 @@ class LaporanLimbah extends Model
                 return null;
             }
 
-            // Same-origin path so images load when APP_URL host differs from the browser URL.
-            return '/storage/foto-limbah/'.$this->gambar;
+            return route('laporan-limbah.gambar', ['filename' => $this->gambar]);
         });
     }
 }

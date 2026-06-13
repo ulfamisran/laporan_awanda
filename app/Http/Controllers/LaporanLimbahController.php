@@ -113,7 +113,7 @@ class LaporanLimbahController extends Controller
                 }
                 $s = $d->satuan instanceof SatuanLimbah ? $d->satuan->label() : (string) $d->satuan;
                 $jml = '<span class="font-mono text-xs">'.e(number_format((float) $d->jumlah, 2, ',', '.')).' '.e($s).'</span>';
-                if (! $d->gambar_url) {
+                if (! $d->gambar) {
                     return '<div class="text-center">'.$jml.'</div>';
                 }
 
@@ -228,6 +228,18 @@ class LaporanLimbahController extends Controller
         $harian->load(['details.kategoriLimbah', 'profilMbg', 'creator']);
 
         return view('laporan-limbah.show', ['harian' => $harian]);
+    }
+
+    public function gambar(string $filename): BinaryFileResponse
+    {
+        $filename = basename($filename);
+        $path = 'foto-limbah/'.$filename;
+
+        if (! Storage::disk('public')->exists($path)) {
+            abort(404);
+        }
+
+        return Storage::disk('public')->response($path);
     }
 
     public function edit(Request $request, LaporanLimbahHarian $harian): View
