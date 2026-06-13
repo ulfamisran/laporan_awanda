@@ -242,7 +242,10 @@ class LaporanLimbahController extends Controller
             abort(404);
         }
 
-        return Storage::disk('public')->response($path);
+        $response = Storage::disk('public')->response($path);
+        $response->headers->set('Cache-Control', 'public, max-age=86400');
+
+        return $response;
     }
 
     public function edit(Request $request, LaporanLimbahHarian $harian): View

@@ -289,7 +289,7 @@ Route::middleware(['auth', 'dapur.role:super_admin,admin_pusat,admin', ResolvePe
         Route::get('/create', [LaporanLimbahController::class, 'create'])->name('create');
         Route::post('/', [LaporanLimbahController::class, 'store'])->name('store');
         Route::get('/gambar/{filename}', [LaporanLimbahController::class, 'gambar'])
-            ->where('filename', '[A-Za-z0-9_\.\-]+')
+            ->where('filename', '.+')
             ->name('gambar');
         Route::get('/harian/{harian}/edit', [LaporanLimbahController::class, 'edit'])->name('harian.edit');
         Route::put('/harian/{harian}', [LaporanLimbahController::class, 'update'])->name('harian.update');

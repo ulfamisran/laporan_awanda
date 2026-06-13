@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\JenisPenangananLimbah;
 use App\Enums\SatuanLimbah;
+use App\Support\LimbahGambarUrl;
 use App\Support\LimbahVolumeKg;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -97,12 +98,6 @@ class LaporanLimbah extends Model
 
     protected function gambarUrl(): Attribute
     {
-        return Attribute::get(function (): ?string {
-            if (! $this->gambar) {
-                return null;
-            }
-
-            return route('laporan-limbah.gambar', ['filename' => $this->gambar]);
-        });
+        return Attribute::get(fn (): ?string => LimbahGambarUrl::for($this->gambar));
     }
 }
