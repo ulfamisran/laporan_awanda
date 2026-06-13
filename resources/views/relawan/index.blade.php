@@ -51,7 +51,6 @@
                         <th class="hidden">Id</th>
                         <th>No</th>
                         <th>Foto</th>
-                        <th>NIK</th>
                         <th>Nama</th>
                         <th>Posisi</th>
                         <th>Cabang</th>
@@ -91,7 +90,6 @@
                     { data: 'id', name: 'relawans.id', visible: false, searchable: false },
                     { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false, width: '48px' },
                     { data: 'foto_thumb', name: 'foto_thumb', orderable: false, searchable: false },
-                    { data: 'nik', name: 'relawans.nik' },
                     { data: 'nama_lengkap', name: 'relawans.nama_lengkap' },
                     { data: 'posisi_label', name: 'posisi_label', orderable: false, searchable: false },
                     { data: 'dapur_label', name: 'dapur_label', orderable: false, searchable: false },

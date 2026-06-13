@@ -6,7 +6,7 @@
     <div class="inst-form-page" style="max-width:52rem;">
         <a href="{{ route('master.relawan.index') }}" class="inst-back">← Kembali ke daftar</a>
         <h2 class="inst-form-title">Tambah relawan</h2>
-        <p class="inst-form-lead">Isi data dasar relawan. Detail lain (NIK, kontak, foto, dll.) dapat dilengkapi saat ubah profil.</p>
+        <p class="inst-form-lead">Isi data dasar relawan. Detail lain (kontak, foto, dll.) dapat dilengkapi saat ubah profil.</p>
         <div class="inst-form-card">
             <form id="form-relawan" method="POST" action="{{ route('master.relawan.store') }}" class="space-y-6">
                 @csrf
