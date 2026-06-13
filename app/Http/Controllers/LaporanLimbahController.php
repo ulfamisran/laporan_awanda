@@ -28,7 +28,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Yajra\DataTables\Facades\DataTables;
 
 class LaporanLimbahController extends Controller
@@ -125,7 +125,9 @@ class LaporanLimbahController extends Controller
         }
 
         $rawCols = ['aksi'];
+        $katCols = [];
         foreach ($kategoris as $k) {
+            $katCols[] = 'kat_'.$k->id;
             $rawCols[] = 'kat_'.$k->id;
         }
 
@@ -142,6 +144,7 @@ class LaporanLimbahController extends Controller
                 return '<div class="flex flex-wrap items-center justify-end">'.$show.$edit.$hapus.'</div>';
             })
             ->rawColumns($rawCols)
+            ->only(array_merge(['id', 'DT_RowIndex', 'tanggal', 'menu_makanan'], $katCols, ['aksi']))
             ->toJson();
     }
 
@@ -230,7 +233,7 @@ class LaporanLimbahController extends Controller
         return view('laporan-limbah.show', ['harian' => $harian]);
     }
 
-    public function gambar(string $filename): BinaryFileResponse
+    public function gambar(string $filename): StreamedResponse
     {
         $filename = basename($filename);
         $path = 'foto-limbah/'.$filename;
