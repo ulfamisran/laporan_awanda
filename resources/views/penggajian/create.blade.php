@@ -69,7 +69,7 @@
                     <div>
                         <label for="jumlah-hadir-semua" class="inst-label">Jumlah hadir (semua relawan)</label>
                         <input type="number" id="jumlah-hadir-semua" min="0" max="31" step="1"
-                            class="inst-input input-jumlah-hadir mt-1 text-center"
+                            class="inst-input input-jumlah-hadir input-jumlah-hadir-master mt-1 text-center"
                             value="{{ old('jumlah_hadir_semua', $defaultJumlahHadir) }}">
                     </div>
                     <p class="pb-1 text-xs inst-td-muted">Nilai di sini otomatis diterapkan ke semua baris relawan.</p>
@@ -83,7 +83,7 @@
                             <th>Posisi</th>
                             @if ($metode === 'kehadiran')
                                 <th class="text-right">Gaji per hari</th>
-                                <th class="text-right">Jumlah hadir</th>
+                                <th class="text-center">Jumlah hadir</th>
                             @else
                                 <th class="text-right">Gaji pokok</th>
                             @endif
@@ -98,7 +98,7 @@
                                 <td class="inst-td-muted">{{ $r->posisiRelawan?->nama_posisi ?? '—' }}</td>
                                 @if ($metode === 'kehadiran')
                                     <td class="text-right font-mono">{{ formatRupiah($r->gaji_per_hari) }}</td>
-                                    <td class="text-right">
+                                    <td class="text-center">
                                         <input type="number" min="0" max="31" name="jumlah_hadir[{{ $r->id }}]" value="{{ old('jumlah_hadir.'.$r->id, $defaultJumlahHadir) }}"
                                             class="inst-input input-jumlah-hadir js-jumlah-hadir-row text-center" @disabled($sudah)>
                                     </td>
@@ -158,11 +158,25 @@
 @push('styles')
     <style>
         .input-jumlah-hadir {
-            width: 3.25rem;
-            max-width: 3.25rem;
-            min-width: 3.25rem;
-            padding-left: 0.25rem;
-            padding-right: 0.25rem;
+            width: 5rem;
+            max-width: 5rem;
+            min-width: 5rem;
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .input-jumlah-hadir-master {
+            width: 6rem;
+            max-width: 6rem;
+            min-width: 6rem;
+            font-size: 1rem;
+        }
+
+        .inst-table td.text-center .input-jumlah-hadir {
+            display: inline-block;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         #relawan_id + .select2-container .select2-selection--single {
