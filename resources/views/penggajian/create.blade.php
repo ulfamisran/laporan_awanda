@@ -64,6 +64,17 @@
             <input type="hidden" name="status_create" value="{{ $statusCreate }}">
             <input type="hidden" name="tanggal_bayar_create" value="{{ $tanggalBayarCreate }}">
             <h3 class="mb-4 text-sm font-bold uppercase tracking-wide" style="color:#1a4a6b;">Pratinjau relawan aktif ({{ $previewRelawans->count() }})</h3>
+            @if ($metode === 'kehadiran')
+                <div class="mb-4 flex flex-wrap items-end gap-x-4 gap-y-2 rounded-lg border px-4 py-3" style="border-color:#d4e8f4;background:#f8fbfd;">
+                    <div>
+                        <label for="jumlah-hadir-semua" class="inst-label">Jumlah hadir (semua relawan)</label>
+                        <input type="number" id="jumlah-hadir-semua" min="0" max="31" step="1"
+                            class="inst-input input-jumlah-hadir mt-1 text-center"
+                            value="{{ old('jumlah_hadir_semua', $defaultJumlahHadir) }}">
+                    </div>
+                    <p class="pb-1 text-xs inst-td-muted">Nilai di sini otomatis diterapkan ke semua baris relawan.</p>
+                </div>
+            @endif
             <div class="overflow-x-auto">
                 <table class="inst-table">
                     <thead>
@@ -89,7 +100,7 @@
                                     <td class="text-right font-mono">{{ formatRupiah($r->gaji_per_hari) }}</td>
                                     <td class="text-right">
                                         <input type="number" min="0" max="31" name="jumlah_hadir[{{ $r->id }}]" value="{{ old('jumlah_hadir.'.$r->id, $defaultJumlahHadir) }}"
-                                            class="inst-input inline-block w-24 text-right" @disabled($sudah)>
+                                            class="inst-input input-jumlah-hadir js-jumlah-hadir-row text-center" @disabled($sudah)>
                                     </td>
                                 @else
                                     <td class="text-right font-mono">{{ formatRupiah($r->gaji_pokok) }}</td>
@@ -110,7 +121,7 @@
                 <button type="submit" class="inst-btn-primary">
                 Generate penggajian (Bulk)
                 </button>
-                <p class="mt-2 text-xs inst-td-muted">Isi jumlah hadir per relawan. Record duplikat (relawan + bulan + tahun pada periode aktif) akan dilewati.</p>
+                <p class="mt-2 text-xs inst-td-muted">Atur jumlah hadir di atas untuk semua relawan, atau sesuaikan per baris. Record duplikat (relawan + bulan + tahun pada periode aktif) akan dilewati.</p>
             </div>
         </form>
     @elseif(request('preview'))
@@ -137,7 +148,7 @@
             </div>
             <div @class(['hidden' => $metode !== 'kehadiran'])>
                 <label for="jumlah_hadir_single" class="inst-label">Jumlah hadir</label>
-                <input type="number" min="0" max="31" step="1" name="jumlah_hadir" id="jumlah_hadir_single" value="{{ old('jumlah_hadir', $defaultJumlahHadir) }}" class="inst-input mt-1 w-full" @required($metode === 'kehadiran')>
+                <input type="number" min="0" max="31" step="1" name="jumlah_hadir" id="jumlah_hadir_single" value="{{ old('jumlah_hadir', $defaultJumlahHadir) }}" class="inst-input input-jumlah-hadir mt-1 text-center" @required($metode === 'kehadiran')>
             </div>
             <button type="submit" class="inst-btn-secondary w-fit">Simpan satu penggajian</button>
         </form>
@@ -146,6 +157,14 @@
 
 @push('styles')
     <style>
+        .input-jumlah-hadir {
+            width: 3.25rem;
+            max-width: 3.25rem;
+            min-width: 3.25rem;
+            padding-left: 0.25rem;
+            padding-right: 0.25rem;
+        }
+
         #relawan_id + .select2-container .select2-selection--single {
             height: 42px;
             border: 1px solid #d4e8f4;
@@ -194,6 +213,25 @@
                         jQuery(this).select2({ width: '100%', language: { noResults: () => 'Tidak ada hasil' } });
                     }
                 });
+            }
+
+            const masterHadir = document.getElementById('jumlah-hadir-semua');
+            if (masterHadir) {
+                function clampHari(v) {
+                    if (v === '' || v === null) return '';
+                    const n = parseInt(v, 10);
+                    if (Number.isNaN(n)) return '';
+                    return String(Math.min(31, Math.max(0, n)));
+                }
+                function applyHadirSemua() {
+                    const v = clampHari(masterHadir.value);
+                    if (v !== masterHadir.value) masterHadir.value = v;
+                    document.querySelectorAll('.js-jumlah-hadir-row:not(:disabled)').forEach(function (el) {
+                        el.value = v;
+                    });
+                }
+                masterHadir.addEventListener('input', applyHadirSemua);
+                masterHadir.addEventListener('change', applyHadirSemua);
             }
         })();
         if (window.lucide) lucide.createIcons();
