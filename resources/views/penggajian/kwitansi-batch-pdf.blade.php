@@ -5,29 +5,57 @@
     <title>Kwitansi Batch Penggajian</title>
     <style>
         * { box-sizing: border-box; }
-        body { margin: 10px; font-family: DejaVu Serif, serif; font-size: 10px; color: #1f2937; }
-        .page { width: 100%; }
-        .kwitansi { border: 1px solid #9ca3af; padding: 8px 10px; margin-bottom: 10px; }
+        html, body { margin: 0; padding: 0; }
+        body {
+            margin: 10px;
+            font-family: DejaVu Serif, serif;
+            font-size: 11px;
+            line-height: 1;
+            color: #1f2937;
+        }
+        p, h1, td, th { margin: 0; padding: 0; line-height: 1; }
+        table { border-collapse: collapse; border-spacing: 0; }
+        .page {
+            width: 100%;
+            page-break-after: always;
+            page-break-inside: avoid;
+        }
+        .page:last-child { page-break-after: auto; }
+        .kwitansi {
+            border: 1px solid #9ca3af;
+            padding: 2mm 3mm;
+            margin-bottom: 8mm;
+            page-break-inside: avoid;
+        }
+        .kwitansi:last-child { margin-bottom: 0; }
         .hdr { display: table; width: 100%; }
-        .hdr-cell { display: table-cell; vertical-align: top; }
-        .logo { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; }
+        .hdr-cell { display: table-cell; vertical-align: middle; line-height: 1.15; }
+        .logo { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; display: block; }
         .instansi { text-align: center; }
-        .instansi h1 { margin: 0; font-size: 11px; line-height: 1.1; text-transform: uppercase; }
-        .instansi p { margin: 1px 0; font-size: 8px; }
-        .title { text-align: right; font-size: 11px; font-weight: bold; text-transform: uppercase; margin: 0; }
-        table.meta { width: 100%; margin-top: 5px; }
-        table.meta td { padding: 1px 0; vertical-align: top; }
+        .instansi h1 { font-size: 11px; text-transform: uppercase; line-height: 1.15; }
+        .instansi p { font-size: 8px; line-height: 1.15; }
+        .title { text-align: right; font-size: 11px; font-weight: bold; text-transform: uppercase; line-height: 1.15; }
+        table.meta { width: 100%; margin-top: 1mm; }
+        table.meta td { vertical-align: top; line-height: 1; }
+        table.meta table tr:first-child td { padding-top: 3mm; }
         .kiri { width: 56%; }
         .kanan { width: 44%; }
-        .label { width: 115px; }
-        .total-row { margin-top: 4px; font-weight: bold; }
-        .total-box { border: 1px solid #6b7280; padding: 2px 6px; text-align: center; margin-top: 2px; }
-        .ttd { margin-top: 2px; display: table; width: 100%; }
-        .ttd-col { display: table-cell; width: 50%; text-align: center; }
-        .ttd-col p { margin: 0; }
-        .ttd-line { margin: 22px auto 0; width: 70%; border-top: 1px dotted #6b7280; }
-        .ttd-name { margin-top: 0; }
-        .page-break { page-break-after: always; }
+        .label { width: 88px; }
+        .total-row { margin-top: 1mm; font-weight: bold; line-height: 1; font-size: 11px; }
+        .total-box {
+            border: 1px solid #6b7280;
+            padding: 1mm 2mm;
+            text-align: center;
+            margin-top: 1mm;
+            line-height: 1;
+            font-size: 11px;
+        }
+        .ttd { margin-top: 1mm; display: table; width: 100%; table-layout: fixed; font-size: 11px; }
+        .ttd-col { display: table-cell; width: 50%; text-align: center; vertical-align: top; line-height: 1; }
+        .ttd-head { min-height: 26px; }
+        .ttd-space { height: 32px; }
+        .ttd-line { margin: 0 auto; width: 70%; border-top: 1px dotted #6b7280; height: 0; }
+        .ttd-name { margin-top: 0; line-height: 1; }
     </style>
 </head>
 <body>
@@ -73,7 +101,7 @@
                         $terbilang = trim($penyebut((int) round((float) $p->total_gaji))).' Rupiah';
                     @endphp
                     <div class="hdr">
-                        <div class="hdr-cell" style="width:48px;">
+                        <div class="hdr-cell" style="width:42px;">
                             @if (! empty($logoDataUri))
                                 <img src="{{ $logoDataUri }}" class="logo" alt="">
                             @endif
@@ -82,7 +110,7 @@
                             <h1>{{ strtoupper($profil?->nama_dapur ?? 'Dapur MBG') }}</h1>
                             <p>{{ $profil?->alamat ?? '-' }}</p>
                         </div>
-                        <div class="hdr-cell" style="width:150px; text-align:right;">
+                        <div class="hdr-cell" style="width:120px; text-align:right;">
                             <p class="title">Slip Gaji Relawan</p>
                         </div>
                     </div>
@@ -90,14 +118,14 @@
                     <table class="meta">
                         <tr>
                             <td class="kiri">
-                                <table style="width:100%;">
+                                <table style="width:100%;" cellspacing="0" cellpadding="0">
                                     <tr><td class="label">Nama</td><td>: {{ $p->relawan?->nama_lengkap }}</td></tr>
                                     <tr><td class="label">Bagian</td><td>: {{ $p->relawan?->posisiRelawan?->nama_posisi ?? '-' }}</td></tr>
                                     <tr><td class="label">Gaji Pokok</td><td>: Rp {{ number_format((float) $p->gaji_pokok, 0, ',', '.') }}</td></tr>
                                 </table>
                             </td>
                             <td class="kanan">
-                                <table style="width:100%;">
+                                <table style="width:100%;" cellspacing="0" cellpadding="0">
                                     <tr><td class="label">Periode</td><td>: {{ $periode }}</td></tr>
                                     <tr><td class="label">Jumlah Hari Kerja</td><td>: {{ (int) $p->jumlah_hadir }} Hari Operasional</td></tr>
                                 </table>
@@ -110,11 +138,18 @@
 
                     <div class="ttd">
                         <div class="ttd-col">
-                            <p>Penerima</p>
+                            <div class="ttd-head">
+                                <p>Penerima</p>
+                            </div>
+                            <div class="ttd-space"></div>
                             <div class="ttd-line"></div>
                         </div>
                         <div class="ttd-col">
-                            <p>Mengetahui</p>
+                            <div class="ttd-head">
+                                <p>Mengetahui</p>
+                                <p>PLO Keuangan</p>
+                            </div>
+                            <div class="ttd-space"></div>
                             <div class="ttd-line"></div>
                             <p class="ttd-name">{{ $profil?->nama_akuntansi ?? '-' }}</p>
                         </div>
@@ -122,9 +157,6 @@
                 </div>
             @endforeach
         </div>
-        @if (! $loop->last)
-            <div class="page-break"></div>
-        @endif
     @endforeach
 </body>
 </html>

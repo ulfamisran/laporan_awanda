@@ -43,14 +43,6 @@ class RelawanController extends Controller
 
         return DataTables::eloquent($query)
             ->addIndexColumn()
-            ->addColumn('foto_thumb', function (Relawan $relawan) {
-                $url = $relawan->foto_url;
-                if (! $url) {
-                    return '<span class="inline-flex h-10 w-10 items-center justify-center rounded-lg text-[11px] font-bold text-white" style="background:#4a9b7a;">R</span>';
-                }
-
-                return '<img src="'.e($url).'" alt="" class="h-10 w-10 rounded-lg border object-cover" style="border-color:#d4e8f4;">';
-            })
             ->addColumn('posisi_label', fn (Relawan $r) => e($r->posisiRelawan?->nama_posisi ?? '—'))
             ->addColumn('dapur_label', fn (Relawan $r) => e($r->profilMbg?->nama_dapur ?? '—'))
             ->addColumn('gaji_label', fn (Relawan $r) => formatRupiah($r->gaji_pokok))
@@ -73,7 +65,7 @@ class RelawanController extends Controller
 
                 return '<div class="flex flex-wrap items-center justify-end gap-y-1">'.$detail.$edit.$hapus.'</div>';
             })
-            ->rawColumns(['foto_thumb', 'status_badge', 'aksi'])
+            ->rawColumns(['status_badge', 'aksi'])
             ->toJson();
     }
 
