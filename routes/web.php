@@ -266,6 +266,7 @@ Route::middleware(['auth', 'dapur.role:super_admin,admin_pusat,admin', ResolvePe
         Route::get('/', [PenggajianController::class, 'index'])->name('index');
         Route::get('/batch-detail', [PenggajianController::class, 'batchDetail'])->name('batch-detail');
         Route::post('/batch-status', [PenggajianController::class, 'batchStatus'])->name('batch-status');
+        Route::delete('/batch', [PenggajianController::class, 'destroyBatch'])->name('batch-destroy');
         Route::get('/cetak-kwitansi-batch', [PenggajianController::class, 'cetakKwitansiBatch'])->name('cetak-kwitansi-batch');
         Route::get('/create', [PenggajianController::class, 'create'])->name('create');
         Route::post('/generate-bulk', [PenggajianController::class, 'generateBulk'])->name('generate-bulk');

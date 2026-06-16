@@ -6,6 +6,7 @@
     @php
         $u = auth()->user();
         $isAdminDapur = $u->hasRole('admin') && ! $u->hasAnyRole(['super_admin', 'admin_pusat']);
+        $canManageDraft = $u->hasAnyRole(['super_admin', 'admin_pusat', 'admin']);
     @endphp
 
     <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -82,8 +83,21 @@
                                         <i data-lucide="list" class="h-3.5 w-3.5"></i>
                                         Lihat detail
                                     </a>
+                                    @if ($canManageDraft && ($batch['status'] === 'draft' || ($batch['draft_count'] ?? 0) > 0))
+                                        <form method="post" action="{{ route('penggajian.batch-destroy') }}" class="form-hapus-penggajian form-hapus-batch inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <input type="hidden" name="mulai" value="{{ $batch['periode_mulai'] }}">
+                                            <input type="hidden" name="selesai" value="{{ $batch['periode_selesai'] }}">
+                                            <input type="hidden" name="metode" value="{{ $batch['metode_penggajian'] }}">
+                                            <button type="submit" class="inst-btn-secondary !h-8 !px-3 !py-1 text-xs inline-flex items-center gap-1" style="color:#c0392b;border-color:#fecaca;">
+                                                <i data-lucide="trash-2" class="h-3.5 w-3.5"></i>
+                                                Hapus{{ $batch['status'] !== 'draft' && ($batch['draft_count'] ?? 0) < ($batch['total_karyawan'] ?? 0) ? ' draft' : ' batch' }}
+                                            </button>
+                                        </form>
+                                    @endif
                                     @if ($batch['status'] === 'draft' && $u->hasAnyRole(['super_admin', 'admin_pusat']))
-                                        <form method="post" action="{{ route('penggajian.batch-status') }}" class="w-full">
+                                        <form method="post" action="{{ route('penggajian.batch-status') }}" class="inline">
                                             @csrf
                                             <input type="hidden" name="mulai" value="{{ $batch['periode_mulai'] }}">
                                             <input type="hidden" name="selesai" value="{{ $batch['periode_selesai'] }}">
@@ -95,13 +109,13 @@
                                             </button>
                                         </form>
                                     @elseif ($batch['status'] === 'approved' && $u->hasRole('super_admin'))
-                                        <form method="post" action="{{ route('penggajian.batch-status') }}" class="flex flex-col items-end gap-1">
+                                        <form method="post" action="{{ route('penggajian.batch-status') }}" class="inline">
                                             @csrf
                                             <input type="hidden" name="mulai" value="{{ $batch['periode_mulai'] }}">
                                             <input type="hidden" name="selesai" value="{{ $batch['periode_selesai'] }}">
                                             <input type="hidden" name="metode" value="{{ $batch['metode_penggajian'] }}">
                                             <input type="hidden" name="aksi" value="bayar">
-                                            <input type="date" name="tanggal_bayar" value="{{ now()->toDateString() }}" class="inst-input !h-8 !px-2 !py-1 text-xs">
+                                            <input type="hidden" name="tanggal_bayar" value="{{ now()->toDateString() }}">
                                             <button type="submit" class="inst-btn-secondary !h-8 !px-3 !py-1 text-xs inline-flex items-center gap-1">
                                                 <i data-lucide="wallet" class="h-3.5 w-3.5"></i>
                                                 Bayar batch
@@ -144,6 +158,16 @@
 
             status?.addEventListener('change', function () {
                 form?.submit();
+            });
+
+            document.addEventListener('submit', function (e) {
+                const form = e.target;
+                if (!(form instanceof HTMLFormElement) || !form.classList.contains('form-hapus-penggajian')) return;
+                const isBatch = form.classList.contains('form-hapus-batch');
+                const msg = isBatch
+                    ? 'Hapus seluruh penggajian draft pada batch ini?'
+                    : 'Hapus penggajian draft ini?';
+                if (!confirm(msg)) e.preventDefault();
             });
 
             if (!search || rows.length === 0) return;

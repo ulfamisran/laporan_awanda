@@ -84,7 +84,7 @@
             @endif
 
             @if ($st === \App\Enums\StatusPenggajian::Draft && $u->hasAnyRole(['super_admin', 'admin_pusat', 'admin']))
-                <form method="post" action="{{ route('penggajian.destroy', $p) }}" class="form-hapus-penggajian inline" onsubmit="return confirm('Hapus penggajian draft ini?');">
+                <form method="post" action="{{ route('penggajian.destroy', $p) }}" class="form-hapus-penggajian inline">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="text-sm font-semibold" style="color:#c0392b;">Hapus draft</button>
@@ -109,6 +109,14 @@
 
 @push('scripts')
     <script>
-        if (window.lucide) lucide.createIcons();
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.lucide) lucide.createIcons();
+
+            document.addEventListener('submit', function (e) {
+                const form = e.target;
+                if (!(form instanceof HTMLFormElement) || !form.classList.contains('form-hapus-penggajian')) return;
+                if (!confirm('Hapus penggajian draft ini?')) e.preventDefault();
+            });
+        });
     </script>
 @endpush

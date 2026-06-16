@@ -68,6 +68,9 @@ class PenggajianController extends Controller
                     ->unique()
                     ->values();
                 $status = $statuses->count() === 1 ? (string) $statuses->first() : 'campuran';
+                $draftCount = $group->filter(
+                    fn (Penggajian $row) => ($row->status instanceof StatusPenggajian ? $row->status : StatusPenggajian::from((string) $row->status)) === StatusPenggajian::Draft
+                )->count();
 
                 return [
                     'periode_mulai' => $mulai,
@@ -75,6 +78,7 @@ class PenggajianController extends Controller
                     'periode_label' => $first->periode_label,
                     'metode_penggajian' => $first->metode_penggajian ?: 'gaji_pokok',
                     'status' => $status,
+                    'draft_count' => $draftCount,
                     'total_karyawan' => $group->count(),
                     'total_pembayaran' => (float) $group->sum('total_gaji'),
                 ];
@@ -191,6 +195,48 @@ class PenggajianController extends Controller
         });
 
         return back()->with('success', "Status penggajian batch ditandai dibayar ({$updated} relawan).");
+    }
+
+    public function destroyBatch(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'mulai' => ['required', 'date'],
+            'selesai' => ['required', 'date', 'after_or_equal:mulai'],
+            'metode' => ['required', 'string', 'in:gaji_pokok,kehadiran'],
+        ]);
+
+        $profilId = ProfilMbgTenant::id();
+        $this->ensurePenggajianProfil($request, $profilId);
+        $this->abortUnlessCanManageDraft($request);
+
+        $deleted = Penggajian::query()
+            ->where('profil_mbg_id', $profilId)
+            ->where('periode_id', PeriodeTenant::id())
+            ->whereDate('periode_mulai', $data['mulai'])
+            ->whereDate('periode_selesai', $data['selesai'])
+            ->where('metode_penggajian', $data['metode'])
+            ->where('status', StatusPenggajian::Draft)
+            ->delete();
+
+        if ($deleted === 0) {
+            return back()->with('error', 'Tidak ada penggajian draft yang dapat dihapus pada batch ini.');
+        }
+
+        $remaining = Penggajian::query()
+            ->where('profil_mbg_id', $profilId)
+            ->where('periode_id', PeriodeTenant::id())
+            ->whereDate('periode_mulai', $data['mulai'])
+            ->whereDate('periode_selesai', $data['selesai'])
+            ->where('metode_penggajian', $data['metode'])
+            ->exists();
+
+        if ($remaining) {
+            return back()->with('success', "Berhasil menghapus {$deleted} data penggajian draft.");
+        }
+
+        return redirect()
+            ->route('penggajian.index')
+            ->with('success', "Berhasil menghapus {$deleted} data penggajian draft. Batch dikosongkan.");
     }
 
     public function cetakKwitansiBatch(Request $request): mixed
@@ -583,14 +629,9 @@ class PenggajianController extends Controller
             return back()->with('error', 'Hanya penggajian draft yang dapat dihapus.');
         }
 
-        $mulai = optional($penggajian->periode_mulai)->toDateString();
-        $selesai = optional($penggajian->periode_selesai)->toDateString();
-
         $penggajian->delete();
 
-        return redirect()
-            ->route('penggajian.index', ['mulai' => $mulai, 'selesai' => $selesai])
-            ->with('success', 'Data penggajian draft dihapus.');
+        return back()->with('success', 'Data penggajian draft dihapus.');
     }
 
     public function cetakSlip(Request $request, Penggajian $penggajian): mixed
