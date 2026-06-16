@@ -83,11 +83,11 @@
                 </form>
             @endif
 
-            @if ($st === \App\Enums\StatusPenggajian::Draft && $u->hasAnyRole(['super_admin', 'admin_pusat', 'admin']))
+            @if ($u->hasAnyRole(['super_admin', 'admin_pusat', 'admin']))
                 <form method="post" action="{{ route('penggajian.destroy', $p) }}" class="form-hapus-penggajian inline">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" class="text-sm font-semibold" style="color:#c0392b;">Hapus draft</button>
+                    <button type="submit" class="text-sm font-semibold" style="color:#c0392b;">Hapus</button>
                 </form>
             @endif
 
@@ -115,7 +115,7 @@
             document.addEventListener('submit', function (e) {
                 const form = e.target;
                 if (!(form instanceof HTMLFormElement) || !form.classList.contains('form-hapus-penggajian')) return;
-                if (!confirm('Hapus penggajian draft ini?')) e.preventDefault();
+                if (!confirm('Hapus penggajian ini?')) e.preventDefault();
             });
         });
     </script>

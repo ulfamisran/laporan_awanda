@@ -83,7 +83,7 @@
                                         <i data-lucide="list" class="h-3.5 w-3.5"></i>
                                         Lihat detail
                                     </a>
-                                    @if ($canManageDraft && ($batch['status'] === 'draft' || ($batch['draft_count'] ?? 0) > 0))
+                                    @if ($canManageDraft)
                                         <form method="post" action="{{ route('penggajian.batch-destroy') }}" class="form-hapus-penggajian form-hapus-batch inline">
                                             @csrf
                                             @method('DELETE')
@@ -92,7 +92,7 @@
                                             <input type="hidden" name="metode" value="{{ $batch['metode_penggajian'] }}">
                                             <button type="submit" class="inst-btn-secondary !h-8 !px-3 !py-1 text-xs inline-flex items-center gap-1" style="color:#c0392b;border-color:#fecaca;">
                                                 <i data-lucide="trash-2" class="h-3.5 w-3.5"></i>
-                                                Hapus{{ $batch['status'] !== 'draft' && ($batch['draft_count'] ?? 0) < ($batch['total_karyawan'] ?? 0) ? ' draft' : ' batch' }}
+                                                Hapus batch
                                             </button>
                                         </form>
                                     @endif
@@ -165,8 +165,8 @@
                 if (!(form instanceof HTMLFormElement) || !form.classList.contains('form-hapus-penggajian')) return;
                 const isBatch = form.classList.contains('form-hapus-batch');
                 const msg = isBatch
-                    ? 'Hapus seluruh penggajian draft pada batch ini?'
-                    : 'Hapus penggajian draft ini?';
+                    ? 'Hapus seluruh penggajian pada batch ini?'
+                    : 'Hapus penggajian ini?';
                 if (!confirm(msg)) e.preventDefault();
             });
 

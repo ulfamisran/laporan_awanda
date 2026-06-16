@@ -215,28 +215,15 @@ class PenggajianController extends Controller
             ->whereDate('periode_mulai', $data['mulai'])
             ->whereDate('periode_selesai', $data['selesai'])
             ->where('metode_penggajian', $data['metode'])
-            ->where('status', StatusPenggajian::Draft)
             ->delete();
 
         if ($deleted === 0) {
-            return back()->with('error', 'Tidak ada penggajian draft yang dapat dihapus pada batch ini.');
-        }
-
-        $remaining = Penggajian::query()
-            ->where('profil_mbg_id', $profilId)
-            ->where('periode_id', PeriodeTenant::id())
-            ->whereDate('periode_mulai', $data['mulai'])
-            ->whereDate('periode_selesai', $data['selesai'])
-            ->where('metode_penggajian', $data['metode'])
-            ->exists();
-
-        if ($remaining) {
-            return back()->with('success', "Berhasil menghapus {$deleted} data penggajian draft.");
+            return back()->with('error', 'Tidak ada penggajian yang dapat dihapus pada batch ini.');
         }
 
         return redirect()
             ->route('penggajian.index')
-            ->with('success', "Berhasil menghapus {$deleted} data penggajian draft. Batch dikosongkan.");
+            ->with('success', "Berhasil menghapus {$deleted} data penggajian.");
     }
 
     public function cetakKwitansiBatch(Request $request): mixed
@@ -625,13 +612,9 @@ class PenggajianController extends Controller
         $this->authorizePenggajianRecord($request, $penggajian);
         $this->abortUnlessCanManageDraft($request);
 
-        if ($penggajian->status !== StatusPenggajian::Draft) {
-            return back()->with('error', 'Hanya penggajian draft yang dapat dihapus.');
-        }
-
         $penggajian->delete();
 
-        return back()->with('success', 'Data penggajian draft dihapus.');
+        return back()->with('success', 'Data penggajian dihapus.');
     }
 
     public function cetakSlip(Request $request, Penggajian $penggajian): mixed
