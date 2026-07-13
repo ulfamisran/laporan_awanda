@@ -15,6 +15,7 @@ class StoreProfilMbgRequest extends MbgFormRequest
     {
         return [
             'nama_dapur' => ['required', 'string', 'max:255'],
+            'daerah_sppg' => ['nullable', 'string', 'max:255'],
             'kode_dapur' => ['required', 'string', 'max:50', 'unique:profil_mbg,kode_dapur'],
             'alamat' => ['nullable', 'string'],
             'kota' => ['nullable', 'string', 'max:100'],
@@ -30,6 +31,7 @@ class StoreProfilMbgRequest extends MbgFormRequest
     {
         return [
             'nama_dapur' => 'nama dapur',
+            'daerah_sppg' => 'daerah SPPG',
             'kode_dapur' => 'kode dapur',
             'alamat' => 'alamat',
             'kota' => 'kota',

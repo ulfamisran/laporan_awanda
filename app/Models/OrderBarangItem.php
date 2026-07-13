@@ -16,6 +16,7 @@ class OrderBarangItem extends Model
         'supplier_id',
         'nama_barang',
         'supplier_nama',
+        'nomor_nota',
         'harga_barang',
         'jumlah_barang',
         'satuan_barang',

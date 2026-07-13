@@ -63,12 +63,13 @@ class PenerimaanBarangController extends Controller
             ->where('periode_id', PeriodeTenant::id())
             ->sum('jumlah');
 
-        $sisaQty = max((float) $item->jumlah_barang - $qtyDiterima, 0);
+        $qtyOrder = (float) $item->jumlah_barang;
+        $sisaQty = max($qtyOrder - $qtyDiterima, 0);
         if ($sisaQty <= 0) {
             return redirect()->route('stok.penerimaan.index')->with('success', 'Item order ini sudah diterima penuh.');
         }
 
-        return view('penerimaan-barang.create', compact('item', 'qtyDiterima', 'sisaQty'));
+        return view('penerimaan-barang.create', compact('item', 'qtyDiterima', 'sisaQty', 'qtyOrder'));
     }
 
     public function store(Request $request, OrderBarangItem $item): RedirectResponse
@@ -82,18 +83,21 @@ class PenerimaanBarangController extends Controller
             ->where('periode_id', PeriodeTenant::id())
             ->sum('jumlah');
 
-        $sisaQty = max((float) $item->jumlah_barang - $qtyDiterima, 0);
+        $qtyOrder = (float) $item->jumlah_barang;
+        $sisaQty = max($qtyOrder - $qtyDiterima, 0);
         if ($sisaQty <= 0) {
             return redirect()->route('stok.penerimaan.index')->with('success', 'Item order ini sudah diterima penuh.');
         }
 
         $data = $request->validate([
             'tanggal' => ['required', 'date'],
-            'qty_diterima' => ['required', 'numeric', 'min:0.01', 'max:'.$sisaQty],
+            'qty_diterima' => ['required', 'numeric', 'min:'.$qtyOrder],
             'kondisi_penerimaan' => ['required', 'string', 'max:255'],
             'keterangan' => ['nullable', 'string', 'max:5000'],
             'gambar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
-        ], [], [
+        ], [
+            'qty_diterima.min' => 'Qty diterima harus sama dengan atau lebih besar dari qty order ('.number_format($qtyOrder, 2, ',', '.').').',
+        ], [
             'qty_diterima' => 'qty diterima',
             'kondisi_penerimaan' => 'kondisi',
         ]);

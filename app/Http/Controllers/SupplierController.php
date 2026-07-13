@@ -17,7 +17,10 @@ class SupplierController extends Controller
             $query->where(function ($sub) use ($q) {
                 $sub->where('nama_supplier', 'like', '%'.$q.'%')
                     ->orWhere('no_hp', 'like', '%'.$q.'%')
-                    ->orWhere('alamat', 'like', '%'.$q.'%');
+                    ->orWhere('alamat', 'like', '%'.$q.'%')
+                    ->orWhere('nama_bank', 'like', '%'.$q.'%')
+                    ->orWhere('nomor_rekening', 'like', '%'.$q.'%')
+                    ->orWhere('atas_nama_rekening', 'like', '%'.$q.'%');
             });
         }
 
@@ -41,10 +44,16 @@ class SupplierController extends Controller
             'nama_supplier' => ['required', 'string', 'max:255'],
             'no_hp' => ['required', 'string', 'max:32'],
             'alamat' => ['required', 'string', 'max:5000'],
+            'nama_bank' => ['nullable', 'string', 'max:255'],
+            'nomor_rekening' => ['nullable', 'string', 'max:64'],
+            'atas_nama_rekening' => ['nullable', 'string', 'max:255'],
         ], [], [
             'nama_supplier' => 'nama supplier',
             'no_hp' => 'nomor HP',
             'alamat' => 'alamat',
+            'nama_bank' => 'nama bank',
+            'nomor_rekening' => 'nomor rekening',
+            'atas_nama_rekening' => 'atas nama rekening',
         ]);
 
         Supplier::query()->create($data);
@@ -69,10 +78,16 @@ class SupplierController extends Controller
             'nama_supplier' => ['required', 'string', 'max:255'],
             'no_hp' => ['required', 'string', 'max:32'],
             'alamat' => ['required', 'string', 'max:5000'],
+            'nama_bank' => ['nullable', 'string', 'max:255'],
+            'nomor_rekening' => ['nullable', 'string', 'max:64'],
+            'atas_nama_rekening' => ['nullable', 'string', 'max:255'],
         ], [], [
             'nama_supplier' => 'nama supplier',
             'no_hp' => 'nomor HP',
             'alamat' => 'alamat',
+            'nama_bank' => 'nama bank',
+            'nomor_rekening' => 'nomor rekening',
+            'atas_nama_rekening' => 'atas nama rekening',
         ]);
 
         $supplier->update($data);

@@ -14,7 +14,7 @@ class UpdateProfilMbgRequest extends MbgFormRequest
 
     protected function prepareForValidation(): void
     {
-        $nullableStrings = ['id_sppg', 'nama_yayasan', 'ketua_yayasan', 'nomor_rekening_va', 'tempat_pelaporan'];
+        $nullableStrings = ['id_sppg', 'daerah_sppg', 'nama_yayasan', 'ketua_yayasan', 'nomor_rekening_va', 'tempat_pelaporan'];
         foreach ($nullableStrings as $key) {
             if ($this->has($key) && $this->input($key) === '') {
                 $this->merge([$key => null]);
@@ -31,6 +31,7 @@ class UpdateProfilMbgRequest extends MbgFormRequest
 
         return [
             'nama_dapur' => ['required', 'string', 'max:255'],
+            'daerah_sppg' => ['nullable', 'string', 'max:255'],
             'kode_dapur' => [
                 'required',
                 'string',
@@ -64,6 +65,7 @@ class UpdateProfilMbgRequest extends MbgFormRequest
     {
         return [
             'nama_dapur' => 'nama SPPG',
+            'daerah_sppg' => 'daerah SPPG',
             'kode_dapur' => 'kode dapur',
             'id_sppg' => 'ID SPPG',
             'alamat' => 'alamat',

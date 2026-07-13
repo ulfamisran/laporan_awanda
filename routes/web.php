@@ -199,6 +199,8 @@ Route::middleware(['auth', 'dapur.role:super_admin,admin_pusat,admin', ResolvePe
         Route::put('order/{order}', [OrderBarangController::class, 'update'])->name('order.update');
         Route::get('order/{order}', [OrderBarangController::class, 'show'])->name('order.show');
         Route::get('order/{order}/cetak-nota', [OrderBarangController::class, 'cetakNota'])->name('order.cetak-nota');
+        Route::get('order/{order}/cetak-nota-supplier', [OrderBarangController::class, 'cetakNotaSupplier'])->name('order.cetak-nota-supplier');
+        Route::get('order/{order}/cetak-spm', [OrderBarangController::class, 'cetakSuratPermohonanPembayaran'])->name('order.cetak-spm');
 
         Route::get('penerimaan', [PenerimaanBarangController::class, 'index'])->name('penerimaan.index');
         Route::get('penerimaan/laporan/pdf', [PenerimaanBarangController::class, 'reportPdf'])->name('penerimaan.report-pdf');

@@ -15,5 +15,8 @@ class Supplier extends Model
         'nama_supplier',
         'no_hp',
         'alamat',
+        'nama_bank',
+        'nomor_rekening',
+        'atas_nama_rekening',
     ];
 }

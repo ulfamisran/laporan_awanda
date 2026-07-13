@@ -42,11 +42,7 @@
                 BADAN GIZI NASIONAL (<span class="italic-en">NATIONAL NUTRITION AGENCY</span>)
             </div>
             <div class="hdr-row line-sppg">SATUAN PELAYANAN PEMENUHAN GIZI (SPPG)</div>
-            <div class="hdr-row line-loc">
-                {{ trim((string) ($profil?->kota ?? '')) !== '' || trim((string) ($profil?->provinsi ?? '')) !== ''
-                    ? trim((string) ($profil?->kota ?? '')) . (trim((string) ($profil?->kota ?? '')) !== '' && trim((string) ($profil?->provinsi ?? '')) !== '' ? ' - ' : '') . trim((string) ($profil?->provinsi ?? ''))
-                    : '-' }}
-            </div>
+            <div class="hdr-row line-loc">{{ trim((string) ($profil?->daerah_sppg ?? '')) !== '' ? $profil->daerah_sppg : '—' }}</div>
             <div class="hdr-row line-alamat">{{ trim((string) ($profil?->alamat ?? '')) !== '' ? $profil->alamat : '—' }}</div>
         </div>
 

@@ -17,6 +17,10 @@
                     <input type="text" name="nama_dapur" id="nama_dapur" value="{{ old('nama_dapur') }}" required class="inst-input" placeholder="Nama dapur">
                 </div>
                 <div>
+                    <label for="daerah_sppg" class="inst-label">Daerah SPPG</label>
+                    <input type="text" name="daerah_sppg" id="daerah_sppg" value="{{ old('daerah_sppg') }}" class="inst-input" maxlength="255" placeholder="Contoh: Manggala Bangkala 3">
+                </div>
+                <div>
                     <label for="kode_dapur" class="inst-label">Kode dapur <span class="inst-required">*</span></label>
                     <input type="text" name="kode_dapur" id="kode_dapur" value="{{ old('kode_dapur') }}" required class="inst-input" placeholder="Contoh: DP-JKT-01">
                 </div>

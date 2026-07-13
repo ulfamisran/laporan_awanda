@@ -35,6 +35,7 @@ class SidebarMenu
                     ['label' => 'Pengguna', 'route' => 'master.pengguna.index', 'match' => ['master.pengguna.*'], 'roles' => ['super_admin']],
                     ['label' => 'Peran', 'route' => 'master.peran.index', 'match' => ['master.peran.*'], 'roles' => ['super_admin']],
                     ['label' => 'Profil cabang MBG', 'route' => 'master.profil-mbg.edit', 'match' => ['master.profil-mbg.*'], 'roles' => ['super_admin']],
+                    ['label' => 'Supplier', 'route' => 'master.supplier.index', 'match' => ['master.supplier.*']],
                     ['label' => 'Kategori Limbah', 'route' => 'master.kategori-limbah.index', 'match' => ['master.kategori-limbah.*']],
                     ['label' => 'Posisi Relawan', 'route' => 'master.posisi-relawan.index', 'match' => ['master.posisi-relawan.*']],
                     ['label' => 'Relawan', 'route' => 'master.relawan.index', 'match' => ['master.relawan.*']],

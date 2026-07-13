@@ -6,7 +6,7 @@
     <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
             <h2 class="inst-page-title">Master supplier</h2>
-            <p class="inst-page-desc">Kelola data supplier: nama, nomor HP, dan alamat.</p>
+            <p class="inst-page-desc">Kelola data supplier, termasuk rekening bank untuk surat permohonan pembayaran.</p>
         </div>
         @if (auth()->user()->hasAnyRole(['super_admin', 'admin_pusat']))
             <a href="{{ route('master.supplier.create') }}" class="inst-btn-primary shrink-0">
@@ -36,7 +36,9 @@
                     <tr>
                         <th>Nama supplier</th>
                         <th>No HP</th>
-                        <th>Alamat</th>
+                        <th>Bank</th>
+                        <th>No. rekening</th>
+                        <th>Atas nama</th>
                         <th class="text-right">Aksi</th>
                     </tr>
                 </thead>
@@ -45,7 +47,9 @@
                         <tr>
                             <td class="font-medium">{{ $row->nama_supplier }}</td>
                             <td>{{ $row->no_hp }}</td>
-                            <td class="inst-td-muted">{{ \Illuminate\Support\Str::limit($row->alamat, 140) }}</td>
+                            <td>{{ $row->nama_bank ?: '—' }}</td>
+                            <td class="font-mono text-xs">{{ $row->nomor_rekening ?: '—' }}</td>
+                            <td>{{ $row->atas_nama_rekening ?: '—' }}</td>
                             <td class="text-right">
                                 @if (auth()->user()->hasAnyRole(['super_admin', 'admin_pusat']))
                                     <div class="inline-flex items-center gap-3">
@@ -63,7 +67,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="inst-td-muted py-8 text-center">Belum ada data supplier.</td>
+                            <td colspan="6" class="inst-td-muted py-8 text-center">Belum ada data supplier.</td>
                         </tr>
                     @endforelse
                 </tbody>

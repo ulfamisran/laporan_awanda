@@ -1,9 +1,5 @@
 @php
-    $kota = trim((string) ($profil?->kota ?? ''));
-    $prov = trim((string) ($profil?->provinsi ?? ''));
-    $kotaProv = $kota !== '' && $prov !== ''
-        ? $kota.'–'.$prov
-        : ($kota !== '' ? $kota : ($prov !== '' ? $prov : '—'));
+    $daerahSppg = trim((string) ($profil?->daerah_sppg ?? ''));
     $alamatTampil = trim((string) ($profil?->alamat ?? ''));
 @endphp
 <!DOCTYPE html>
@@ -59,7 +55,7 @@
             BADAN GIZI NASIONAL (<span class="italic-en">NATIONAL NUTRITION AGENCY</span>)
         </div>
         <div class="hdr-row line-sppg">SATUAN PELAYANAN PEMENUHAN GIZI (SPPG)</div>
-        <div class="hdr-row line-loc">{{ $kotaProv }}</div>
+        <div class="hdr-row line-loc">{{ $daerahSppg !== '' ? $daerahSppg : '—' }}</div>
         <div class="hdr-row line-alamat">{{ $alamatTampil !== '' ? $profil?->alamat : '—' }}</div>
     </div>
 

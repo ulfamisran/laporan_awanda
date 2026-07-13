@@ -16,6 +16,7 @@ class ProfilMbg extends Model
 
     protected $fillable = [
         'nama_dapur',
+        'daerah_sppg',
         'kode_dapur',
         'id_sppg',
         'alamat',

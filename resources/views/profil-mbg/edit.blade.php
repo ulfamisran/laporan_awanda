@@ -18,6 +18,10 @@
                     <input type="text" name="nama_dapur" id="nama_dapur" value="{{ old('nama_dapur', $profil->nama_dapur) }}" required class="inst-input" placeholder="Nama SPPG">
                 </div>
                 <div>
+                    <label for="daerah_sppg" class="inst-label">Daerah SPPG</label>
+                    <input type="text" name="daerah_sppg" id="daerah_sppg" value="{{ old('daerah_sppg', $profil->daerah_sppg) }}" class="inst-input" maxlength="255" placeholder="Contoh: Manggala Bangkala 3">
+                </div>
+                <div>
                     <label for="id_sppg" class="inst-label">ID SPPG</label>
                     <input type="text" name="id_sppg" id="id_sppg" value="{{ old('id_sppg', $profil->id_sppg) }}" class="inst-input font-mono" maxlength="64" placeholder="Contoh: VOZM0FRH">
                 </div>

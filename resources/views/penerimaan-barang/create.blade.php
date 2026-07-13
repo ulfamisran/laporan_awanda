@@ -28,7 +28,11 @@
 
                 <div>
                     <label for="qty_diterima" class="inst-label">Qty diterima <span class="inst-required">*</span></label>
-                    <input type="number" step="0.01" min="0.01" max="{{ $sisaQty }}" name="qty_diterima" id="qty_diterima" class="inst-input font-mono" required value="{{ old('qty_diterima', $sisaQty > 0 ? number_format($sisaQty, 2, '.', '') : '') }}">
+                    <input type="number" step="0.01" min="{{ $qtyOrder }}" name="qty_diterima" id="qty_diterima" class="inst-input font-mono" required value="{{ old('qty_diterima', number_format($qtyOrder, 2, '.', '')) }}">
+                    <p class="mt-1 text-xs" style="color:#7fa8c9;">Minimal sama dengan qty order ({{ number_format($qtyOrder, 2, ',', '.') }} {{ $item->satuan_barang }}). Boleh lebih besar.</p>
+                    @error('qty_diterima')
+                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <div>
