@@ -51,7 +51,7 @@
             $supplier = $group['supplier'] ?? null;
             $namaDapur = trim((string) ($profil?->nama_dapur ?? $order->profilMbg?->nama_dapur ?? ''));
             $kota = trim((string) ($profil?->kota ?? $profil?->tempat_pelaporan ?? ''));
-            $namaYayasan = trim((string) ($profil?->nama_yayasan ?? ''));
+            $namaKotaSppg = trim((string) ($profil?->kota ?? ''));
             $namaAkuntansi = trim((string) ($profil?->nama_akuntansi ?? ''));
             $namaKaSppg = trim((string) ($profil?->penanggung_jawab ?? ''));
             $tanggalSurat = $order->tanggal_order;
@@ -97,7 +97,7 @@
 
             <div class="tujuan">
                 <p>Kepada Yth.</p>
-                <p>Perwakilan {{ $namaYayasan !== '' ? $namaYayasan : 'Yayasan' }}</p>
+                <p>Mitra SPPG {{ $namaKotaSppg !== '' ? $namaKotaSppg : '—' }}</p>
                 <p>Di Tempat</p>
             </div>
 
