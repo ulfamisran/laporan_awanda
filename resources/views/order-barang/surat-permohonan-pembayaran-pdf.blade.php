@@ -36,11 +36,11 @@
         .rekening .indent { margin-left: 18px; }
         .sign-wrap { width: 100%; margin-top: 28px; }
         .sign-table { width: 100%; border-collapse: collapse; }
-        .sign-table td { border: none; width: 50%; vertical-align: top; padding: 0; }
-        .sign-left { text-align: left; }
-        .sign-right { text-align: right; }
-        .sign-block { display: inline-block; text-align: center; min-width: 180px; }
-        .sign-block p { margin: 2px 0; }
+        .sign-table td { border: none; width: 50%; vertical-align: top; padding: 0; font-size: 11px; line-height: 1.35; }
+        .sign-left { text-align: center; }
+        .sign-right { text-align: center; }
+        .sign-table .sign-date { padding-bottom: 2px; }
+        .sign-table .sign-role { padding-top: 0; }
         .sign-space { height: 56px; }
     </style>
 </head>
@@ -144,23 +144,24 @@
             <div class="sign-wrap">
                 <table class="sign-table">
                     <tr>
-                        <td class="sign-left">
-                            <div class="sign-block">
-                                <p>Dibuat oleh,</p>
-                                <p>Akuntan</p>
-                                <div class="sign-space"></div>
-                                <p><strong><u>{{ $namaAkuntansi !== '' ? $namaAkuntansi : '................................' }}</u></strong></p>
-                            </div>
-                        </td>
-                        <td class="sign-right">
-                            <div class="sign-block">
-                                <p>{{ $kota !== '' ? $kota : '—' }}, {{ $tanggalSurat?->translatedFormat('d F Y') ?? '-' }}</p>
-                                <p>Mengetahui,</p>
-                                <p>Ka SPPG</p>
-                                <div class="sign-space"></div>
-                                <p><strong><u>{{ $namaKaSppg !== '' ? $namaKaSppg : '................................' }}</u></strong></p>
-                            </div>
-                        </td>
+                        <td class="sign-left sign-date">&nbsp;</td>
+                        <td class="sign-right sign-date">{{ $kota !== '' ? $kota : '—' }}, {{ $tanggalSurat?->translatedFormat('d F Y') ?? '-' }}</td>
+                    </tr>
+                    <tr>
+                        <td class="sign-left">Dibuat oleh,</td>
+                        <td class="sign-right">Mengetahui,</td>
+                    </tr>
+                    <tr>
+                        <td class="sign-left sign-role">Akuntan</td>
+                        <td class="sign-right sign-role">Ka SPPG</td>
+                    </tr>
+                    <tr>
+                        <td class="sign-left"><div class="sign-space"></div></td>
+                        <td class="sign-right"><div class="sign-space"></div></td>
+                    </tr>
+                    <tr>
+                        <td class="sign-left"><strong><u>{{ $namaAkuntansi !== '' ? $namaAkuntansi : '................................' }}</u></strong></td>
+                        <td class="sign-right"><strong><u>{{ $namaKaSppg !== '' ? $namaKaSppg : '................................' }}</u></strong></td>
                     </tr>
                 </table>
             </div>
