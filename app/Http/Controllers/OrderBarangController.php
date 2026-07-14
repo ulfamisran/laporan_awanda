@@ -203,29 +203,42 @@ class OrderBarangController extends Controller
 
         $profil = ProfilMbg::query()->find(ProfilMbgTenant::id());
         $logoDataUri = $this->profilLogoDataUriForPdf($profil);
-        $supplierGroups = $this->buildSupplierGroups($order)->map(function (array $group) use ($order, $profil): array {
-            $first = $group['items']->first();
-            $supplier = $first?->supplier;
-            $grandTotal = $group['items']->sum(
+
+        $items = $order->items->values();
+        $grandTotal = $items->sum(
+            fn ($item): float => (float) $item->jumlah_barang * (float) $item->harga_barang
+        );
+
+        $rekeningSupplier = $this->buildSupplierGroups($order)->map(function (array $group) use ($order): array {
+            $supplier = $group['items']->first()?->supplier;
+            $subtotal = $group['items']->sum(
                 fn ($item): float => (float) $item->jumlah_barang * (float) $item->harga_barang
             );
 
-            $group['supplier'] = $supplier;
-            $group['grand_total'] = $grandTotal;
-            $group['nomor_spm'] = $this->formatNomorSpm(
-                (string) $group['nomor_nota'],
-                $profil,
-                $order->tanggal_order
-            );
-
-            return $group;
+            return [
+                'supplier_nama' => $group['supplier_nama'],
+                'nomor_nota' => (string) ($group['nomor_nota'] ?: $order->nomor_order),
+                'nama_bank' => trim((string) ($supplier?->nama_bank ?? '')),
+                'nomor_rekening' => trim((string) ($supplier?->nomor_rekening ?? '')),
+                'atas_nama_rekening' => trim((string) ($supplier?->atas_nama_rekening ?? '')),
+                'subtotal' => $subtotal,
+            ];
         })->values();
+
+        $nomorSpm = $this->formatNomorSpm(
+            (string) $order->nomor_order,
+            $profil,
+            $order->tanggal_order
+        );
 
         $pdf = Pdf::loadView('order-barang.surat-permohonan-pembayaran-pdf', [
             'order' => $order,
             'profil' => $profil,
             'logoDataUri' => $logoDataUri,
-            'supplierGroups' => $supplierGroups,
+            'items' => $items,
+            'grandTotal' => $grandTotal,
+            'rekeningSupplier' => $rekeningSupplier,
+            'nomorSpm' => $nomorSpm,
         ])->setPaper('a4', 'portrait');
 
         $safeNomorOrder = str_replace(['/', '\\'], '-', (string) $order->nomor_order);
