@@ -6,7 +6,9 @@
     <div class="inst-form-page" style="max-width:72rem;">
         <a href="{{ route('stok.order.index') }}" class="inst-back">← Kembali</a>
         <h2 class="inst-form-title">{{ $heading ?? 'Buat order barang' }}</h2>
-        <p class="inst-form-lead text-sm" style="color:#4a6b7f;">Nomor order: <span class="font-mono font-semibold">{{ $previewNomorOrder }}</span> {{ ($isEdit ?? false) ? '' : '(otomatis saat simpan)' }}</p>
+        @if (! ($isEdit ?? false))
+            <p class="inst-form-lead text-sm" style="color:#4a6b7f;">Nomor order: <span class="font-mono font-semibold">{{ $previewNomorOrder }}</span> (otomatis saat simpan)</p>
+        @endif
         @include('components.periode-aktif-badge')
 
         <div class="inst-form-card">
@@ -17,6 +19,16 @@
                 @endif
 
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    @if ($isEdit ?? false)
+                        <div>
+                            <label for="nomor_order" class="inst-label">Nomor order <span class="inst-required">*</span></label>
+                            <input type="text" name="nomor_order" id="nomor_order" class="inst-input font-mono" required maxlength="100" value="{{ old('nomor_order', $previewNomorOrder) }}">
+                            <p class="mt-1 text-xs" style="color:#7fa8c9;">Harus unik dalam periode aktif.</p>
+                            @error('nomor_order')
+                                <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    @endif
                     <div>
                         <label for="tanggal_order" class="inst-label">Tanggal pencatatan <span class="inst-required">*</span></label>
                         <input type="date" name="tanggal_order" id="tanggal_order" class="inst-input" required value="{{ $tanggalOrder ?? old('tanggal_order', now()->toDateString()) }}">
@@ -45,9 +57,7 @@
                             <tbody></tbody>
                         </table>
                     </div>
-                    @if ($isEdit ?? false)
-                        <p class="mt-2 text-xs" style="color:#7fa8c9;">Pilih supplier dari master (bisa dicari). Lengkapi data rekening supplier di menu Data Master → Supplier agar surat permohonan pembayaran terisi lengkap.</p>
-                    @endif
+                    <p class="mt-2 text-xs" style="color:#7fa8c9;">Pilih supplier dari master (bisa dicari). Lengkapi data rekening supplier di menu Data Master → Supplier agar surat permohonan pembayaran terisi lengkap.</p>
                 </div>
 
                 <div class="flex flex-wrap gap-3 pt-2">
@@ -94,10 +104,6 @@
             }
 
             function supplierFieldHtml(idx, selectedNama) {
-                if (!isEdit) {
-                    return `<input type="text" name="items[${idx}][supplier_nama]" class="inst-input px-2" value="${escapeHtml(selectedNama || '')}" placeholder="Nama supplier (opsional)">`;
-                }
-
                 let options = `<option value="">— Tanpa supplier —</option>`;
                 let matched = false;
                 suppliers.forEach(function (s) {
@@ -113,7 +119,7 @@
             }
 
             function initSupplierSelect(tr) {
-                if (!isEdit || typeof jQuery === 'undefined' || !jQuery.fn.select2) return;
+                if (typeof jQuery === 'undefined' || !jQuery.fn.select2) return;
                 const $el = jQuery(tr).find('.select2-supplier');
                 if (!$el.length || $el.data('select2')) return;
                 $el.select2({
@@ -144,7 +150,7 @@
                 });
 
                 tr.querySelector('.btn-remove')?.addEventListener('click', function () {
-                    if (isEdit && typeof jQuery !== 'undefined') {
+                    if (typeof jQuery !== 'undefined') {
                         const $sel = jQuery(tr).find('.select2-supplier');
                         if ($sel.data('select2')) $sel.select2('destroy');
                     }

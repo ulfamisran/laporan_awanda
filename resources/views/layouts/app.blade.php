@@ -106,6 +106,93 @@
         [x-cloak] { display: none !important; }
         .select2-container { width: 100% !important; }
 
+        /* Select2 mengikuti gaya inst-input / inst-select */
+        .select2-container--default .select2-selection--single {
+            box-sizing: border-box;
+            height: auto !important;
+            min-height: 2.5rem;
+            border-radius: 0.5rem !important;
+            border: 1px solid #d4e8f4 !important;
+            background-color: #ffffff !important;
+            outline: none;
+            box-shadow: none;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            color: #1a4a6b !important;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+            padding: 0.625rem 2.5rem 0.625rem 1rem !important;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__placeholder {
+            color: #a8c0d4 !important;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 100% !important;
+            top: 0 !important;
+            right: 0.5rem !important;
+            width: 1.5rem !important;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow b {
+            border-color: #7fa8c9 transparent transparent transparent !important;
+            margin-top: -2px;
+        }
+        .select2-container--default.select2-container--open .select2-selection--single .select2-selection__arrow b {
+            border-color: transparent transparent #7fa8c9 transparent !important;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__clear {
+            margin-right: 1.75rem;
+            color: #7fa8c9;
+            font-weight: 600;
+        }
+        .select2-container--default.select2-container--focus .select2-selection--single,
+        .select2-container--default.select2-container--open .select2-selection--single {
+            border-color: #4a9b7a !important;
+            box-shadow: 0 0 0 1px #4a9b7a !important;
+        }
+        .select2-container--default .select2-selection--single:hover {
+            border-color: #c5dce8 !important;
+        }
+        .select2-dropdown {
+            border: 1px solid #d4e8f4 !important;
+            border-radius: 0.5rem !important;
+            overflow: hidden;
+            background: #ffffff;
+            z-index: 10050;
+        }
+        .select2-container--default .select2-search--dropdown .select2-search__field {
+            border: 1px solid #d4e8f4 !important;
+            border-radius: 0.5rem !important;
+            padding: 0.5rem 0.75rem !important;
+            color: #1a4a6b;
+            font-size: 0.875rem;
+            outline: none;
+        }
+        .select2-container--default .select2-search--dropdown .select2-search__field:focus {
+            border-color: #4a9b7a !important;
+        }
+        .select2-container--default .select2-results__option {
+            font-size: 0.875rem;
+            color: #1a4a6b;
+            padding: 0.5rem 0.75rem;
+        }
+        .select2-container--default .select2-results__option--highlighted.select2-results__option--selectable {
+            background-color: #e8f1f8 !important;
+            color: #1a4a6b !important;
+        }
+        .select2-container--default .select2-results__option--selected {
+            background-color: #f0f7f4 !important;
+            color: #1a4a6b !important;
+        }
+        /* Select2 di dalam tabel order (lebih kompak, selaras input px-2) */
+        #table-items .select2-container--default .select2-selection--single {
+            min-height: 2.375rem;
+        }
+        #table-items .select2-container--default .select2-selection--single .select2-selection__rendered {
+            padding: 0.5rem 2rem 0.5rem 0.5rem !important;
+            font-size: 0.875rem;
+        }
+
         /* —— Institutional: panel, table, form (template) —— */
         .inst-panel {
             border-radius: 1rem;

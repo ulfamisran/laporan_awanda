@@ -12,6 +12,12 @@
             <a href="{{ route('stok.order.cetak-nota', $order) }}" target="_blank" rel="noopener" class="inst-btn-outline">Cetak nota</a>
             <a href="{{ route('stok.order.cetak-nota-supplier', $order) }}" target="_blank" rel="noopener" class="inst-btn-outline">Cetak nota supplier</a>
             <a href="{{ route('stok.order.cetak-spm', $order) }}" target="_blank" rel="noopener" class="inst-btn-outline">Cetak SPM</a>
+            <a href="{{ route('stok.order.edit', $order) }}" class="inst-btn-outline">Update</a>
+            <form method="POST" action="{{ route('stok.order.destroy', $order) }}" class="form-hapus-order inline">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="inst-btn-outline" style="color:#c0392b;border-color:#f5c2c0;">Hapus</button>
+            </form>
             <a href="{{ route('stok.order.index') }}" class="inst-btn-outline">Kembali</a>
         </div>
     </div>
@@ -53,3 +59,27 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        document.addEventListener('submit', function (e) {
+            const form = e.target;
+            if (!(form instanceof HTMLFormElement)) return;
+            if (!form.classList.contains('form-hapus-order')) return;
+            e.preventDefault();
+            if (typeof window.mbgConfirmDelete !== 'function') {
+                form.submit();
+                return;
+            }
+            window
+                .mbgConfirmDelete({
+                    title: 'Hapus order?',
+                    text: 'Data order dan itemnya akan dihapus permanen.',
+                    confirmText: 'Ya, hapus',
+                })
+                .then(function (r) {
+                    if (r.isConfirmed) form.submit();
+                });
+        });
+    </script>
+@endpush

@@ -197,6 +197,7 @@ Route::middleware(['auth', 'dapur.role:super_admin,admin_pusat,admin', ResolvePe
         Route::post('order', [OrderBarangController::class, 'store'])->name('order.store');
         Route::get('order/{order}/edit', [OrderBarangController::class, 'edit'])->name('order.edit');
         Route::put('order/{order}', [OrderBarangController::class, 'update'])->name('order.update');
+        Route::delete('order/{order}', [OrderBarangController::class, 'destroy'])->name('order.destroy');
         Route::get('order/{order}', [OrderBarangController::class, 'show'])->name('order.show');
         Route::get('order/{order}/cetak-nota', [OrderBarangController::class, 'cetakNota'])->name('order.cetak-nota');
         Route::get('order/{order}/cetak-nota-supplier', [OrderBarangController::class, 'cetakNotaSupplier'])->name('order.cetak-nota-supplier');

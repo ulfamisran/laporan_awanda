@@ -18,6 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class OrderBarangController extends Controller
@@ -48,7 +49,7 @@ class OrderBarangController extends Controller
             'previewNomorOrder' => $this->previewNextNomorOrder(),
             'initialItems' => old('items', []),
             'tanggalOrder' => old('tanggal_order', now()->toDateString()),
-            'suppliers' => [],
+            'suppliers' => Supplier::query()->orderBy('nama_supplier')->get(['id', 'nama_supplier']),
         ]);
     }
 
@@ -115,7 +116,7 @@ class OrderBarangController extends Controller
     public function update(Request $request, OrderBarang $order): RedirectResponse
     {
         $this->ensureAccessible($order);
-        $data = $this->validatePayload($request);
+        $data = $this->validatePayload($request, $order);
 
         if ($order->items()->whereHas('penerimaan')->exists()) {
             return back()
@@ -134,6 +135,7 @@ class OrderBarangController extends Controller
 
             $order->update([
                 'tanggal_order' => $data['tanggal_order'],
+                'nomor_order' => $data['nomor_order'],
             ]);
 
             $order->items()->delete();
@@ -143,6 +145,26 @@ class OrderBarangController extends Controller
         return redirect()
             ->route('stok.order.index')
             ->with('success', 'Order barang berhasil diperbarui.');
+    }
+
+    public function destroy(OrderBarang $order): RedirectResponse
+    {
+        $this->ensureAccessible($order);
+
+        if ($order->items()->whereHas('penerimaan')->exists()) {
+            return redirect()
+                ->route('stok.order.index')
+                ->withErrors(['order' => 'Order ini sudah dipakai pada penerimaan barang, sehingga tidak bisa dihapus.']);
+        }
+
+        DB::transaction(function () use ($order): void {
+            $order->items()->delete();
+            $order->delete();
+        });
+
+        return redirect()
+            ->route('stok.order.index')
+            ->with('success', 'Order barang berhasil dihapus.');
     }
 
     public function show(OrderBarang $order): View
@@ -327,7 +349,12 @@ class OrderBarangController extends Controller
 
     private function lastSequenceNumber(string $suffix): int
     {
+        $periodeId = PeriodeTenant::id();
+        $profilId = ProfilMbgTenant::id();
+
         $lastOrder = OrderBarang::query()
+            ->where('periode_id', $periodeId)
+            ->where('profil_mbg_id', $profilId)
             ->where('nomor_order', 'like', '%'.$suffix)
             ->lockForUpdate()
             ->orderByDesc('nomor_order')
@@ -336,6 +363,9 @@ class OrderBarangController extends Controller
         $lastNota = OrderBarangItem::query()
             ->whereNotNull('nomor_nota')
             ->where('nomor_nota', 'like', '%'.$suffix)
+            ->whereHas('orderBarang', function ($q) use ($periodeId, $profilId): void {
+                $q->where('periode_id', $periodeId)->where('profil_mbg_id', $profilId);
+            })
             ->lockForUpdate()
             ->orderByDesc('nomor_nota')
             ->value('nomor_nota');
@@ -455,9 +485,9 @@ class OrderBarangController extends Controller
         $order->unsetRelation('items');
     }
 
-    private function validatePayload(Request $request): array
+    private function validatePayload(Request $request, ?OrderBarang $order = null): array
     {
-        return $request->validate([
+        $rules = [
             'tanggal_order' => ['required', 'date'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.nama_barang' => ['required', 'string', 'max:255'],
@@ -466,15 +496,35 @@ class OrderBarangController extends Controller
             'items.*.satuan_barang' => ['required', 'string', 'max:32'],
             'items.*.supplier_nama' => ['nullable', 'string', 'max:255'],
             'items.*.jumlah_hari_pemakaian' => ['required', 'integer', 'min:0', 'max:3650'],
-        ], [], [
+        ];
+
+        $attributes = [
             'tanggal_order' => 'tanggal order',
+            'nomor_order' => 'nomor order',
             'items.*.nama_barang' => 'nama barang',
             'items.*.harga_barang' => 'harga barang',
             'items.*.jumlah_barang' => 'jumlah barang',
             'items.*.satuan_barang' => 'satuan barang',
             'items.*.supplier_nama' => 'nama supplier',
             'items.*.jumlah_hari_pemakaian' => 'pemakaian (hari)',
-        ]);
+        ];
+
+        if ($order !== null) {
+            $rules['nomor_order'] = [
+                'required',
+                'string',
+                'max:100',
+                Rule::unique('order_barang', 'nomor_order')
+                    ->where(fn ($q) => $q
+                        ->where('profil_mbg_id', ProfilMbgTenant::id())
+                        ->where('periode_id', PeriodeTenant::id()))
+                    ->ignore($order->getKey()),
+            ];
+        }
+
+        return $request->validate($rules, [
+            'nomor_order.unique' => 'Nomor order sudah dipakai pada periode ini.',
+        ], $attributes);
     }
 
     private function resolveBarang(string $namaBarang, float $hargaBarang): Barang
