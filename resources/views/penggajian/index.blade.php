@@ -62,7 +62,7 @@
                     @forelse ($batches as $batch)
                         <tr class="batch-row">
                             <td class="font-medium">{{ $batch['periode_label'] }}</td>
-                            <td>{{ $batch['metode_penggajian'] === 'kehadiran' ? 'Berdasarkan kehadiran' : 'Berdasarkan gaji pokok' }}</td>
+                            <td>{{ $batch['metode_penggajian'] === 'kehadiran' ? 'Berdasarkan kehadiran' : ($batch['metode_penggajian'] === 'nominal_bebas' ? 'Nominal bebas' : 'Berdasarkan gaji pokok') }}</td>
                             <td>
                                 @if ($batch['status'] === 'draft')
                                     <span class="inline-flex rounded-full px-2 py-0.5 text-xs font-semibold" style="background:#e8ecef;color:#4a5568;">Draft</span>

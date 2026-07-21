@@ -57,7 +57,7 @@ class PenggajianExport implements FromCollection, WithHeadings, WithMapping
             $row->relawan?->posisiRelawan?->nama_posisi,
             $row->profilMbg?->nama_dapur,
             $row->periode_label,
-            $row->metode_penggajian === 'kehadiran' ? 'Kehadiran' : 'Gaji pokok',
+            $row->metode_penggajian === 'kehadiran' ? 'Kehadiran' : ($row->metode_penggajian === 'nominal_bebas' ? 'Nominal bebas' : 'Gaji pokok'),
             (int) $row->jumlah_hadir,
             (float) $row->gaji_pokok,
             (float) $row->tunjangan_transport,

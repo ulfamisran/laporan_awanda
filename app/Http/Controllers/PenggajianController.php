@@ -128,7 +128,7 @@ class PenggajianController extends Controller
         $data = $request->validate([
             'mulai' => ['required', 'date'],
             'selesai' => ['required', 'date', 'after_or_equal:mulai'],
-            'metode' => ['required', 'string', 'in:gaji_pokok,kehadiran'],
+            'metode' => ['required', 'string', 'in:gaji_pokok,kehadiran,nominal_bebas'],
             'aksi' => ['required', 'string', 'in:approve,bayar'],
             'tanggal_bayar' => ['nullable', 'date'],
         ]);
@@ -182,7 +182,7 @@ class PenggajianController extends Controller
                 'periode_mulai' => $data['mulai'],
                 'periode_selesai' => $data['selesai'],
             ])->periode_label;
-            $metodeLabel = $data['metode'] === 'kehadiran' ? 'kehadiran' : 'gaji pokok';
+            $metodeLabel = $this->labelMetodePenggajian((string) $data['metode']);
 
             $this->catatDanaKeluarPenggajian(
                 (int) $first->profil_mbg_id,
@@ -202,7 +202,7 @@ class PenggajianController extends Controller
         $data = $request->validate([
             'mulai' => ['required', 'date'],
             'selesai' => ['required', 'date', 'after_or_equal:mulai'],
-            'metode' => ['required', 'string', 'in:gaji_pokok,kehadiran'],
+            'metode' => ['required', 'string', 'in:gaji_pokok,kehadiran,nominal_bebas'],
         ]);
 
         $profilId = ProfilMbgTenant::id();
@@ -234,7 +234,7 @@ class PenggajianController extends Controller
         $data = $request->validate([
             'mulai' => ['required', 'date'],
             'selesai' => ['required', 'date', 'after_or_equal:mulai'],
-            'metode' => ['required', 'string', 'in:gaji_pokok,kehadiran'],
+            'metode' => ['required', 'string', 'in:gaji_pokok,kehadiran,nominal_bebas'],
         ]);
 
         $rows = Penggajian::query()
@@ -313,11 +313,14 @@ class PenggajianController extends Controller
         $data = $request->validate([
             'periode_mulai' => ['required', 'date'],
             'periode_selesai' => ['required', 'date', 'after_or_equal:periode_mulai'],
-            'metode_penggajian' => ['required', 'string', 'in:gaji_pokok,kehadiran'],
+            'metode_penggajian' => ['required', 'string', 'in:gaji_pokok,kehadiran,nominal_bebas'],
             'status_create' => ['nullable', 'string', 'in:draft,approved,dibayar'],
             'tanggal_bayar_create' => ['nullable', 'date'],
             'jumlah_hadir' => ['nullable', 'array'],
             'jumlah_hadir.*' => ['nullable', 'integer', 'min:0', 'max:31'],
+            'gaji_nominal_default' => ['nullable', 'numeric', 'min:0'],
+            'gaji_nominal' => ['nullable', 'array'],
+            'gaji_nominal.*' => ['nullable', 'numeric', 'min:0'],
         ]);
 
         $profilId = ProfilMbgTenant::id();
@@ -335,6 +338,7 @@ class PenggajianController extends Controller
             abort_unless($request->user()?->hasRole('super_admin'), 403);
         }
         $defaultJumlahHadir = $this->hitungHariPeriode($mulai->toDateString(), $selesai->toDateString());
+        $defaultNominal = round((float) ($data['gaji_nominal_default'] ?? 0), 2);
         $userId = (int) $request->user()->getKey();
 
         $relawans = Relawan::query()
@@ -343,10 +347,41 @@ class PenggajianController extends Controller
             ->orderBy('id')
             ->get();
 
+        if ($metode === 'nominal_bebas') {
+            $adaNominalKosong = false;
+            foreach ($relawans as $rel) {
+                $exists = Penggajian::query()
+                    ->where('relawan_id', $rel->getKey())
+                    ->where('profil_mbg_id', $profilId)
+                    ->where('periode_id', PeriodeTenant::id())
+                    ->where('periode_bulan', (int) $mulai->month)
+                    ->where('periode_tahun', (int) $mulai->year)
+                    ->exists();
+                if ($exists) {
+                    continue;
+                }
+                $nominalBebas = array_key_exists($rel->getKey(), $data['gaji_nominal'] ?? [])
+                    ? (float) $data['gaji_nominal'][$rel->getKey()]
+                    : $defaultNominal;
+                if ($nominalBebas <= 0) {
+                    $adaNominalKosong = true;
+                    break;
+                }
+            }
+            if ($adaNominalKosong) {
+                return back()->withInput()->withErrors([
+                    'gaji_nominal_default' => 'Isi nominal gaji default atau jumlah gaji per pegawai (harus lebih dari 0).',
+                ]);
+            }
+        }
+
         $created = 0;
         $totalDibayar = 0.0;
         foreach ($relawans as $rel) {
             $jumlahHadir = (int) ($data['jumlah_hadir'][$rel->getKey()] ?? $defaultJumlahHadir);
+            $nominalBebas = array_key_exists($rel->getKey(), $data['gaji_nominal'] ?? [])
+                ? (float) $data['gaji_nominal'][$rel->getKey()]
+                : $defaultNominal;
             $exists = Penggajian::query()
                 ->where('relawan_id', $rel->getKey())
                 ->where('profil_mbg_id', $profilId)
@@ -359,6 +394,8 @@ class PenggajianController extends Controller
                 continue;
             }
 
+            $gajiPokok = $this->hitungGajiPokokPeriode($rel, $metode, $jumlahHadir, $nominalBebas);
+
             Penggajian::query()->create([
                 'relawan_id' => $rel->getKey(),
                 'profil_mbg_id' => $profilId,
@@ -369,7 +406,7 @@ class PenggajianController extends Controller
                 'periode_selesai' => $selesai->toDateString(),
                 'metode_penggajian' => $metode,
                 'jumlah_hadir' => $jumlahHadir,
-                'gaji_pokok' => $this->hitungGajiPokokPeriode($rel, $metode, $jumlahHadir),
+                'gaji_pokok' => $gajiPokok,
                 'tunjangan_transport' => 0,
                 'tunjangan_makan' => 0,
                 'tunjangan_lainnya' => 0,
@@ -382,7 +419,7 @@ class PenggajianController extends Controller
                 'approved_by' => $statusCreate !== 'draft' ? $userId : null,
             ]);
             if ($statusCreate === 'dibayar') {
-                $totalDibayar += $this->hitungGajiPokokPeriode($rel, $metode, $jumlahHadir);
+                $totalDibayar += $gajiPokok;
             }
             $created++;
         }
@@ -392,7 +429,7 @@ class PenggajianController extends Controller
                 'periode_mulai' => $mulai->toDateString(),
                 'periode_selesai' => $selesai->toDateString(),
             ])->periode_label;
-            $metodeLabel = $metode === 'kehadiran' ? 'kehadiran' : 'gaji pokok';
+            $metodeLabel = $this->labelMetodePenggajian($metode);
             $this->catatDanaKeluarPenggajian(
                 $profilId,
                 PeriodeTenant::id(),
@@ -417,10 +454,11 @@ class PenggajianController extends Controller
             'relawan_id' => ['required', 'integer', 'exists:relawans,id'],
             'periode_mulai' => ['required', 'date'],
             'periode_selesai' => ['required', 'date', 'after_or_equal:periode_mulai'],
-            'metode_penggajian' => ['required', 'string', 'in:gaji_pokok,kehadiran'],
+            'metode_penggajian' => ['required', 'string', 'in:gaji_pokok,kehadiran,nominal_bebas'],
             'status_create' => ['nullable', 'string', 'in:draft,approved,dibayar'],
             'tanggal_bayar_create' => ['nullable', 'date'],
             'jumlah_hadir' => ['nullable', 'integer', 'min:0', 'max:31'],
+            'gaji_nominal' => ['nullable', 'numeric', 'min:0'],
         ]);
 
         $profilId = ProfilMbgTenant::id();
@@ -445,6 +483,11 @@ class PenggajianController extends Controller
         $jumlahHadir = $metode === 'kehadiran'
             ? (int) $data['jumlah_hadir']
             : $this->hitungHariPeriode($mulai->toDateString(), $selesai->toDateString());
+        $nominalBebas = (float) ($data['gaji_nominal'] ?? 0);
+
+        if ($metode === 'nominal_bebas' && $nominalBebas <= 0) {
+            return back()->withInput()->withErrors(['gaji_nominal' => 'Nominal gaji wajib diisi untuk metode nominal bebas.']);
+        }
 
         $exists = Penggajian::query()
             ->where('relawan_id', $rel->getKey())
@@ -468,7 +511,7 @@ class PenggajianController extends Controller
             'periode_selesai' => $selesai->toDateString(),
             'metode_penggajian' => $metode,
             'jumlah_hadir' => $jumlahHadir,
-            'gaji_pokok' => $this->hitungGajiPokokPeriode($rel, $metode, $jumlahHadir),
+            'gaji_pokok' => $this->hitungGajiPokokPeriode($rel, $metode, $jumlahHadir, $nominalBebas),
             'tunjangan_transport' => 0,
             'tunjangan_makan' => 0,
             'tunjangan_lainnya' => 0,
@@ -523,8 +566,9 @@ class PenggajianController extends Controller
         $this->abortUnlessCanManageDraft($request);
 
         $validated = $request->validate([
-            'metode_penggajian' => ['required', 'string', 'in:gaji_pokok,kehadiran'],
+            'metode_penggajian' => ['required', 'string', 'in:gaji_pokok,kehadiran,nominal_bebas'],
             'jumlah_hadir' => ['nullable', 'integer', 'min:0', 'max:31'],
+            'gaji_nominal' => ['nullable', 'numeric', 'min:0'],
             'tunjangan_transport' => ['required', 'numeric', 'min:0'],
             'tunjangan_makan' => ['required', 'numeric', 'min:0'],
             'tunjangan_lainnya' => ['required', 'numeric', 'min:0'],
@@ -540,10 +584,18 @@ class PenggajianController extends Controller
                 optional($penggajian->periode_mulai)->toDateString() ?? now()->toDateString(),
                 optional($penggajian->periode_selesai)->toDateString() ?? now()->toDateString()
             );
+        $nominalBebas = $metode === 'nominal_bebas'
+            ? (float) ($validated['gaji_nominal'] ?? $penggajian->gaji_pokok)
+            : null;
+
+        if ($metode === 'nominal_bebas' && (float) $nominalBebas <= 0) {
+            return back()->withInput()->withErrors(['gaji_nominal' => 'Nominal gaji wajib diisi untuk metode nominal bebas.']);
+        }
+
         $penggajian->fill([
             'metode_penggajian' => $metode,
             'jumlah_hadir' => $jumlahHadir,
-            'gaji_pokok' => $this->hitungGajiPokokPeriode($penggajian->relawan, $metode, $jumlahHadir),
+            'gaji_pokok' => $this->hitungGajiPokokPeriode($penggajian->relawan, $metode, $jumlahHadir, $nominalBebas),
             'tunjangan_transport' => $validated['tunjangan_transport'],
             'tunjangan_makan' => $validated['tunjangan_makan'],
             'tunjangan_lainnya' => $validated['tunjangan_lainnya'],
@@ -742,8 +794,12 @@ class PenggajianController extends Controller
         abort_unless($penggajian->status === StatusPenggajian::Draft, 403, 'Hanya penggajian draft yang dapat diubah.');
     }
 
-    private function hitungGajiPokokPeriode(?Relawan $relawan, string $metode, int $jumlahHadir): float
+    private function hitungGajiPokokPeriode(?Relawan $relawan, string $metode, int $jumlahHadir, ?float $nominalBebas = null): float
     {
+        if ($metode === 'nominal_bebas') {
+            return round(max(0, (float) $nominalBebas), 2);
+        }
+
         if (! $relawan) {
             return 0;
         }
@@ -757,7 +813,16 @@ class PenggajianController extends Controller
 
     private function normalizeMetodePenggajian(string $metode): string
     {
-        return in_array($metode, ['gaji_pokok', 'kehadiran'], true) ? $metode : 'gaji_pokok';
+        return in_array($metode, ['gaji_pokok', 'kehadiran', 'nominal_bebas'], true) ? $metode : 'gaji_pokok';
+    }
+
+    private function labelMetodePenggajian(string $metode): string
+    {
+        return match ($metode) {
+            'kehadiran' => 'Berdasarkan kehadiran',
+            'nominal_bebas' => 'Nominal bebas',
+            default => 'Berdasarkan gaji pokok',
+        };
     }
 
     private function normalizeStatusCreate(string $status): string

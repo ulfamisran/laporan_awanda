@@ -9,7 +9,10 @@
         $upahHarian = (float) ($p->relawan?->gaji_per_hari ?? 0);
         $metode = old('metode_penggajian', $p->metode_penggajian ?: 'gaji_pokok');
         $hadir = (int) ($p->jumlah_hadir ?? 0);
-        $gaji = $metode === 'kehadiran' ? ($upahHarian * $hadir) : $gajiBulanan;
+        $nominalBebas = (float) old('gaji_nominal', $p->gaji_pokok);
+        $gaji = $metode === 'kehadiran'
+            ? ($upahHarian * $hadir)
+            : ($metode === 'nominal_bebas' ? $nominalBebas : $gajiBulanan);
         $t1 = (float) $p->tunjangan_transport;
         $t2 = (float) $p->tunjangan_makan;
         $t3 = (float) $p->tunjangan_lainnya;
@@ -22,7 +25,7 @@
         <p class="inst-page-desc">{{ $p->relawan?->nama_lengkap }} — {{ $p->periode_label }} (tidak dapat diubah).</p>
     </div>
 
-    <form method="post" action="{{ route('penggajian.update', $p) }}" class="inst-panel max-w-2xl space-y-5 p-6">
+    <form method="post" action="{{ route('penggajian.update', $p) }}" class="inst-panel max-w-2xl space-y-5 p-6" id="form-edit-penggajian">
         @csrf
         @method('PUT')
 
@@ -37,12 +40,13 @@
             <select name="metode_penggajian" id="metode_penggajian" class="inst-select mt-1 w-full js-gaji">
                 <option value="gaji_pokok" @selected($metode === 'gaji_pokok')>Berdasarkan gaji pokok</option>
                 <option value="kehadiran" @selected($metode === 'kehadiran')>Berdasarkan kehadiran</option>
+                <option value="nominal_bebas" @selected($metode === 'nominal_bebas')>Nominal bebas (input manual)</option>
             </select>
         </div>
         <div id="group-jumlah-hadir" @class(['hidden' => $metode !== 'kehadiran'])>
             <label class="inst-label">Gaji per hari</label>
             <input type="text" class="inst-input mt-1 w-full bg-gray-50" readonly value="{{ formatRupiah($upahHarian) }}">
-            <label for="jumlah_hadir" class="inst-label">Jumlah hadir periode ini</label>
+            <label for="jumlah_hadir" class="inst-label mt-3">Jumlah hadir periode ini</label>
             <input type="number" min="0" max="31" step="1" name="jumlah_hadir" id="jumlah_hadir" class="inst-input mt-1 w-full js-gaji"
                 value="{{ old('jumlah_hadir', $p->jumlah_hadir) }}">
             <p class="mt-1 text-xs inst-td-muted">Gaji pokok periode dihitung otomatis: upah per hadir x jumlah hadir.</p>
@@ -50,6 +54,16 @@
         <div id="group-gaji-pokok" @class(['hidden' => $metode !== 'gaji_pokok'])>
             <label class="inst-label">Gaji pokok</label>
             <input type="text" class="inst-input mt-1 w-full bg-gray-50" readonly value="{{ formatRupiah($gajiBulanan) }}">
+        </div>
+        <div id="group-nominal-bebas" @class(['hidden' => $metode !== 'nominal_bebas'])>
+            <label for="gaji_nominal" class="inst-label">Nominal gaji</label>
+            <input type="text" name="gaji_nominal" id="gaji_nominal" inputmode="numeric" autocomplete="off"
+                class="inst-input mt-1 w-full font-mono js-gaji js-gaji-nominal"
+                value="{{ old('gaji_nominal', number_format((float) $p->gaji_pokok, 0, ',', '.')) }}">
+            <p class="mt-1 text-xs inst-td-muted">Isi nominal gaji secara manual untuk periode ini.</p>
+            @error('gaji_nominal')
+                <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+            @enderror
         </div>
         <div>
             <label class="inst-label">Gaji pokok periode</label>
@@ -109,9 +123,25 @@
             const outGajiPokok = document.getElementById('gaji_pokok_periode');
             const metodeEl = document.getElementById('metode_penggajian');
             const jumlahHadirEl = document.getElementById('jumlah_hadir');
+            const nominalEl = document.getElementById('gaji_nominal');
             const groupHadir = document.getElementById('group-jumlah-hadir');
             const groupPokok = document.getElementById('group-gaji-pokok');
+            const groupNominal = document.getElementById('group-nominal-bebas');
+
+            function rupiahRaw(v) {
+                return String(v || '').replace(/\D/g, '');
+            }
+            function formatDigits(v) {
+                const d = rupiahRaw(v);
+                if (!d) return '';
+                return d.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            }
             function num(el) {
+                if (!el) return 0;
+                if (el.classList.contains('js-gaji-nominal')) {
+                    const v = parseFloat(rupiahRaw(el.value));
+                    return Number.isFinite(v) ? v : 0;
+                }
                 const v = parseFloat(String(el.value).replace(',', '.'));
                 return Number.isFinite(v) ? v : 0;
             }
@@ -122,7 +152,9 @@
             function recalc() {
                 const metode = metodeEl ? metodeEl.value : 'gaji_pokok';
                 const hadir = num(document.getElementById('jumlah_hadir'));
-                const gajiPokok = metode === 'kehadiran' ? (upahHarian * hadir) : gajiBulanan;
+                let gajiPokok = gajiBulanan;
+                if (metode === 'kehadiran') gajiPokok = upahHarian * hadir;
+                if (metode === 'nominal_bebas') gajiPokok = num(nominalEl);
                 const t = num(document.getElementById('tunjangan_transport'));
                 const m = num(document.getElementById('tunjangan_makan'));
                 const l = num(document.getElementById('tunjangan_lainnya'));
@@ -130,11 +162,32 @@
                 const total = gajiPokok + t + m + l - p;
                 if (groupHadir) groupHadir.classList.toggle('hidden', metode !== 'kehadiran');
                 if (groupPokok) groupPokok.classList.toggle('hidden', metode !== 'gaji_pokok');
+                if (groupNominal) groupNominal.classList.toggle('hidden', metode !== 'nominal_bebas');
                 if (jumlahHadirEl) jumlahHadirEl.required = metode === 'kehadiran';
+                if (nominalEl) nominalEl.required = metode === 'nominal_bebas';
                 if (outGajiPokok) outGajiPokok.value = fmt(gajiPokok);
                 if (out) out.textContent = fmt(total);
             }
-            inputs.forEach((el) => el.addEventListener('input', recalc));
+
+            if (nominalEl) {
+                nominalEl.addEventListener('input', function () {
+                    this.value = formatDigits(this.value);
+                    recalc();
+                });
+            }
+
+            inputs.forEach((el) => {
+                if (!el.classList.contains('js-gaji-nominal')) {
+                    el.addEventListener('input', recalc);
+                }
+            });
+
+            document.getElementById('form-edit-penggajian')?.addEventListener('submit', function () {
+                if (nominalEl && !nominalEl.disabled) {
+                    nominalEl.value = rupiahRaw(nominalEl.value) || '0';
+                }
+            });
+
             recalc();
         })();
         if (window.lucide) lucide.createIcons();

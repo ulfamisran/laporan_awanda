@@ -23,9 +23,10 @@
                 </div>
                 <div>
                     <label for="c-metode" class="inst-label">Metode penggajian</label>
-                    <select id="c-metode" name="metode_penggajian" class="inst-select mt-1 w-56" required>
+                    <select id="c-metode" name="metode_penggajian" class="inst-select mt-1 w-64" required>
                         <option value="gaji_pokok" @selected($metode === 'gaji_pokok')>Berdasarkan gaji pokok</option>
                         <option value="kehadiran" @selected($metode === 'kehadiran')>Berdasarkan kehadiran</option>
+                        <option value="nominal_bebas" @selected($metode === 'nominal_bebas')>Nominal bebas (input manual)</option>
                     </select>
                 </div>
                 <div>
@@ -49,6 +50,7 @@
     @if ($previewRelawans->isNotEmpty())
         @php
             $adaExisting = $existingRelawanIds->isNotEmpty();
+            $defaultNominal = old('gaji_nominal_default', '0');
         @endphp
         @if ($adaExisting)
             <div class="mb-4 rounded-xl border px-4 py-3 text-sm" style="border-color:#fcd34d;background:#fffbeb;color:#92400e;">
@@ -56,7 +58,7 @@
             </div>
         @endif
 
-        <form method="post" action="{{ route('penggajian.generate-bulk') }}" class="inst-panel mb-6 overflow-hidden p-6">
+        <form method="post" action="{{ route('penggajian.generate-bulk') }}" class="inst-panel mb-6 overflow-hidden p-6" id="form-bulk-penggajian">
             @csrf
             <input type="hidden" name="periode_mulai" value="{{ $mulai }}">
             <input type="hidden" name="periode_selesai" value="{{ $selesai }}">
@@ -75,6 +77,17 @@
                     <p class="pb-1 text-xs inst-td-muted">Nilai di sini otomatis diterapkan ke semua baris relawan.</p>
                 </div>
             @endif
+            @if ($metode === 'nominal_bebas')
+                <div class="mb-4 flex flex-wrap items-end gap-x-4 gap-y-2 rounded-lg border px-4 py-3" style="border-color:#d4e8f4;background:#f8fbfd;">
+                    <div>
+                        <label for="gaji-nominal-semua" class="inst-label">Nominal gaji default (semua relawan)</label>
+                        <input type="text" id="gaji-nominal-semua" name="gaji_nominal_default" inputmode="numeric" autocomplete="off"
+                            class="inst-input input-gaji-nominal input-gaji-nominal-master mt-1 font-mono"
+                            value="{{ $defaultNominal }}">
+                    </div>
+                    <p class="pb-1 text-xs inst-td-muted">Nilai default otomatis mengisi jumlah gaji tiap pegawai. Masih bisa diubah per baris.</p>
+                </div>
+            @endif
             <div class="overflow-x-auto">
                 <table class="inst-table">
                     <thead>
@@ -84,6 +97,8 @@
                             @if ($metode === 'kehadiran')
                                 <th class="text-right">Gaji per hari</th>
                                 <th class="text-center">Jumlah hadir</th>
+                            @elseif ($metode === 'nominal_bebas')
+                                <th class="text-right">Jumlah gaji</th>
                             @else
                                 <th class="text-right">Gaji pokok</th>
                             @endif
@@ -101,6 +116,12 @@
                                     <td class="text-center">
                                         <input type="number" min="0" max="31" name="jumlah_hadir[{{ $r->id }}]" value="{{ old('jumlah_hadir.'.$r->id, $defaultJumlahHadir) }}"
                                             class="inst-input input-jumlah-hadir js-jumlah-hadir-row text-center" @disabled($sudah)>
+                                    </td>
+                                @elseif ($metode === 'nominal_bebas')
+                                    <td class="text-right">
+                                        <input type="text" name="gaji_nominal[{{ $r->id }}]" inputmode="numeric" autocomplete="off"
+                                            value="{{ old('gaji_nominal.'.$r->id, $defaultNominal) }}"
+                                            class="inst-input input-gaji-nominal js-gaji-nominal-row font-mono text-right" @disabled($sudah) @required(! $sudah)>
                                     </td>
                                 @else
                                     <td class="text-right font-mono">{{ formatRupiah($r->gaji_pokok) }}</td>
@@ -121,7 +142,15 @@
                 <button type="submit" class="inst-btn-primary">
                 Generate penggajian (Bulk)
                 </button>
-                <p class="mt-2 text-xs inst-td-muted">Atur jumlah hadir di atas untuk semua relawan, atau sesuaikan per baris. Record duplikat (relawan + bulan + tahun pada periode aktif) akan dilewati.</p>
+                <p class="mt-2 text-xs inst-td-muted">
+                    @if ($metode === 'nominal_bebas')
+                        Atur nominal default di atas, lalu sesuaikan per baris bila perlu. Record duplikat (relawan + bulan + tahun pada periode aktif) akan dilewati.
+                    @elseif ($metode === 'kehadiran')
+                        Atur jumlah hadir di atas untuk semua relawan, atau sesuaikan per baris. Record duplikat (relawan + bulan + tahun pada periode aktif) akan dilewati.
+                    @else
+                        Gaji pokok diambil dari data master relawan. Record duplikat (relawan + bulan + tahun pada periode aktif) akan dilewati.
+                    @endif
+                </p>
             </div>
         </form>
     @elseif(request('preview'))
@@ -130,7 +159,7 @@
 
     <div class="inst-panel mt-8 p-6">
         <h3 class="mb-4 text-sm font-bold uppercase tracking-wide" style="color:#1a4a6b;">Tambah satu relawan (draft)</h3>
-        <form method="post" action="{{ route('penggajian.store') }}" class="grid gap-4 sm:max-w-xl">
+        <form method="post" action="{{ route('penggajian.store') }}" class="grid gap-4 sm:max-w-xl" id="form-single-penggajian">
             @csrf
             <input type="hidden" name="periode_mulai" value="{{ $mulai }}">
             <input type="hidden" name="periode_selesai" value="{{ $selesai }}">
@@ -149,6 +178,11 @@
             <div @class(['hidden' => $metode !== 'kehadiran'])>
                 <label for="jumlah_hadir_single" class="inst-label">Jumlah hadir</label>
                 <input type="number" min="0" max="31" step="1" name="jumlah_hadir" id="jumlah_hadir_single" value="{{ old('jumlah_hadir', $defaultJumlahHadir) }}" class="inst-input input-jumlah-hadir mt-1 text-center" @required($metode === 'kehadiran')>
+            </div>
+            <div @class(['hidden' => $metode !== 'nominal_bebas'])>
+                <label for="gaji_nominal_single" class="inst-label">Nominal gaji</label>
+                <input type="text" name="gaji_nominal" id="gaji_nominal_single" inputmode="numeric" autocomplete="off"
+                    value="{{ old('gaji_nominal', '0') }}" class="inst-input input-gaji-nominal mt-1 font-mono" @required($metode === 'nominal_bebas')>
             </div>
             <button type="submit" class="inst-btn-secondary w-fit">Simpan satu penggajian</button>
         </form>
@@ -173,10 +207,27 @@
             font-size: 1rem;
         }
 
-        .inst-table td.text-center .input-jumlah-hadir {
+        .input-gaji-nominal {
+            width: 9.5rem;
+            max-width: 100%;
+            min-width: 8rem;
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .input-gaji-nominal-master {
+            width: 12rem;
+            max-width: 12rem;
+            min-width: 10rem;
+            font-size: 1rem;
+        }
+
+        .inst-table td.text-center .input-jumlah-hadir,
+        .inst-table td.text-right .input-gaji-nominal {
             display: inline-block;
             margin-left: auto;
-            margin-right: auto;
+            margin-right: 0;
         }
 
         #relawan_id + .select2-container .select2-selection--single {
@@ -247,6 +298,47 @@
                 masterHadir.addEventListener('input', applyHadirSemua);
                 masterHadir.addEventListener('change', applyHadirSemua);
             }
+
+            function rupiahRaw(v) {
+                return String(v || '').replace(/\D/g, '');
+            }
+            function formatDigits(v) {
+                const d = rupiahRaw(v);
+                if (!d) return '';
+                return d.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            }
+            function bindNominalInput(el) {
+                el.addEventListener('input', function () {
+                    this.value = formatDigits(this.value);
+                });
+                el.value = formatDigits(el.value);
+            }
+
+            document.querySelectorAll('.input-gaji-nominal').forEach(bindNominalInput);
+
+            const masterNominal = document.getElementById('gaji-nominal-semua');
+            if (masterNominal) {
+                function applyNominalSemua() {
+                    const v = formatDigits(masterNominal.value);
+                    masterNominal.value = v;
+                    document.querySelectorAll('.js-gaji-nominal-row:not(:disabled)').forEach(function (el) {
+                        el.value = v;
+                    });
+                }
+                masterNominal.addEventListener('input', applyNominalSemua);
+                masterNominal.addEventListener('change', applyNominalSemua);
+            }
+
+            function stripNominalOnSubmit(form) {
+                if (!form) return;
+                form.addEventListener('submit', function () {
+                    form.querySelectorAll('.input-gaji-nominal').forEach(function (el) {
+                        if (!el.disabled) el.value = rupiahRaw(el.value) || '0';
+                    });
+                });
+            }
+            stripNominalOnSubmit(document.getElementById('form-bulk-penggajian'));
+            stripNominalOnSubmit(document.getElementById('form-single-penggajian'));
         })();
         if (window.lucide) lucide.createIcons();
     </script>

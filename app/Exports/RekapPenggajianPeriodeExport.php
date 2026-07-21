@@ -43,7 +43,7 @@ class RekapPenggajianPeriodeExport implements FromCollection, WithColumnFormatti
         return [
             $row->relawan?->nama_lengkap,
             $row->relawan?->posisiRelawan?->nama_posisi,
-            $row->metode_penggajian === 'kehadiran' ? 'Kehadiran' : 'Gaji pokok',
+            $row->metode_penggajian === 'kehadiran' ? 'Kehadiran' : ($row->metode_penggajian === 'nominal_bebas' ? 'Nominal bebas' : 'Gaji pokok'),
             (int) $row->jumlah_hadir,
             (float) $row->gaji_pokok,
             $tunj,

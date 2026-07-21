@@ -42,7 +42,7 @@
                     </dd>
                 </div>
                 <div class="flex justify-between gap-4"><dt class="inst-td-muted">Dapur</dt><dd class="font-medium">{{ $p->profilMbg?->nama_dapur }}</dd></div>
-                <div class="flex justify-between gap-4"><dt class="inst-td-muted">Metode</dt><dd class="font-semibold">{{ $p->metode_penggajian === 'kehadiran' ? 'Berdasarkan kehadiran' : 'Berdasarkan gaji pokok' }}</dd></div>
+                <div class="flex justify-between gap-4"><dt class="inst-td-muted">Metode</dt><dd class="font-semibold">{{ $p->metode_penggajian === 'kehadiran' ? 'Berdasarkan kehadiran' : ($p->metode_penggajian === 'nominal_bebas' ? 'Nominal bebas' : 'Berdasarkan gaji pokok') }}</dd></div>
                 <div class="flex justify-between gap-4"><dt class="inst-td-muted">Jumlah hadir</dt><dd class="font-semibold">{{ $p->jumlah_hadir }} hari</dd></div>
                 <div class="flex justify-between gap-4"><dt class="inst-td-muted">Gaji per hari</dt><dd class="font-mono">{{ formatRupiah($p->relawan?->gaji_per_hari ?? 0) }}</dd></div>
                 <div class="flex justify-between gap-4"><dt class="inst-td-muted">Gaji pokok periode</dt><dd class="font-mono">{{ formatRupiah($p->gaji_pokok) }}</dd></div>

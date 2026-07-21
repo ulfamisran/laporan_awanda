@@ -12,7 +12,7 @@
     <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
             <h2 class="inst-page-title">Detail batch penggajian</h2>
-            <p class="inst-page-desc">{{ $periodeLabel }} — {{ $metode === 'kehadiran' ? 'Berdasarkan kehadiran' : 'Berdasarkan gaji pokok' }}</p>
+            <p class="inst-page-desc">{{ $periodeLabel }} — {{ $metode === 'kehadiran' ? 'Berdasarkan kehadiran' : ($metode === 'nominal_bebas' ? 'Nominal bebas' : 'Berdasarkan gaji pokok') }}</p>
         </div>
         <div class="flex flex-wrap gap-2">
             <a href="{{ route('penggajian.index') }}" class="inst-btn-secondary">Kembali</a>
