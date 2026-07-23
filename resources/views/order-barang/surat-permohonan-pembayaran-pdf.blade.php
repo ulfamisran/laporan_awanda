@@ -74,7 +74,7 @@
         </div>
 
         <div class="title">
-            <h1>Surat Permohonan Pembayaran</h1>
+            <h1>Surat Perintah Membayar</h1>
         </div>
 
         <div class="meta">
