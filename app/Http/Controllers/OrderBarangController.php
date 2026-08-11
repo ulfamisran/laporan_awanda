@@ -118,12 +118,6 @@ class OrderBarangController extends Controller
         $this->ensureAccessible($order);
         $data = $this->validatePayload($request, $order);
 
-        if ($order->items()->whereHas('penerimaan')->exists()) {
-            return back()
-                ->withInput()
-                ->withErrors(['items' => 'Order ini sudah dipakai pada penerimaan barang, sehingga tidak bisa diubah.']);
-        }
-
         DB::transaction(function () use ($order, $data): void {
             $preservedNotaByKey = [];
             foreach ($order->items as $item) {
