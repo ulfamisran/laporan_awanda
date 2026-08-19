@@ -54,10 +54,12 @@
         ];
     @endphp
 
+    @include('components.mobile-expand-accordion')
+
     <div class="mx-auto w-full max-w-2xl px-3 pb-20 sm:px-4">
         <a href="{{ route('label-ompreng.index') }}" class="inst-back">← Kembali</a>
         <h2 class="inst-form-title mt-2">{{ $heading ?? 'Input Label Ompreng Mobile' }}</h2>
-        <p class="inst-form-lead text-sm" style="color:#4a6b7f;">Halaman khusus input via HP. Setelah disimpan, label bisa dilihat atau dicetak dari detail data.</p>
+        <p class="inst-form-lead text-sm" style="color:#4a6b7f;">Halaman khusus input via HP. Ketuk bagian untuk isi data; hanya satu bagian terbuka per label.</p>
 
         <form method="POST" action="{{ $formAction ?? route('label-ompreng.store') }}" class="space-y-5" id="form-label-ompreng-mobile">
             @csrf
@@ -120,64 +122,105 @@
     </div>
 
     <template id="tpl-label-card-mobile">
-        <div class="rounded-2xl border bg-white p-4 shadow-sm" style="border-color:#d4e8f4;">
-            <div class="mb-4 flex items-center justify-between gap-3">
+        <div class="rounded-2xl border bg-white p-4 shadow-sm" style="border-color:#d4e8f4;" data-label-card>
+            <div class="mb-3 flex items-center justify-between gap-3">
                 <h3 class="text-sm font-bold uppercase tracking-wide" style="color:#1a4a6b;">Label <span class="label-number"></span></h3>
-                <button type="button" class="text-xs font-semibold text-red-600 btn-remove-label">Hapus</button>
+                <button type="button" class="mbg-no-expand text-xs font-semibold text-red-600 btn-remove-label">Hapus</button>
             </div>
 
-            <div class="space-y-4">
-                <div>
-                    <label class="inst-label">Menu Hari Ini</label>
-                    <div class="mt-2 space-y-2">
-                        <input type="text" class="inst-input menu-field" data-name="menu_1" maxlength="255" placeholder="Menu 1">
-                        <input type="text" class="inst-input menu-field" data-name="menu_2" maxlength="255" placeholder="Menu 2">
-                        <input type="text" class="inst-input menu-field" data-name="menu_3" maxlength="255" placeholder="Menu 3">
-                        <input type="text" class="inst-input menu-field" data-name="menu_4" maxlength="255" placeholder="Menu 4">
-                        <input type="text" class="inst-input menu-field" data-name="menu_5" maxlength="255" placeholder="Menu 5">
+            <div class="space-y-2 label-sections">
+                <div class="mbg-expand-item" data-expand-item>
+                    <div data-expand-header role="button" tabindex="0" aria-expanded="false">
+                        <button type="button" class="mbg-expand-trigger">
+                            <span class="min-w-0 flex-1">
+                                <span class="mbg-expand-title">Menu Hari Ini</span>
+                                <span class="mbg-expand-summary section-menu-summary">Belum diisi</span>
+                            </span>
+                            <svg class="mbg-expand-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                        </button>
+                    </div>
+                    <div class="mbg-expand-body" data-expand-body hidden>
+                        <div class="space-y-2">
+                            <input type="text" class="inst-input menu-field menu-summary-source" data-name="menu_1" maxlength="255" placeholder="Menu 1">
+                            <input type="text" class="inst-input menu-field menu-summary-source" data-name="menu_2" maxlength="255" placeholder="Menu 2">
+                            <input type="text" class="inst-input menu-field menu-summary-source" data-name="menu_3" maxlength="255" placeholder="Menu 3">
+                            <input type="text" class="inst-input menu-field menu-summary-source" data-name="menu_4" maxlength="255" placeholder="Menu 4">
+                            <input type="text" class="inst-input menu-field menu-summary-source" data-name="menu_5" maxlength="255" placeholder="Menu 5">
+                        </div>
                     </div>
                 </div>
 
-                <div>
-                    <label class="inst-label">Satuan nutrisi</label>
-                    <div class="mt-2 grid grid-cols-2 gap-2">
-                        @foreach ($nutrisiDefs as $nutrisi)
-                            <div>
-                                <label class="inst-label text-xs">{{ $nutrisi['label'] }}</label>
-                                <input type="text" class="inst-input mt-1" data-name="{{ $nutrisi['key'] }}_satuan" maxlength="20" value="{{ $nutrisi['unit'] }}">
-                            </div>
-                        @endforeach
+                <div class="mbg-expand-item" data-expand-item>
+                    <div data-expand-header role="button" tabindex="0" aria-expanded="false">
+                        <button type="button" class="mbg-expand-trigger">
+                            <span class="min-w-0 flex-1">
+                                <span class="mbg-expand-title">Satuan Nutrisi</span>
+                                <span class="mbg-expand-summary">kkal, g, g, g, g</span>
+                            </span>
+                            <svg class="mbg-expand-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                        </button>
+                    </div>
+                    <div class="mbg-expand-body" data-expand-body hidden>
+                        <div class="grid grid-cols-2 gap-2">
+                            @foreach ($nutrisiDefs as $nutrisi)
+                                <div>
+                                    <label class="inst-label text-xs">{{ $nutrisi['label'] }}</label>
+                                    <input type="text" class="inst-input mt-1 satuan-field" data-name="{{ $nutrisi['key'] }}_satuan" maxlength="20" value="{{ $nutrisi['unit'] }}">
+                                </div>
+                            @endforeach
+                        </div>
                     </div>
                 </div>
 
-                <div class="space-y-3">
-                    @foreach ($porsiDefs as $porsi)
-                        <div class="rounded-xl border p-3" style="border-color:#d4e8f4;background:#fbfdff;">
-                            <div class="mb-2 text-sm font-bold" style="color:#1a4a6b;">{{ $porsi['title'] }}</div>
+                @foreach ($porsiDefs as $porsi)
+                    <div class="mbg-expand-item" data-expand-item>
+                        <div data-expand-header role="button" tabindex="0" aria-expanded="false">
+                            <button type="button" class="mbg-expand-trigger">
+                                <span class="min-w-0 flex-1">
+                                    <span class="mbg-expand-title">{{ $porsi['title'] }}</span>
+                                    <span class="mbg-expand-summary porsi-summary">Belum diisi</span>
+                                </span>
+                                <svg class="mbg-expand-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                            </button>
+                        </div>
+                        <div class="mbg-expand-body" data-expand-body hidden>
                             <div class="space-y-2">
                                 @foreach ($nutrisiDefs as $nutrisi)
                                     <div>
                                         <label class="inst-label text-xs">{{ $nutrisi['label'] }}</label>
-                                        <input type="number" min="0" step="0.01" class="inst-input mt-1" data-name="{{ $porsi['prefix'] }}_{{ $nutrisi['key'] }}_nilai" placeholder="0">
+                                        <input type="number" min="0" step="0.01" class="inst-input mt-1 porsi-field" data-name="{{ $porsi['prefix'] }}_{{ $nutrisi['key'] }}_nilai" placeholder="0">
                                     </div>
                                 @endforeach
                             </div>
                         </div>
-                    @endforeach
-                </div>
-
-                <div class="space-y-4">
-                    <div>
-                        <label class="inst-label">Tanggal produksi</label>
-                        <input type="date" class="inst-input mt-1" data-name="tanggal_produksi">
                     </div>
-                    <div>
-                        <label class="inst-label">Batas waktu konsumsi</label>
-                        <div class="mt-1 grid grid-cols-2 gap-2">
-                            <input type="time" class="inst-input" data-name="batas_konsumsi_dari">
-                            <input type="time" class="inst-input" data-name="batas_konsumsi_sampai">
+                @endforeach
+
+                <div class="mbg-expand-item" data-expand-item>
+                    <div data-expand-header role="button" tabindex="0" aria-expanded="false">
+                        <button type="button" class="mbg-expand-trigger">
+                            <span class="min-w-0 flex-1">
+                                <span class="mbg-expand-title">Tanggal & Batas Konsumsi</span>
+                                <span class="mbg-expand-summary meta-summary">Belum diisi</span>
+                            </span>
+                            <svg class="mbg-expand-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                        </button>
+                    </div>
+                    <div class="mbg-expand-body" data-expand-body hidden>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="inst-label">Tanggal produksi</label>
+                                <input type="date" class="inst-input mt-1 meta-field" data-name="tanggal_produksi">
+                            </div>
+                            <div>
+                                <label class="inst-label">Batas waktu konsumsi</label>
+                                <div class="mt-1 grid grid-cols-2 gap-2">
+                                    <input type="time" class="inst-input meta-field" data-name="batas_konsumsi_dari">
+                                    <input type="time" class="inst-input meta-field" data-name="batas_konsumsi_sampai">
+                                </div>
+                                <p class="mt-1 text-xs" style="color:#7fa8c9;">Isi jam mulai dan jam akhir konsumsi.</p>
+                            </div>
                         </div>
-                        <p class="mt-1 text-xs" style="color:#7fa8c9;">Isi jam mulai dan jam akhir konsumsi.</p>
                     </div>
                 </div>
             </div>
@@ -204,9 +247,61 @@
                 return 'labels[' + idx + '][' + field + ']';
             }
 
-            function addCard(data) {
+            function initCardAccordion(card, expandFirst) {
+                const sections = card.querySelector('.label-sections');
+                window.MbgMobileAccordion.initGroup(sections, { expandFirst: !!expandFirst });
+
+                const menuSummary = card.querySelector('.section-menu-summary');
+                const menuInputs = card.querySelectorAll('.menu-summary-source');
+                const updateMenuSummary = function () {
+                    const filled = Array.from(menuInputs).map(function (el) {
+                        return String(el.value || '').trim();
+                    }).filter(Boolean);
+                    menuSummary.textContent = filled.length ? filled.join(', ') : 'Belum diisi';
+                };
+                menuInputs.forEach(function (el) {
+                    el.addEventListener('input', updateMenuSummary);
+                });
+                updateMenuSummary();
+
+                card.querySelectorAll('[data-expand-item]').forEach(function (section) {
+                    const porsiSummary = section.querySelector('.porsi-summary');
+                    const porsiFields = section.querySelectorAll('.porsi-field');
+                    if (porsiSummary && porsiFields.length) {
+                        const updatePorsi = function () {
+                            const count = Array.from(porsiFields).filter(function (el) {
+                                return String(el.value || '').trim() !== '';
+                            }).length;
+                            porsiSummary.textContent = count > 0 ? count + ' nilai terisi' : 'Belum diisi';
+                        };
+                        porsiFields.forEach(function (el) {
+                            el.addEventListener('input', updatePorsi);
+                        });
+                        updatePorsi();
+                    }
+                });
+
+                const metaSummary = card.querySelector('.meta-summary');
+                const metaFields = card.querySelectorAll('.meta-field');
+                const updateMeta = function () {
+                    const tgl = card.querySelector('[data-name="tanggal_produksi"]')?.value || '';
+                    const dari = card.querySelector('[data-name="batas_konsumsi_dari"]')?.value || '';
+                    const sampai = card.querySelector('[data-name="batas_konsumsi_sampai"]')?.value || '';
+                    if (tgl || dari || sampai) {
+                        metaSummary.textContent = [tgl, dari && sampai ? dari + ' - ' + sampai : ''].filter(Boolean).join(' · ');
+                    } else {
+                        metaSummary.textContent = 'Belum diisi';
+                    }
+                };
+                metaFields.forEach(function (el) {
+                    el.addEventListener('input', updateMeta);
+                    el.addEventListener('change', updateMeta);
+                });
+                updateMeta();
+            }
+
+            function addCard(data, expandFirst) {
                 const node = template.content.firstElementChild.cloneNode(true);
-                node.setAttribute('data-label-card', '1');
                 const idx = labelIndex++;
 
                 node.querySelectorAll('[data-name]').forEach(function (input) {
@@ -229,6 +324,7 @@
 
                 container.appendChild(node);
                 updateNumbers();
+                initCardAccordion(node, expandFirst);
             }
 
             document.getElementById('btn-add-label-mobile')?.addEventListener('click', function () {
@@ -266,11 +362,13 @@
                     tanggal_produksi: new Date().toISOString().slice(0, 10),
                     batas_konsumsi_dari: '06:00',
                     batas_konsumsi_sampai: '10:00',
-                });
+                }, true);
             });
 
             if (Array.isArray(initialLabels) && initialLabels.length) {
-                initialLabels.forEach(addCard);
+                initialLabels.forEach(function (item, i) {
+                    addCard(item, i === 0);
+                });
             } else {
                 document.getElementById('btn-add-label-mobile')?.click();
             }

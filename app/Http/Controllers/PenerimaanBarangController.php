@@ -74,7 +74,14 @@ class PenerimaanBarangController extends Controller
             })
             ->values();
 
-        return view('penerimaan-barang.mobile-index', compact('pendingItems'));
+        $orderNumbers = $pendingItems
+            ->map(fn (OrderBarangItem $item) => $item->orderBarang?->nomor_order)
+            ->filter()
+            ->unique()
+            ->sort()
+            ->values();
+
+        return view('penerimaan-barang.mobile-index', compact('pendingItems', 'orderNumbers'));
     }
 
     public function create(OrderBarangItem $item): View
@@ -173,7 +180,12 @@ class PenerimaanBarangController extends Controller
             ? 'stok.penerimaan.mobile'
             : 'stok.penerimaan.index';
 
-        return redirect()->route($redirectRoute)->with('success', 'Penerimaan barang berhasil disimpan dan masuk ke transaksi barang masuk.');
+        $redirectParams = [];
+        if ($request->boolean('mobile') && $request->filled('nomor_order')) {
+            $redirectParams['nomor_order'] = $request->input('nomor_order');
+        }
+
+        return redirect()->route($redirectRoute, $redirectParams)->with('success', 'Penerimaan barang berhasil disimpan dan masuk ke transaksi barang masuk.');
     }
 
     public function reportPdf()

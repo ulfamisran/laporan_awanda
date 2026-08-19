@@ -101,6 +101,60 @@
                 z-index: 50; transition: left 0.3s ease;
             }
             .sidebar-wrap.open { left: 0; }
+            .mobile-compact-header {
+                gap: 0.75rem !important;
+                padding: 0.75rem !important;
+            }
+            .mobile-compact-header .mobile-header-main {
+                gap: 0.75rem !important;
+            }
+            .mobile-compact-header .mobile-header-title {
+                font-size: 1.2rem !important;
+                line-height: 1.4rem !important;
+            }
+            .mobile-compact-header .mobile-header-subtitle {
+                display: none;
+            }
+            .mobile-compact-header .mobile-header-side {
+                gap: 0.5rem !important;
+                flex: 0 0 auto !important;
+                min-width: auto !important;
+            }
+            .mobile-compact-header .mobile-header-side form {
+                gap: 0.5rem !important;
+                flex-wrap: nowrap !important;
+                width: auto !important;
+                min-width: 0 !important;
+                flex: 0 0 auto !important;
+            }
+            .mobile-compact-header .mobile-header-side label {
+                white-space: nowrap;
+                font-size: 0.65rem !important;
+            }
+            .mobile-compact-header .mobile-header-side .inst-select {
+                width: 8.5rem !important;
+                min-width: 8.5rem !important;
+                padding-top: 0.45rem !important;
+                padding-bottom: 0.45rem !important;
+                padding-left: 0.75rem !important;
+                padding-right: 2rem !important;
+                font-size: 0.75rem !important;
+            }
+            .mobile-main-compact {
+                padding: 1rem 0.75rem 1.5rem !important;
+                gap: 1rem !important;
+            }
+            .inst-form-page > .inst-back:first-child {
+                margin-bottom: 0.75rem;
+            }
+            .inst-form-title {
+                font-size: 1.25rem;
+                line-height: 1.6rem;
+            }
+            .inst-form-card {
+                margin-top: 1rem;
+                padding: 1rem;
+            }
         }
 
         [x-cloak] { display: none !important; }
@@ -535,8 +589,8 @@
         </div>
 
         <div class="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-auto">
-            <header class="flex shrink-0 flex-wrap items-center justify-between gap-4 border-b px-6 py-5 md:px-8" style="background:#ffffff; border-color:#d4e8f4;">
-                <div class="flex min-w-0 flex-1 items-center gap-4">
+            <header class="mobile-compact-header flex shrink-0 flex-wrap items-center justify-between gap-4 border-b px-6 py-5 md:px-8" style="background:#ffffff; border-color:#d4e8f4;">
+                <div class="mobile-header-main flex min-w-0 flex-1 items-center gap-4">
                     <button
                         type="button"
                         class="rounded-lg p-2 md:hidden"
@@ -547,10 +601,10 @@
                         <i data-lucide="menu" style="width:20px;height:20px;color:#1a4a6b;"></i>
                     </button>
                     <div>
-                        <h1 class="text-2xl font-bold tracking-tight md:text-3xl" style="font-family:'Plus Jakarta Sans',sans-serif;color:#1a4a6b;">
+                        <h1 class="mobile-header-title text-2xl font-bold tracking-tight md:text-3xl" style="font-family:'Plus Jakarta Sans',sans-serif;color:#1a4a6b;">
                             @yield('title', 'Dasbor')
                         </h1>
-                        <p class="mt-1 text-xs" style="color:#7fa8c9;">
+                        <p class="mobile-header-subtitle mt-1 text-xs" style="color:#7fa8c9;">
                             @hasSection('header_subtitle')
                                 @yield('header_subtitle')
                             @else
@@ -559,7 +613,7 @@
                         </p>
                     </div>
                 </div>
-                <div class="flex min-w-0 flex-1 flex-col items-stretch gap-3 sm:max-w-xl sm:flex-none sm:flex-row sm:items-center sm:justify-end">
+                <div class="mobile-header-side flex min-w-0 flex-1 flex-col items-stretch gap-3 sm:max-w-xl sm:flex-none sm:flex-row sm:items-center sm:justify-end">
                     @if ($periodeToolbar['visible'] ?? false)
                         <form
                             method="POST"
@@ -604,7 +658,7 @@
                 </div>
             </header>
 
-            <main class="flex-1 space-y-6 overflow-auto px-6 py-8 md:px-8">
+            <main class="mobile-main-compact flex-1 space-y-6 overflow-auto px-6 py-8 md:px-8">
                 <div id="flash-toast" class="sr-only" aria-live="polite"></div>
 
                 @if ($errors->any())
