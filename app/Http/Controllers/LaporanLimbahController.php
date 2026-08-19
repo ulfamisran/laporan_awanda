@@ -81,7 +81,7 @@ class LaporanLimbahController extends Controller
         $kategoris = KategoriLimbah::query()->orderBy('nama_kategori')->get();
 
         $query = LaporanLimbahHarian::query()
-            ->with(['details.kategoriLimbah'])
+            ->with(['details.kategoriLimbah', 'creator'])
             ->orderByDesc('tanggal')
             ->orderByDesc('id');
 
@@ -102,7 +102,8 @@ class LaporanLimbahController extends Controller
         $dt = DataTables::eloquent($query)
             ->addIndexColumn()
             ->editColumn('tanggal', fn (LaporanLimbahHarian $h) => $h->tanggal?->format('d/m/Y') ?? '')
-            ->editColumn('menu_makanan', fn (LaporanLimbahHarian $h) => Str::limit((string) $h->menu_makanan, 120));
+            ->editColumn('menu_makanan', fn (LaporanLimbahHarian $h) => Str::limit((string) $h->menu_makanan, 120))
+            ->addColumn('input_oleh', fn (LaporanLimbahHarian $h) => e($h->creator?->name ?? '—'));
 
         foreach ($kategoris as $k) {
             $kid = (int) $k->id;
@@ -144,7 +145,7 @@ class LaporanLimbahController extends Controller
                 return '<div class="flex flex-wrap items-center justify-end">'.$show.$edit.$hapus.'</div>';
             })
             ->rawColumns($rawCols)
-            ->only(array_merge(['id', 'DT_RowIndex', 'tanggal', 'menu_makanan'], $katCols, ['aksi']))
+            ->only(array_merge(['id', 'DT_RowIndex', 'tanggal', 'menu_makanan', 'input_oleh'], $katCols, ['aksi']))
             ->toJson();
     }
 

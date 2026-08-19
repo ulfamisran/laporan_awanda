@@ -77,6 +77,7 @@
             ['data' => 'DT_RowIndex', 'orderable' => false, 'searchable' => false, 'width' => '48px'],
             ['data' => 'tanggal', 'name' => 'laporan_limbah_harian.tanggal'],
             ['data' => 'menu_makanan', 'name' => 'laporan_limbah_harian.menu_makanan'],
+            ['data' => 'input_oleh', 'name' => 'input_oleh', 'orderable' => false, 'searchable' => false],
         ];
         foreach ($kategoris as $k) {
             $dtCols[] = [
@@ -99,6 +100,7 @@
                         <th>No</th>
                         <th>Tanggal</th>
                         <th>Menu</th>
+                        <th>Input oleh</th>
                         @foreach ($kategoris as $k)
                             <th>{{ $k->nama_kategori }}</th>
                         @endforeach
