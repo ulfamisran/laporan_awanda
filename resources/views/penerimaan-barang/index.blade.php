@@ -8,7 +8,10 @@
             <h2 class="inst-page-title">Penerimaan barang</h2>
             <p class="inst-page-desc">Proses terima barang berdasarkan order barang periode aktif.</p>
         </div>
-        <a href="{{ route('stok.penerimaan.report-pdf') }}" target="_blank" rel="noopener" class="inst-btn-secondary text-sm">Laporan PDF</a>
+        <div class="flex flex-wrap gap-2">
+            <a href="{{ route('stok.penerimaan.mobile') }}" class="inst-btn-outline text-sm">Input via HP</a>
+            <a href="{{ route('stok.penerimaan.report-pdf') }}" target="_blank" rel="noopener" class="inst-btn-secondary text-sm">Laporan PDF</a>
+        </div>
     </div>
 
     <div class="inst-panel mb-6 overflow-hidden p-4 sm:p-6">

@@ -207,7 +207,9 @@ Route::middleware(['auth', 'dapur.role:super_admin,admin_pusat,admin', ResolvePe
         Route::get('order/{order}/cetak-spm', [OrderBarangController::class, 'cetakSuratPermohonanPembayaran'])->name('order.cetak-spm');
 
         Route::get('penerimaan', [PenerimaanBarangController::class, 'index'])->name('penerimaan.index');
+        Route::get('penerimaan/mobile', [PenerimaanBarangController::class, 'indexMobile'])->name('penerimaan.mobile');
         Route::get('penerimaan/laporan/pdf', [PenerimaanBarangController::class, 'reportPdf'])->name('penerimaan.report-pdf');
+        Route::get('penerimaan/{item}/terima-mobile', [PenerimaanBarangController::class, 'createMobile'])->name('penerimaan.create-mobile');
         Route::get('penerimaan/{item}/terima', [PenerimaanBarangController::class, 'create'])->name('penerimaan.create');
         Route::post('penerimaan/{item}/terima', [PenerimaanBarangController::class, 'store'])->name('penerimaan.store');
 
@@ -290,6 +292,7 @@ Route::middleware(['auth', 'dapur.role:super_admin,admin_pusat,admin', ResolvePe
     Route::prefix('label-ompreng')->name('label-ompreng.')->group(function () {
         Route::get('/', [LabelOmprengController::class, 'index'])->name('index');
         Route::get('/create', [LabelOmprengController::class, 'create'])->name('create');
+        Route::get('/create-mobile', [LabelOmprengController::class, 'createMobile'])->name('create-mobile');
         Route::post('/', [LabelOmprengController::class, 'store'])->name('store');
         Route::get('/{labelOmpreng}/edit', [LabelOmprengController::class, 'edit'])->name('edit');
         Route::put('/{labelOmpreng}', [LabelOmprengController::class, 'update'])->name('update');
@@ -304,6 +307,7 @@ Route::middleware(['auth', 'dapur.role:super_admin,admin_pusat,admin', ResolvePe
         Route::get('/export-pdf', [LaporanLimbahController::class, 'exportPdf'])->name('export-pdf');
         Route::get('/rekapitulasi', [LaporanLimbahController::class, 'rekapitulasi'])->name('rekapitulasi');
         Route::get('/create', [LaporanLimbahController::class, 'create'])->name('create');
+        Route::get('/create-mobile', [LaporanLimbahController::class, 'createMobile'])->name('create-mobile');
         Route::post('/', [LaporanLimbahController::class, 'store'])->name('store');
         Route::get('/gambar/{filename}', [LaporanLimbahController::class, 'gambar'])
             ->where('filename', '.+')

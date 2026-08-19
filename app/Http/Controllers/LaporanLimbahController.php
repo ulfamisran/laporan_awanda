@@ -156,6 +156,14 @@ class LaporanLimbahController extends Controller
         return view('laporan-limbah.create', compact('profilId', 'kategoris'));
     }
 
+    public function createMobile(Request $request): View
+    {
+        $profilId = $this->profilMbgIdForLimbahOrFirst($request);
+        $kategoris = KategoriLimbah::query()->orderBy('nama_kategori')->get();
+
+        return view('laporan-limbah.mobile-create', compact('profilId', 'kategoris'));
+    }
+
     public function store(Request $request): RedirectResponse
     {
         $this->mergeProfilForAdminDapur($request);
@@ -219,8 +227,12 @@ class LaporanLimbahController extends Controller
             return $h;
         });
 
+        $redirectRoute = $request->boolean('mobile')
+            ? 'laporan-limbah.index'
+            : 'laporan-limbah.harian.show';
+
         return redirect()
-            ->route('laporan-limbah.harian.show', $harian)
+            ->route($redirectRoute, $request->boolean('mobile') ? [] : $harian)
             ->with('success', 'Laporan limbah harian berhasil disimpan.');
     }
 

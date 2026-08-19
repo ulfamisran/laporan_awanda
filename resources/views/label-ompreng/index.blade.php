@@ -8,10 +8,15 @@
             <h2 class="inst-page-title">Label Ompreng</h2>
             <p class="inst-page-desc">Riwayat data label ompreng yang sudah tersimpan.</p>
         </div>
-        <a href="{{ route('label-ompreng.create') }}" class="inst-btn-primary">
-            <i data-lucide="plus" class="h-[18px] w-[18px]"></i>
-            Tambah data
-        </a>
+        <div class="flex flex-wrap gap-2">
+            <a href="{{ route('label-ompreng.create-mobile') }}" class="inst-btn-outline">
+                Input via HP
+            </a>
+            <a href="{{ route('label-ompreng.create') }}" class="inst-btn-primary">
+                <i data-lucide="plus" class="h-[18px] w-[18px]"></i>
+                Tambah data
+            </a>
+        </div>
     </div>
 
     <div class="inst-panel overflow-hidden p-4 sm:p-6">

@@ -48,6 +48,24 @@ class LabelOmprengController extends Controller
         ]);
     }
 
+    public function createMobile(): View
+    {
+        $profil = ProfilMbg::query()->first();
+
+        return view('label-ompreng.mobile-create', [
+            'pageTitle' => 'Input Label Ompreng Mobile',
+            'heading' => 'Input Label Ompreng Mobile',
+            'submitLabel' => 'Simpan data label',
+            'formAction' => route('label-ompreng.store'),
+            'formMethod' => 'POST',
+            'initialLabels' => null,
+            'defaultLokasi' => $this->defaultLokasi($profil),
+            'defaultPeringatan' => $this->defaultPeringatan(),
+            'defaultHimbauan' => $this->defaultHimbauan(),
+            'defaultTemplate' => 'premium',
+        ]);
+    }
+
     public function edit(LabelOmpreng $labelOmpreng): View
     {
         $this->ensureAccessible($labelOmpreng);
@@ -396,15 +414,7 @@ class LabelOmprengController extends Controller
 
     private function defaultLokasi(?ProfilMbg $profil): string
     {
-        $nama = trim((string) ($profil?->nama_dapur ?? ''));
-        $daerah = trim((string) ($profil?->daerah_sppg ?? ''));
-        $parts = array_values(array_filter([$nama, $daerah]));
-
-        if ($parts === []) {
-            return 'SPPG';
-        }
-
-        return strtoupper('SPPG '.implode(' ', $parts));
+        return 'SPPG SIDENRENG RAPPANG PANCA LAUTANG CORAWALI';
     }
 
     private function defaultPeringatan(): string

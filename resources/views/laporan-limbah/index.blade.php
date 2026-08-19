@@ -14,6 +14,7 @@
         </div>
         <div class="flex flex-wrap gap-2">
             <a href="{{ route('laporan-limbah.rekapitulasi', request()->query()) }}" class="inst-btn-secondary text-sm">Rekapitulasi</a>
+            <a href="{{ route('laporan-limbah.create-mobile') }}" class="inst-btn-outline text-sm">Input via HP</a>
             <a href="{{ route('laporan-limbah.create') }}" class="inst-btn-primary shrink-0">Tambah laporan harian</a>
         </div>
     </div>

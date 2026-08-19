@@ -52,6 +52,31 @@ class PenerimaanBarangController extends Controller
         return view('penerimaan-barang.index', compact('pendingItems', 'receivedRows'));
     }
 
+    public function indexMobile(): View
+    {
+        $profilId = ProfilMbgTenant::id();
+        $periodeId = PeriodeTenant::id();
+
+        $pendingItems = OrderBarangItem::query()
+            ->with(['orderBarang', 'supplier'])
+            ->whereHas('orderBarang', function ($q) use ($profilId, $periodeId): void {
+                $q->where('profil_mbg_id', $profilId)->where('periode_id', $periodeId);
+            })
+            ->withSum(['penerimaan as qty_diterima' => function ($q) use ($profilId, $periodeId): void {
+                $q->where('profil_mbg_id', $profilId)->where('periode_id', $periodeId);
+            }], 'jumlah')
+            ->orderByDesc('id')
+            ->get()
+            ->filter(function (OrderBarangItem $item): bool {
+                $diterima = (float) ($item->qty_diterima ?? 0);
+
+                return $diterima + 0.00001 < (float) $item->jumlah_barang;
+            })
+            ->values();
+
+        return view('penerimaan-barang.mobile-index', compact('pendingItems'));
+    }
+
     public function create(OrderBarangItem $item): View
     {
         $this->ensureOrderItemAccessible($item);
@@ -70,6 +95,26 @@ class PenerimaanBarangController extends Controller
         }
 
         return view('penerimaan-barang.create', compact('item', 'qtyDiterima', 'sisaQty', 'qtyOrder'));
+    }
+
+    public function createMobile(OrderBarangItem $item): View|RedirectResponse
+    {
+        $this->ensureOrderItemAccessible($item);
+        $item->loadMissing(['orderBarang', 'supplier', 'barang']);
+
+        $qtyDiterima = (float) BarangMasuk::query()
+            ->where('order_barang_item_id', $item->id)
+            ->where('profil_mbg_id', ProfilMbgTenant::id())
+            ->where('periode_id', PeriodeTenant::id())
+            ->sum('jumlah');
+
+        $qtyOrder = (float) $item->jumlah_barang;
+        $sisaQty = max($qtyOrder - $qtyDiterima, 0);
+        if ($sisaQty <= 0) {
+            return redirect()->route('stok.penerimaan.mobile')->with('success', 'Item order ini sudah diterima penuh.');
+        }
+
+        return view('penerimaan-barang.mobile-create', compact('item', 'qtyDiterima', 'sisaQty', 'qtyOrder'));
     }
 
     public function store(Request $request, OrderBarangItem $item): RedirectResponse
@@ -124,7 +169,11 @@ class PenerimaanBarangController extends Controller
 
         BarangMasuk::query()->create($payload);
 
-        return redirect()->route('stok.penerimaan.index')->with('success', 'Penerimaan barang berhasil disimpan dan masuk ke transaksi barang masuk.');
+        $redirectRoute = $request->boolean('mobile')
+            ? 'stok.penerimaan.mobile'
+            : 'stok.penerimaan.index';
+
+        return redirect()->route($redirectRoute)->with('success', 'Penerimaan barang berhasil disimpan dan masuk ke transaksi barang masuk.');
     }
 
     public function reportPdf()
