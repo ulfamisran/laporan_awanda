@@ -60,6 +60,13 @@ class SidebarMenu
             ],
             [
                 'type' => 'link',
+                'label' => 'Label Ompreng',
+                'route' => 'label-ompreng.index',
+                'match' => ['label-ompreng.*'],
+                'icon' => 'tags',
+            ],
+            [
+                'type' => 'link',
                 'label' => 'Laporan Limbah',
                 'route' => 'laporan-limbah.index',
                 'match' => ['laporan-limbah.*'],

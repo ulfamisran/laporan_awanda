@@ -19,6 +19,7 @@ use App\Http\Controllers\KeuanganTransaksiController;
 use App\Http\Controllers\LaporanKeuanganController;
 use App\Http\Controllers\LaporanLimbahController;
 use App\Http\Controllers\LaporanRekapController;
+use App\Http\Controllers\LabelOmprengController;
 use App\Http\Controllers\MutasiStokController;
 use App\Http\Controllers\OrderBarangController;
 use App\Http\Controllers\PenggajianController;
@@ -283,6 +284,16 @@ Route::middleware(['auth', 'dapur.role:super_admin,admin_pusat,admin', ResolvePe
         Route::put('/{penggajian}', [PenggajianController::class, 'update'])->name('update');
         Route::delete('/{penggajian}', [PenggajianController::class, 'destroy'])->name('destroy');
         Route::get('/{penggajian}', [PenggajianController::class, 'show'])->name('show');
+    });
+    Route::prefix('label-ompreng')->name('label-ompreng.')->group(function () {
+        Route::get('/', [LabelOmprengController::class, 'index'])->name('index');
+        Route::get('/create', [LabelOmprengController::class, 'create'])->name('create');
+        Route::post('/', [LabelOmprengController::class, 'store'])->name('store');
+        Route::get('/{labelOmpreng}/edit', [LabelOmprengController::class, 'edit'])->name('edit');
+        Route::put('/{labelOmpreng}', [LabelOmprengController::class, 'update'])->name('update');
+        Route::get('/{labelOmpreng}', [LabelOmprengController::class, 'show'])->name('show');
+        Route::get('/{labelOmpreng}/preview', [LabelOmprengController::class, 'preview'])->name('preview');
+        Route::get('/{labelOmpreng}/cetak', [LabelOmprengController::class, 'cetak'])->name('cetak');
     });
     Route::prefix('laporan-limbah')->name('laporan-limbah.')->group(function () {
         Route::get('/', [LaporanLimbahController::class, 'index'])->name('index');
