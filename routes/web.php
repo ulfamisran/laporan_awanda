@@ -202,6 +202,10 @@ Route::middleware(['auth', 'dapur.role:super_admin,admin_pusat,admin', ResolvePe
         Route::get('order/create', [OrderBarangController::class, 'create'])->name('order.create');
         Route::get('order/create-mobile', [OrderBarangController::class, 'createMobile'])->name('order.create-mobile');
         Route::post('order', [OrderBarangController::class, 'store'])->name('order.store');
+        Route::get('order/refresh-nomor', fn () => redirect()
+            ->route('stok.order.index')
+            ->with('info', 'Refresh nomor order hanya bisa dijalankan dari tombol "Refresh nomor" di halaman order barang.'))
+            ->name('order.refresh-nomor.redirect');
         Route::post('order/refresh-nomor', [OrderBarangController::class, 'refreshNomor'])->name('order.refresh-nomor');
         Route::get('order/{order}/edit', [OrderBarangController::class, 'edit'])->name('order.edit');
         Route::put('order/{order}', [OrderBarangController::class, 'update'])->name('order.update');

@@ -260,41 +260,53 @@ class OrderBarangController extends Controller
         $periodeId = PeriodeTenant::id();
         $periode = PeriodeTenant::model();
 
-        DB::transaction(function () use ($profilId, $periodeId, $periode): void {
-            $orders = OrderBarang::query()
-                ->with(['items.supplier'])
-                ->where('profil_mbg_id', $profilId)
-                ->where('periode_id', $periodeId)
-                ->orderBy('tanggal_order')
-                ->orderBy('id')
-                ->lockForUpdate()
-                ->get();
+        try {
+            DB::transaction(function () use ($profilId, $periodeId, $periode): void {
+                $orders = OrderBarang::query()
+                    ->with(['items.supplier'])
+                    ->where('profil_mbg_id', $profilId)
+                    ->where('periode_id', $periodeId)
+                    ->orderBy('tanggal_order')
+                    ->orderBy('id')
+                    ->lockForUpdate()
+                    ->get();
 
-            $next = 1;
-            $suffix = $this->nomorSuffixForDate($periode?->tanggal_awal);
-
-            foreach ($orders as $order) {
-                $groups = $order->items
-                    ->groupBy(fn (OrderBarangItem $item): string => $this->supplierGroupKey($item->supplier_nama ?? $item->supplier?->nama_supplier))
-                    ->sortKeys();
-
-                if ($groups->isEmpty()) {
-                    continue;
+                // Lepaskan nomor lama dulu agar tidak bentrok unique (profil, periode, nomor_order).
+                foreach ($orders as $order) {
+                    $order->update(['nomor_order' => '__tmp__'.$order->getKey()]);
                 }
 
-                $firstNumber = null;
-                foreach ($groups as $items) {
-                    $number = $this->formatNomorSequence($next++, $suffix);
-                    $itemIds = $items->pluck('id')->all();
-                    OrderBarangItem::query()->whereIn('id', $itemIds)->update(['nomor_nota' => $number]);
-                    $firstNumber ??= $number;
-                }
+                $next = 1;
+                $suffix = $this->nomorSuffixForDate($periode->tanggal_awal);
 
-                if ($firstNumber) {
-                    $order->update(['nomor_order' => $firstNumber]);
+                foreach ($orders as $order) {
+                    $groups = $order->items
+                        ->groupBy(fn (OrderBarangItem $item): string => $this->supplierGroupKey($item->supplier_nama ?? $item->supplier?->nama_supplier))
+                        ->sortKeys();
+
+                    if ($groups->isEmpty()) {
+                        continue;
+                    }
+
+                    $firstNumber = null;
+                    foreach ($groups as $items) {
+                        $number = $this->formatNomorSequence($next++, $suffix);
+                        OrderBarangItem::query()->whereIn('id', $items->pluck('id')->all())->update(['nomor_nota' => $number]);
+                        $firstNumber ??= $number;
+                    }
+
+                    if ($firstNumber) {
+                        $order->update(['nomor_order' => $firstNumber]);
+                    }
                 }
-            }
-        });
+            });
+        } catch (\Throwable $e) {
+            report($e);
+
+            return redirect()
+                ->route('stok.order.index')
+                ->with('error', 'Gagal refresh nomor order. Jika di server production, pastikan migrasi terbaru sudah dijalankan (`php artisan migrate --force`).');
+        }
 
         return redirect()
             ->route('stok.order.index')
