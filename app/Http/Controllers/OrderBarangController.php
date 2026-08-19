@@ -8,6 +8,7 @@ use App\Models\Barang;
 use App\Models\KategoriBarang;
 use App\Models\OrderBarang;
 use App\Models\OrderBarangItem;
+use App\Models\Periode;
 use App\Models\ProfilMbg;
 use App\Models\Supplier;
 use App\Support\PeriodeTenant;
@@ -34,7 +35,10 @@ class OrderBarangController extends Controller
             ->orderByDesc('id')
             ->paginate(20);
 
-        return view('order-barang.index', compact('items'));
+        return view('order-barang.index', [
+            'items' => $items,
+            'periodeAktif' => PeriodeTenant::model(),
+        ]);
     }
 
     public function create(): View
@@ -166,7 +170,116 @@ class OrderBarangController extends Controller
         $this->ensureAccessible($order);
         $order->load(['items.barang', 'items.supplier', 'profilMbg']);
 
-        return view('order-barang.show', compact('order'));
+        $periodeOptions = Periode::query()
+            ->where('profil_mbg_id', ProfilMbgTenant::id())
+            ->whereKeyNot($order->periode_id)
+            ->orderByDesc('tanggal_awal')
+            ->orderByDesc('id')
+            ->get();
+
+        $hasPenerimaan = $order->items()->whereHas('penerimaan')->exists();
+
+        return view('order-barang.show', compact('order', 'periodeOptions', 'hasPenerimaan'));
+    }
+
+    public function movePeriode(Request $request, OrderBarang $order): RedirectResponse
+    {
+        $this->ensureAccessible($order);
+
+        if ($order->items()->whereHas('penerimaan')->exists()) {
+            return redirect()
+                ->route('stok.order.show', $order)
+                ->withErrors(['order' => 'Order yang sudah dipakai pada penerimaan barang tidak bisa dipindahkan periode.']);
+        }
+
+        $data = $request->validate([
+            'periode_id' => [
+                'required',
+                'integer',
+                Rule::exists('periode', 'id')->where(fn ($q) => $q->where('profil_mbg_id', ProfilMbgTenant::id())),
+            ],
+        ], [], [
+            'periode_id' => 'periode tujuan',
+        ]);
+
+        $targetPeriode = Periode::query()->findOrFail((int) $data['periode_id']);
+        $oldOrderId = $order->getKey();
+
+        DB::transaction(function () use ($order, $targetPeriode): void {
+            $order->load('items.supplier');
+
+            $supplierKeys = $order->items
+                ->map(fn (OrderBarangItem $item): string => $this->supplierGroupKey($item->supplier_nama ?? $item->supplier?->nama_supplier))
+                ->unique()
+                ->sort()
+                ->values();
+
+            $nomorList = $this->allocateSequentialNomorForPeriode($targetPeriode->getKey(), $supplierKeys->count(), $targetPeriode->tanggal_awal ?? $order->tanggal_order);
+            $notaByKey = $supplierKeys->combine($nomorList)->all();
+
+            $order->update([
+                'periode_id' => $targetPeriode->getKey(),
+                'nomor_order' => $nomorList[0] ?? $order->nomor_order,
+            ]);
+
+            foreach ($order->items as $item) {
+                $key = $this->supplierGroupKey($item->supplier_nama ?? $item->supplier?->nama_supplier);
+                $item->update([
+                    'nomor_nota' => $notaByKey[$key] ?? $order->nomor_order,
+                ]);
+            }
+        });
+
+        return redirect()
+            ->route('stok.order.index', ['periode' => $targetPeriode->getKey()])
+            ->with('success', 'Order berhasil dipindahkan ke periode '.$targetPeriode->labelRingkas().'. Silakan buka periode tersebut untuk melihat datanya.');
+    }
+
+    public function refreshNomor(Request $request): RedirectResponse
+    {
+        $profilId = ProfilMbgTenant::id();
+        $periodeId = PeriodeTenant::id();
+        $periode = PeriodeTenant::model();
+
+        DB::transaction(function () use ($profilId, $periodeId, $periode): void {
+            $orders = OrderBarang::query()
+                ->with(['items.supplier'])
+                ->where('profil_mbg_id', $profilId)
+                ->where('periode_id', $periodeId)
+                ->orderBy('tanggal_order')
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->get();
+
+            $next = 1;
+            $suffix = $this->nomorSuffixForDate($periode?->tanggal_awal);
+
+            foreach ($orders as $order) {
+                $groups = $order->items
+                    ->groupBy(fn (OrderBarangItem $item): string => $this->supplierGroupKey($item->supplier_nama ?? $item->supplier?->nama_supplier))
+                    ->sortKeys();
+
+                if ($groups->isEmpty()) {
+                    continue;
+                }
+
+                $firstNumber = null;
+                foreach ($groups as $items) {
+                    $number = $this->formatNomorSequence($next++, $suffix);
+                    $itemIds = $items->pluck('id')->all();
+                    OrderBarangItem::query()->whereIn('id', $itemIds)->update(['nomor_nota' => $number]);
+                    $firstNumber ??= $number;
+                }
+
+                if ($firstNumber) {
+                    $order->update(['nomor_order' => $firstNumber]);
+                }
+            }
+        });
+
+        return redirect()
+            ->route('stok.order.index')
+            ->with('success', 'Nomor order dan nomor nota supplier pada periode aktif berhasil dirapikan ulang.');
     }
 
     public function cetakNota(OrderBarang $order)
@@ -316,7 +429,7 @@ class OrderBarangController extends Controller
 
     private function previewNextNomorOrder(): string
     {
-        $suffix = '/SPPG/PL/'.now()->format('m/Y');
+        $suffix = $this->nomorSuffixForDate(PeriodeTenant::model()?->tanggal_awal);
 
         return $this->formatNomorSequence($this->lastSequenceNumber($suffix) + 1, $suffix);
     }
@@ -326,12 +439,24 @@ class OrderBarangController extends Controller
      */
     private function allocateSequentialNomor(int $count): array
     {
+        return $this->allocateSequentialNomorForPeriode(
+            PeriodeTenant::id(),
+            $count,
+            PeriodeTenant::model()?->tanggal_awal
+        );
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function allocateSequentialNomorForPeriode(int $periodeId, int $count, mixed $referenceDate = null): array
+    {
         if ($count < 1) {
             return [];
         }
 
-        $suffix = '/SPPG/PL/'.now()->format('m/Y');
-        $next = $this->lastSequenceNumber($suffix) + 1;
+        $suffix = $this->nomorSuffixForDate($referenceDate);
+        $next = $this->lastSequenceNumberForPeriode($periodeId, $suffix) + 1;
         $numbers = [];
 
         for ($i = 0; $i < $count; $i++) {
@@ -343,7 +468,11 @@ class OrderBarangController extends Controller
 
     private function lastSequenceNumber(string $suffix): int
     {
-        $periodeId = PeriodeTenant::id();
+        return $this->lastSequenceNumberForPeriode(PeriodeTenant::id(), $suffix);
+    }
+
+    private function lastSequenceNumberForPeriode(int $periodeId, string $suffix): int
+    {
         $profilId = ProfilMbgTenant::id();
 
         $lastOrder = OrderBarang::query()
@@ -372,6 +501,13 @@ class OrderBarangController extends Controller
         }
 
         return $max;
+    }
+
+    private function nomorSuffixForDate(mixed $date = null): string
+    {
+        $baseDate = $date ?: now();
+
+        return '/SPPG/PL/'.optional($baseDate)->format('m/Y');
     }
 
     private function formatNomorSequence(int $number, string $suffix): string

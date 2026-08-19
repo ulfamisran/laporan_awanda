@@ -113,7 +113,7 @@
 
             <div class="space-y-4">
                 <div>
-                    <p class="inst-label">Menu 5 poin</p>
+                    <p class="inst-label">Menu Hari Ini</p>
                     <div class="mt-2 space-y-2">
                         <input type="text" class="inst-input menu-field" data-name="menu_1" maxlength="255" placeholder="Poin menu 1">
                         <input type="text" class="inst-input menu-field" data-name="menu_2" maxlength="255" placeholder="Poin menu 2">
@@ -178,8 +178,12 @@
                         <input type="date" class="inst-input mt-1" data-name="tanggal_produksi">
                     </div>
                     <div>
-                        <label class="inst-label">Batas waktu konsumsi</label>
-                        <input type="time" class="inst-input mt-1" data-name="batas_konsumsi">
+                        <label class="inst-label">Batas waktu konsumsi (dari - sampai)</label>
+                        <div class="mt-1 flex items-center gap-2">
+                            <input type="time" class="inst-input" data-name="batas_konsumsi_dari" placeholder="Dari">
+                            <span class="text-sm font-semibold" style="color:#7fa8c9;">—</span>
+                            <input type="time" class="inst-input" data-name="batas_konsumsi_sampai" placeholder="Sampai">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -265,7 +269,8 @@
                     bumil_busui_karbohidrat_nilai: '',
                     bumil_busui_serat_nilai: '',
                     tanggal_produksi: new Date().toISOString().slice(0, 10),
-                    batas_konsumsi: '10:00',
+                    batas_konsumsi_dari: '06:00',
+                    batas_konsumsi_sampai: '10:00',
                 });
             });
 

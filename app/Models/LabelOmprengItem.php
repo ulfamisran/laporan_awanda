@@ -49,6 +49,7 @@ class LabelOmprengItem extends Model
         'bumil_busui_serat_nilai',
         'tanggal_produksi',
         'batas_konsumsi',
+        'batas_konsumsi_sampai',
     ];
 
     protected function casts(): array

@@ -72,7 +72,7 @@
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>Menu 5 Poin</th>
+                        <th>Menu Hari Ini</th>
                         <th>Nilai Gizi 4 Porsi</th>
                         <th>Tanggal Produksi</th>
                         <th>Batas Konsumsi</th>
@@ -126,7 +126,7 @@
                                 </table>
                             </td>
                             <td>{{ $item->tanggal_produksi?->format('d/m/Y') ?? '—' }}</td>
-                            <td>{{ substr((string) $item->batas_konsumsi, 0, 5) }}</td>
+                            <td>{{ substr((string) $item->batas_konsumsi, 0, 5) }} - {{ substr((string) $item->batas_konsumsi_sampai, 0, 5) }}</td>
                         </tr>
                     @endforeach
                 </tbody>

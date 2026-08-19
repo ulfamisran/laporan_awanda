@@ -7,11 +7,20 @@
         <div>
             <h2 class="inst-page-title">Order barang</h2>
             <p class="inst-page-desc">Permohonan barang berdasarkan periode aktif.</p>
+            @if ($periodeAktif)
+                <p class="mt-1 text-xs" style="color:#7fa8c9;">Periode aktif: {{ $periodeAktif->labelRingkas() }}</p>
+            @endif
         </div>
-        <a href="{{ route('stok.order.create') }}" class="inst-btn-primary">
-            <i data-lucide="plus" class="h-[18px] w-[18px]"></i>
-            Buat order
-        </a>
+        <div class="flex flex-wrap gap-2">
+            <form method="POST" action="{{ route('stok.order.refresh-nomor') }}" class="form-refresh-nomor">
+                @csrf
+                <button type="submit" class="inst-btn-outline">Refresh nomor</button>
+            </form>
+            <a href="{{ route('stok.order.create') }}" class="inst-btn-primary">
+                <i data-lucide="plus" class="h-[18px] w-[18px]"></i>
+                Buat order
+            </a>
+        </div>
     </div>
 
     <div class="inst-panel overflow-hidden p-4 sm:p-6">
@@ -85,6 +94,25 @@
                     title: 'Hapus order?',
                     text: 'Data order dan itemnya akan dihapus permanen.',
                     confirmText: 'Ya, hapus',
+                })
+                .then(function (r) {
+                    if (r.isConfirmed) form.submit();
+                });
+        });
+        document.addEventListener('submit', function (e) {
+            const form = e.target;
+            if (!(form instanceof HTMLFormElement)) return;
+            if (!form.classList.contains('form-refresh-nomor')) return;
+            e.preventDefault();
+            if (typeof window.mbgConfirmDelete !== 'function') {
+                form.submit();
+                return;
+            }
+            window
+                .mbgConfirmDelete({
+                    title: 'Refresh nomor order?',
+                    text: 'Nomor order dan nomor nota supplier pada periode aktif akan disusun ulang sesuai urutan saat ini.',
+                    confirmText: 'Ya, refresh',
                 })
                 .then(function (r) {
                     if (r.isConfirmed) form.submit();

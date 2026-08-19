@@ -213,7 +213,7 @@ class LabelOmprengController extends Controller
             ],
             'gizi_groups' => $this->buildGiziGroups($item),
             'tanggal_produksi' => optional($item->tanggal_produksi)->format('d-m-y') ?: '-',
-            'batas_konsumsi' => substr((string) $item->batas_konsumsi, 0, 5),
+            'batas_konsumsi' => substr((string) $item->batas_konsumsi, 0, 5).' - '.substr((string) $item->batas_konsumsi_sampai, 0, 5),
         ];
     }
 
@@ -302,7 +302,8 @@ class LabelOmprengController extends Controller
             'labels.*.bumil_busui_karbohidrat_nilai' => ['nullable', 'numeric', 'min:0'],
             'labels.*.bumil_busui_serat_nilai' => ['nullable', 'numeric', 'min:0'],
             'labels.*.tanggal_produksi' => ['required', 'date'],
-            'labels.*.batas_konsumsi' => ['required', 'date_format:H:i'],
+            'labels.*.batas_konsumsi_dari' => ['required', 'date_format:H:i'],
+            'labels.*.batas_konsumsi_sampai' => ['required', 'date_format:H:i'],
         ]);
     }
 
@@ -341,7 +342,8 @@ class LabelOmprengController extends Controller
             'bumil_busui_karbohidrat_nilai' => $row['bumil_busui_karbohidrat_nilai'] ?? null,
             'bumil_busui_serat_nilai' => $row['bumil_busui_serat_nilai'] ?? null,
             'tanggal_produksi' => $row['tanggal_produksi'],
-            'batas_konsumsi' => $row['batas_konsumsi'].':00',
+            'batas_konsumsi' => $row['batas_konsumsi_dari'].':00',
+            'batas_konsumsi_sampai' => $row['batas_konsumsi_sampai'].':00',
         ];
     }
 
@@ -379,7 +381,8 @@ class LabelOmprengController extends Controller
             'bumil_busui_karbohidrat_nilai' => $item->bumil_busui_karbohidrat_nilai,
             'bumil_busui_serat_nilai' => $item->bumil_busui_serat_nilai,
             'tanggal_produksi' => optional($item->tanggal_produksi)->toDateString(),
-            'batas_konsumsi' => substr((string) $item->batas_konsumsi, 0, 5),
+            'batas_konsumsi_dari' => substr((string) $item->batas_konsumsi, 0, 5),
+            'batas_konsumsi_sampai' => substr((string) $item->batas_konsumsi_sampai, 0, 5),
         ];
     }
 

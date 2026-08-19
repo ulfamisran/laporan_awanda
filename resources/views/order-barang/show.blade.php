@@ -29,6 +29,30 @@
             <div><span class="font-semibold">Jumlah item:</span> {{ $order->items->count() }}</div>
         </div>
 
+        <div class="mb-5 rounded-xl border p-4" style="border-color:#d4e8f4;background:#fbfdff;">
+            <div class="mb-2 text-sm font-bold" style="color:#1a4a6b;">Pindahkan ke periode lain</div>
+            @if ($hasPenerimaan)
+                <p class="text-sm" style="color:#c0392b;">Order ini sudah dipakai pada penerimaan barang, jadi periode tidak bisa dipindahkan.</p>
+            @elseif ($periodeOptions->isEmpty())
+                <p class="text-sm" style="color:#7fa8c9;">Belum ada periode lain yang tersedia untuk cabang ini.</p>
+            @else
+                <form method="POST" action="{{ route('stok.order.move-periode', $order) }}" class="flex flex-col gap-3 lg:flex-row lg:items-end">
+                    @csrf
+                    <div class="w-full lg:max-w-md">
+                        <label for="periode_id" class="inst-label">Periode tujuan</label>
+                        <select name="periode_id" id="periode_id" class="inst-select mt-1 w-full" required>
+                            <option value="">Pilih periode tujuan</option>
+                            @foreach ($periodeOptions as $periode)
+                                <option value="{{ $periode->id }}">{{ $periode->labelRingkas() }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <button type="submit" class="inst-btn-primary">Pindahkan periode</button>
+                </form>
+                <p class="mt-2 text-xs" style="color:#7fa8c9;">Saat dipindahkan, nomor order dan nomor nota supplier akan menyesuaikan urutan pada periode tujuan.</p>
+            @endif
+        </div>
+
         <div class="overflow-x-auto">
             <table class="inst-table">
                 <thead>
@@ -76,6 +100,25 @@
                     title: 'Hapus order?',
                     text: 'Data order dan itemnya akan dihapus permanen.',
                     confirmText: 'Ya, hapus',
+                })
+                .then(function (r) {
+                    if (r.isConfirmed) form.submit();
+                });
+        });
+        document.addEventListener('submit', function (e) {
+            const form = e.target;
+            if (!(form instanceof HTMLFormElement)) return;
+            if (form.action !== @json(route('stok.order.move-periode', $order))) return;
+            e.preventDefault();
+            if (typeof window.mbgConfirmDelete !== 'function') {
+                form.submit();
+                return;
+            }
+            window
+                .mbgConfirmDelete({
+                    title: 'Pindahkan ke periode lain?',
+                    text: 'Nomor order dan nomor nota supplier akan disesuaikan ulang di periode tujuan.',
+                    confirmText: 'Ya, pindahkan',
                 })
                 .then(function (r) {
                     if (r.isConfirmed) form.submit();
