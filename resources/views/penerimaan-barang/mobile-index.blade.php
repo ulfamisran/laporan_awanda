@@ -8,7 +8,7 @@
     <div class="mx-auto w-full max-w-2xl px-3 pb-20 sm:px-4">
         <a href="{{ route('stok.penerimaan.index') }}" class="inst-back">← Versi desktop</a>
         <h2 class="inst-form-title mt-2">Penerimaan Barang</h2>
-        <p class="inst-form-lead text-sm" style="color:#4a6b7f;">Cari nomor order terlebih dahulu, lalu ketuk barang untuk input penerimaan.</p>
+        <p class="inst-form-lead text-sm" style="color:#4a6b7f;">Pilih nomor order terlebih dahulu, lalu ketuk barang untuk input penerimaan.</p>
         @include('components.periode-aktif-badge')
 
         @if (session('success'))
@@ -20,18 +20,18 @@
         <div class="mt-4 rounded-2xl border bg-white p-4 shadow-sm" style="border-color:#d4e8f4;">
             <label for="lookup-nomor-order" class="inst-label">Nomor order</label>
             <div class="mt-1 flex gap-2">
-                <input type="text" id="lookup-nomor-order" class="inst-input flex-1 font-mono" list="order-numbers-list" placeholder="Ketik atau pilih nomor order..." autocomplete="off" value="{{ request('nomor_order') }}">
+                <select id="lookup-nomor-order" class="inst-select flex-1 font-mono">
+                    <option value="">Pilih nomor order...</option>
+                    @foreach ($orderNumbers as $nomor)
+                        <option value="{{ $nomor }}" @selected(request('nomor_order') === $nomor)>{{ $nomor }}</option>
+                    @endforeach
+                </select>
                 <button type="button" id="btn-lookup-order" class="inst-btn-primary shrink-0 px-4">Cari</button>
             </div>
-            <datalist id="order-numbers-list">
-                @foreach ($orderNumbers as $nomor)
-                    <option value="{{ $nomor }}"></option>
-                @endforeach
-            </datalist>
             @if ($orderNumbers->isEmpty())
                 <p class="mt-2 text-xs" style="color:#7fa8c9;">Tidak ada order dengan barang belum diterima penuh.</p>
             @else
-                <p class="mt-2 text-xs" style="color:#7fa8c9;">{{ $orderNumbers->count() }} nomor order menunggu penerimaan.</p>
+                <p class="mt-2 text-xs" style="color:#7fa8c9;">Dropdown ini hanya menampilkan {{ $orderNumbers->count() }} order yang masih punya barang belum diterima penuh.</p>
             @endif
         </div>
 
@@ -179,12 +179,6 @@
             }
 
             lookupBtn?.addEventListener('click', showOrderItems);
-            lookupInput?.addEventListener('keydown', function (e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    showOrderItems();
-                }
-            });
             lookupInput?.addEventListener('change', showOrderItems);
 
             if (lookupInput?.value.trim()) {
