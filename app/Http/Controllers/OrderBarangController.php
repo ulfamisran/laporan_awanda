@@ -57,6 +57,21 @@ class OrderBarangController extends Controller
         ]);
     }
 
+    public function createMobile(): View
+    {
+        return view('order-barang.mobile-create', [
+            'pageTitle' => 'Buat Order Barang Mobile',
+            'heading' => 'Buat order barang via HP',
+            'formAction' => route('stok.order.store'),
+            'formMethod' => 'POST',
+            'submitLabel' => 'Simpan order',
+            'previewNomorOrder' => $this->previewNextNomorOrder(),
+            'initialItems' => old('items', []),
+            'tanggalOrder' => old('tanggal_order', now()->toDateString()),
+            'suppliers' => Supplier::query()->orderBy('nama_supplier')->get(['id', 'nama_supplier']),
+        ]);
+    }
+
     public function store(Request $request): RedirectResponse
     {
         $data = $this->validatePayload($request);
@@ -82,8 +97,12 @@ class OrderBarangController extends Controller
             $this->syncOrderItems($order, $data['items'], $notaByKey);
         });
 
+        $redirectRoute = $request->boolean('mobile')
+            ? 'stok.order.create-mobile'
+            : 'stok.order.index';
+
         return redirect()
-            ->route('stok.order.index')
+            ->route($redirectRoute)
             ->with('success', 'Order barang berhasil disimpan.');
     }
 

@@ -16,6 +16,7 @@
                 @csrf
                 <button type="submit" class="inst-btn-outline">Refresh nomor</button>
             </form>
+            <a href="{{ route('stok.order.create-mobile') }}" class="inst-btn-outline">Input via HP</a>
             <a href="{{ route('stok.order.create') }}" class="inst-btn-primary">
                 <i data-lucide="plus" class="h-[18px] w-[18px]"></i>
                 Buat order
