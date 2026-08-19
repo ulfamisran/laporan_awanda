@@ -15,15 +15,24 @@
                 <div>
                     <label for="name" class="inst-label">Nama <span class="inst-required">*</span></label>
                     <input type="text" name="name" id="name" value="{{ old('name') }}" required class="inst-input" placeholder="Nama lengkap">
+                    @error('name')
+                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
                 <div>
                     <label for="email" class="inst-label">Email <span class="inst-required">*</span></label>
                     <input type="email" name="email" id="email" value="{{ old('email') }}" required class="inst-input" placeholder="nama@email.com">
+                    @error('email')
+                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
                         <label for="password" class="inst-label">Kata sandi <span class="inst-required">*</span></label>
                         <input type="password" name="password" id="password" required class="inst-input" placeholder="Minimal 8 karakter">
+                        @error('password')
+                            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
                     <div>
                         <label for="password_confirmation" class="inst-label">Ulangi kata sandi <span class="inst-required">*</span></label>
@@ -38,6 +47,9 @@
                         <option value="admin_pusat" @selected(old('role') === 'admin_pusat')>Admin pusat</option>
                         <option value="admin" @selected(old('role') === 'admin')>Admin</option>
                     </select>
+                    @error('role')
+                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
                 <div>
                     <label for="profil_mbg_id" class="inst-label">Profil MBG / dapur</label>
@@ -47,6 +59,9 @@
                             <option value="{{ $p->id }}" @selected((string) old('profil_mbg_id') === (string) $p->id)>{{ $p->nama_dapur }} ({{ $p->kode_dapur }})</option>
                         @endforeach
                     </select>
+                    @error('profil_mbg_id')
+                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
                 <div>
                     <label for="status" class="inst-label">Status <span class="inst-required">*</span></label>
@@ -54,6 +69,9 @@
                         <option value="aktif" @selected(old('status', 'aktif') === 'aktif')>Aktif</option>
                         <option value="nonaktif" @selected(old('status') === 'nonaktif')>Nonaktif</option>
                     </select>
+                    @error('status')
+                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
                 <div>
                     <p class="inst-label">Foto profil</p>

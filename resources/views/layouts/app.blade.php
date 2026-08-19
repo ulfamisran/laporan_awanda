@@ -578,6 +578,9 @@
                         <div class="truncate text-sm font-medium text-white">{{ $u->name }}</div>
                         <div class="truncate text-[11px]" style="color:#7fa8c9;">{{ $roleLabel }}</div>
                     </div>
+                    <a href="{{ route('akun.password.edit') }}" class="shrink-0 rounded-lg p-2 transition hover:bg-white/10" title="Ganti kata sandi" aria-label="Ganti kata sandi">
+                        <i data-lucide="key-round" style="width:16px;height:16px;color:#7fa8c9;"></i>
+                    </a>
                     <form method="POST" action="{{ route('logout') }}" class="shrink-0">
                         @csrf
                         <button type="submit" class="rounded-lg p-2 transition hover:bg-white/10" title="Keluar" aria-label="Keluar">

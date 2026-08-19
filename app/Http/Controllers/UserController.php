@@ -6,39 +6,35 @@ use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Models\ProfilMbg;
 use App\Models\User;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
-use Yajra\DataTables\Facades\DataTables;
 
 class UserController extends Controller
 {
-    public function index(): View
-    {
-        return view('users.index');
-    }
-
-    public function data(Request $request): JsonResponse
+    public function index(Request $request): View
     {
         $query = User::query()
-            ->select('users.*')
-            ->with(['profilMbg', 'roles']);
+            ->with(['profilMbg', 'roles'])
+            ->orderByDesc('id');
 
-        if ($request->filled('status_filter') && in_array($request->string('status_filter')->toString(), ['aktif', 'nonaktif'], true)) {
-            $query->where('users.status', $request->string('status_filter'));
+        if ($request->filled('q')) {
+            $keyword = '%'.$request->string('q')->trim().'%';
+            $query->where(function ($q) use ($keyword): void {
+                $q->where('name', 'like', $keyword)
+                    ->orWhere('email', 'like', $keyword);
+            });
         }
 
-        return DataTables::eloquent($query)
-            ->addIndexColumn()
-            ->addColumn('role_badges', fn (User $user) => view('users.partials.role-badges', ['user' => $user])->render())
-            ->addColumn('profil_label', fn (User $user) => e($user->profilMbg?->nama_dapur ?? '—'))
-            ->addColumn('status_badge', fn (User $user) => view('users.partials.status-badge', ['user' => $user])->render())
-            ->addColumn('aksi', fn (User $user) => view('users.partials.actions', ['user' => $user])->render())
-            ->rawColumns(['role_badges', 'status_badge', 'aksi'])
-            ->toJson();
+        if ($request->filled('status') && in_array($request->string('status')->toString(), ['aktif', 'nonaktif'], true)) {
+            $query->where('status', $request->string('status'));
+        }
+
+        $users = $query->paginate(15)->withQueryString();
+
+        return view('users.index', compact('users'));
     }
 
     public function create(): View
@@ -50,7 +46,10 @@ class UserController extends Controller
 
     public function store(StoreUserRequest $request): RedirectResponse
     {
-        $data = $request->safe()->only(['name', 'email', 'profil_mbg_id', 'status']);
+        $data = $request->safe()->only(['name', 'email', 'status']);
+        $data['profil_mbg_id'] = $request->validated('role') === 'admin'
+            ? $request->validated('profil_mbg_id')
+            : null;
         $data['password'] = Hash::make($request->validated('password'));
 
         if ($request->hasFile('foto')) {
@@ -74,7 +73,10 @@ class UserController extends Controller
 
     public function update(UpdateUserRequest $request, User $user): RedirectResponse
     {
-        $data = $request->safe()->only(['name', 'email', 'profil_mbg_id', 'status']);
+        $data = $request->safe()->only(['name', 'email', 'status']);
+        $data['profil_mbg_id'] = $request->validated('role') === 'admin'
+            ? $request->validated('profil_mbg_id')
+            : null;
 
         if ($request->filled('password')) {
             $data['password'] = Hash::make($request->validated('password'));
@@ -95,8 +97,12 @@ class UserController extends Controller
             ->with('success', 'Data pengguna berhasil diperbarui.');
     }
 
-    public function destroy(User $user): RedirectResponse
+    public function destroy(Request $request, User $user): RedirectResponse
     {
+        if ((int) $request->user()?->getKey() === (int) $user->getKey()) {
+            return back()->with('error', 'Anda tidak dapat menghapus akun sendiri.');
+        }
+
         if ($user->foto) {
             Storage::disk('public')->delete('foto-user/'.$user->foto);
         }

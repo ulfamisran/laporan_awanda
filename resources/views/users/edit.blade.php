@@ -25,6 +25,9 @@
                     <div>
                         <label for="password" class="inst-label">Kata sandi baru</label>
                         <input type="password" name="password" id="password" class="inst-input" placeholder="Kosongkan jika tidak diubah">
+                        @error('password')
+                            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
                     <div>
                         <label for="password_confirmation" class="inst-label">Ulangi kata sandi</label>

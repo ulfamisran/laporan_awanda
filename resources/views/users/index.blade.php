@@ -6,7 +6,7 @@
     <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
             <h2 class="inst-page-title">Daftar pengguna</h2>
-            <p class="inst-page-desc">Kelola akun, peran, dan status pengguna.</p>
+            <p class="inst-page-desc">Kelola akun, peran, dan status pengguna. Hanya super admin yang dapat menambah pengguna baru.</p>
         </div>
         <a href="{{ route('master.pengguna.create') }}" class="inst-btn-primary shrink-0">
             <i data-lucide="user-plus" class="h-[18px] w-[18px]"></i>
@@ -14,23 +14,32 @@
         </a>
     </div>
 
-    <div class="inst-filter-panel mb-4">
-        <div class="max-w-xs">
-            <label for="filter-status" class="inst-label-filter">Status</label>
-            <select id="filter-status" class="inst-select mt-2">
-                <option value="">Semua</option>
-                <option value="aktif">Aktif</option>
-                <option value="nonaktif">Nonaktif</option>
-            </select>
+    <form method="GET" action="{{ route('master.pengguna.index') }}" class="inst-filter-panel mb-4">
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:items-end">
+            <div>
+                <label for="q" class="inst-label-filter">Pencarian</label>
+                <input type="search" name="q" id="q" value="{{ request('q') }}" placeholder="Nama atau email…" class="inst-input mt-2">
+            </div>
+            <div>
+                <label for="status" class="inst-label-filter">Status</label>
+                <select name="status" id="status" class="inst-select mt-2">
+                    <option value="">Semua</option>
+                    <option value="aktif" @selected(request('status') === 'aktif')>Aktif</option>
+                    <option value="nonaktif" @selected(request('status') === 'nonaktif')>Nonaktif</option>
+                </select>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <button type="submit" class="inst-btn-primary">Terapkan</button>
+                <a href="{{ route('master.pengguna.index') }}" class="inst-btn-outline">Reset</a>
+            </div>
         </div>
-    </div>
+    </form>
 
-    <div class="inst-panel inst-datatable-wrap overflow-hidden p-4 sm:p-6">
+    <div class="inst-panel overflow-hidden p-4 sm:p-6">
         <div class="overflow-x-auto">
-            <table id="tabel-pengguna" class="w-full text-sm" style="width:100%">
+            <table class="inst-table">
                 <thead>
                     <tr>
-                        <th class="hidden">Id</th>
                         <th>No</th>
                         <th>Nama</th>
                         <th>Email</th>
@@ -40,54 +49,37 @@
                         <th class="text-right">Aksi</th>
                     </tr>
                 </thead>
+                <tbody>
+                    @forelse ($users as $user)
+                        <tr>
+                            <td class="inst-td-muted">{{ $users->firstItem() + $loop->index }}</td>
+                            <td class="font-medium">{{ $user->name }}</td>
+                            <td>{{ $user->email }}</td>
+                            <td>@include('users.partials.role-badges', ['user' => $user])</td>
+                            <td>{{ $user->profilMbg?->nama_dapur ?? '—' }}</td>
+                            <td>@include('users.partials.status-badge', ['user' => $user])</td>
+                            <td class="text-right">@include('users.partials.actions', ['user' => $user])</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" class="inst-td-muted py-8 text-center">Belum ada data pengguna.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
             </table>
         </div>
+        @if ($users->hasPages())
+            <div class="mt-4 border-t pt-4" style="border-color:#e8f1f8;">
+                {{ $users->links() }}
+            </div>
+        @endif
     </div>
 @endsection
 
-@push('styles')
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css">
-@endpush
-
 @push('scripts')
-    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
     <script>
         (function () {
-            const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-            const table = jQuery('#tabel-pengguna').DataTable({
-                processing: true,
-                serverSide: true,
-                ajax: {
-                    url: @json(route('master.pengguna.data')),
-                    headers: { 'X-CSRF-TOKEN': csrf },
-                    data: function (d) {
-                        d.status_filter = document.getElementById('filter-status')?.value || '';
-                    },
-                },
-                order: [[0, 'desc']],
-                columns: [
-                    { data: 'id', name: 'users.id', visible: false, searchable: false },
-                    { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false, width: '48px' },
-                    { data: 'name', name: 'users.name' },
-                    { data: 'email', name: 'users.email' },
-                    { data: 'role_badges', name: 'role_badges', orderable: false, searchable: false },
-                    { data: 'profil_label', name: 'profil_label', orderable: false, searchable: false },
-                    { data: 'status_badge', name: 'users.status', orderable: false, searchable: false },
-                    { data: 'aksi', name: 'aksi', orderable: false, searchable: false, className: 'text-right' },
-                ],
-                language: {
-                    url: 'https://cdn.datatables.net/plug-ins/1.13.8/i18n/id.json',
-                },
-                drawCallback: function () {
-                    if (window.lucide && typeof lucide.createIcons === 'function') {
-                        lucide.createIcons();
-                    }
-                },
-            });
-
-            document.getElementById('filter-status')?.addEventListener('change', function () {
-                table.ajax.reload();
-            });
+            if (window.lucide) lucide.createIcons();
 
             document.addEventListener('submit', function (e) {
                 const form = e.target;

@@ -22,6 +22,7 @@ use App\Http\Controllers\LaporanRekapController;
 use App\Http\Controllers\LabelOmprengController;
 use App\Http\Controllers\MutasiStokController;
 use App\Http\Controllers\OrderBarangController;
+use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\PenggajianController;
 use App\Http\Controllers\PenerimaanBarangController;
 use App\Http\Controllers\PeriodeController;
@@ -50,6 +51,11 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/keluar', [LoginController::class, 'logout'])->middleware('auth')->name('logout');
 
+Route::middleware(['auth', 'dapur.role:super_admin,admin_pusat,admin'])->group(function () {
+    Route::get('/akun/password', [PasswordController::class, 'edit'])->name('akun.password.edit');
+    Route::put('/akun/password', [PasswordController::class, 'update'])->name('akun.password.update');
+});
+
 Route::middleware(['auth', 'dapur.role:super_admin,admin_pusat,admin', ResolvePeriode::class])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/data', [DashboardController::class, 'data'])->name('dashboard.data');
@@ -66,7 +72,6 @@ Route::middleware(['auth', 'dapur.role:super_admin,admin_pusat,admin', ResolvePe
 
     Route::prefix('master')->name('master.')->group(function () {
         Route::middleware('dapur.role:super_admin')->group(function () {
-            Route::get('pengguna/data', [UserController::class, 'data'])->name('pengguna.data');
             Route::post('pengguna/{user}/reset-password', [UserController::class, 'resetPassword'])->name('pengguna.reset-password');
             Route::resource('pengguna', UserController::class)->parameters(['pengguna' => 'user'])->except(['show']);
 
