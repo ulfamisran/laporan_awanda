@@ -20,7 +20,7 @@
             <h3 class="mb-4 text-sm font-bold uppercase tracking-wide" style="color:#1a4a6b;">Ringkasan data</h3>
             <div class="grid gap-3 text-sm sm:grid-cols-2">
                 <div><span class="font-semibold" style="color:#1a4a6b;">SPPG:</span> {{ $labelOmpreng->lokasi_sppg }}</div>
-                <div><span class="font-semibold" style="color:#1a4a6b;">Format:</span> Premium Hijau Biru</div>
+                <div><span class="font-semibold" style="color:#1a4a6b;">Format:</span> Pilih saat lihat/cetak</div>
                 <div><span class="font-semibold" style="color:#1a4a6b;">Jumlah data:</span> {{ $labelOmpreng->jumlah_item }} label</div>
                 <div><span class="font-semibold" style="color:#1a4a6b;">Input oleh:</span> {{ $labelOmpreng->creator?->name ?? '—' }}</div>
             </div>
@@ -40,7 +40,14 @@
         <div class="inst-panel p-6">
             <h3 class="mb-4 text-sm font-bold uppercase tracking-wide" style="color:#1a4a6b;">Lihat / Cetak Label</h3>
             <form method="GET" action="{{ route('label-ompreng.preview', $labelOmpreng) }}" target="_blank" class="space-y-4">
-                <input type="hidden" name="template" value="premium">
+                <div>
+                    <label for="template" class="inst-label">Template label</label>
+                    <select name="template" id="template" class="inst-select mt-1" style="width: 100%; max-width: 16rem;">
+                        <option value="premium">1) Template versi 1</option>
+                        <option value="toska">2) Template versi 2</option>
+                        <option value="krem">3) Template versi 3</option>
+                    </select>
+                </div>
                 <div>
                     <label for="jumlah_cetak" class="inst-label">Jumlah label dicetak</label>
                     <input type="number" name="jumlah_cetak" id="jumlah_cetak" min="1" max="999" value="{{ max(1, (int) $labelOmpreng->jumlah_item) }}" class="inst-input mt-1 w-full">

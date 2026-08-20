@@ -38,8 +38,12 @@
                                 <div class="inline-flex items-center gap-2">
                                     <a href="{{ route('label-ompreng.show', $row) }}" class="inst-btn-outline text-xs !px-3 !py-1.5">Detail</a>
                                     <a href="{{ route('label-ompreng.edit', $row) }}" class="inst-btn-outline text-xs !px-3 !py-1.5" style="border-color:#d97706;color:#d97706;">Update</a>
-                                    <form method="GET" action="{{ route('label-ompreng.preview', $row) }}" target="_blank" class="inline-flex items-center gap-2">
-                                        <input type="hidden" name="template" value="premium">
+                                    <form method="GET" action="{{ route('label-ompreng.preview', $row) }}" target="_blank" class="inline-flex flex-wrap items-center justify-end gap-2">
+                                        <select name="template" class="inst-select text-xs" style="width: 12.5rem; padding-top: 0.35rem; padding-bottom: 0.35rem;">
+                                            <option value="premium">1) Template versi 1</option>
+                                            <option value="toska">2) Template versi 2</option>
+                                            <option value="krem">3) Template versi 3</option>
+                                        </select>
                                         <input type="number" name="jumlah_cetak" min="1" max="999" value="{{ max(1, (int) $row->jumlah_item) }}" class="inst-input text-center text-xs" style="width: 4.5rem;">
                                         <button type="submit" class="inst-btn-outline text-xs !px-3 !py-1.5" style="border-color:#0f766e;color:#0f766e;">Lihat</button>
                                         <button type="submit" formaction="{{ route('label-ompreng.cetak', $row) }}" class="inst-btn-primary text-xs !px-3 !py-1.5">Cetak</button>

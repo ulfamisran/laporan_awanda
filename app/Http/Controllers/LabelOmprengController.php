@@ -158,7 +158,7 @@ class LabelOmprengController extends Controller
         $this->ensureAccessible($labelOmpreng);
 
         $data = $request->validate([
-            'template' => ['nullable', 'string', 'in:premium'],
+            'template' => ['nullable', 'string', 'in:premium,toska,krem'],
             'jumlah_cetak' => ['nullable', 'integer', 'min:1', 'max:999'],
         ]);
 
@@ -176,7 +176,7 @@ class LabelOmprengController extends Controller
         $this->ensureAccessible($labelOmpreng);
 
         $data = $request->validate([
-            'template' => ['nullable', 'string', 'in:premium'],
+            'template' => ['nullable', 'string', 'in:premium,toska,krem'],
             'jumlah_cetak' => ['nullable', 'integer', 'min:1', 'max:999'],
         ]);
 
@@ -285,7 +285,7 @@ class LabelOmprengController extends Controller
     {
         return $request->validate([
             'lokasi_sppg' => ['required', 'string', 'max:255'],
-            'template' => ['nullable', 'string', 'in:premium'],
+            'template' => ['nullable', 'string', 'in:premium,toska,krem'],
             'peringatan' => ['required', 'string', 'max:1000'],
             'himbauan' => ['required', 'string', 'max:1000'],
             'labels' => ['required', 'array', 'min:1'],
