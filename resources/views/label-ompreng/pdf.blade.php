@@ -215,7 +215,7 @@
             border: 1.5px solid {{ $theme['sky'] }};
             border-radius: 7px;
             overflow: hidden;
-            background: rgba(255,255,255,0.92);
+            background: #ffffff;
         }
         .sec-head {
             padding: {{ $isToska ? '5px 5px 6px' : '2px 4px' }};
@@ -223,7 +223,7 @@
             font-weight: bold;
             text-transform: uppercase;
             color: {{ $theme['navy'] }};
-            background: {{ $theme['mist'] }};
+            background: #ffffff;
             border-bottom: 1px solid {{ $theme['sky'] }};
             letter-spacing: 0.04em;
             line-height: 1.35;
@@ -257,19 +257,19 @@
             padding: {{ $isToska ? '1px 3px' : '2px 4px' }};
             font-size: {{ $isToska ? '9.5px' : '7.8px' }};
             font-weight: bold; text-transform: uppercase;
-            background: {{ $theme['mist'] }}; color: {{ $theme['greenDeep'] }};
+            background: #ffffff; color: {{ $theme['greenDeep'] }};
             border-bottom: 1px solid {{ $theme['sky'] }};
         }
         .mi {
             border: 1px solid {{ $isToska ? '#93c5fd' : $theme['sky'] }};
             border-radius: 6px;
             padding: 3px 4px;
-            background: {{ $isToska ? '#eff6ff' : $theme['mist'] }};
+            background: #ffffff;
             margin-bottom: {{ $isToska ? '4px' : '2px' }};
         }
         .mi-batas {
-            border: 2px solid #991b1b;
-            background: #dc2626;
+            border: 2px solid #dc2626;
+            background: #ffffff;
             border-radius: 6px;
         }
         .ml {
@@ -288,23 +288,26 @@
         }
         .mi-batas .ml {
             font-size: {{ $isToska ? '10px' : '7.3px' }};
-            color: #ffffff;
+            color: #dc2626;
         }
         .mi-batas .mv {
             font-size: {{ $isToska ? '13.5px' : '10px' }};
             font-weight: bold;
-            color: #ffffff;
+            color: #dc2626;
         }
-        .warn { border-color: #fca5a5; }
+        .warn { border-color: #fca5a5; background: #ffffff; }
         .warn .sec-head {
             color: {{ $theme['warn'] }};
-            background: {{ $theme['warnBg'] }};
+            background: #ffffff;
             border-bottom-color: #fca5a5;
         }
-        .info { border-color: {{ $isToska ? '#93c5fd' : ($theme['orange'] ?? $theme['green']) }}; }
+        .info {
+            border-color: {{ $isToska ? '#93c5fd' : ($theme['orange'] ?? $theme['green']) }};
+            background: #ffffff;
+        }
         .info .sec-head {
             color: {{ $isToska ? '#1e3a8a' : ($theme['orange'] ?? $theme['greenDeep']) }};
-            background: {{ $theme['infoBg'] }};
+            background: #ffffff;
             border-bottom-color: {{ $isToska ? '#93c5fd' : ($theme['orange'] ?? $theme['green']) }};
         }
         .sec.warn,
@@ -322,7 +325,7 @@
             text-align: center;
             vertical-align: top;
             border: 1px solid {{ $theme['sky'] }};
-            background: {{ $theme['mist'] }};
+            background: #ffffff;
             padding: 4px 3px 5px !important;
         }
         .toska-nutri-inner {
@@ -429,11 +432,19 @@
             margin-right: 3px;
         }
         .krem-body { padding: 5px 5px 6px; }
+        .krem-body .sec {
+            margin-top: 6px;
+            text-align: left;
+        }
+        .krem-body .sec.warn,
+        .krem-body .sec.info {
+            margin-top: 6px;
+        }
         .krem-card {
             margin-top: 6px;
             border: 1px solid #dce9dd;
             border-radius: 8px;
-            background: #fbfdf8;
+            background: #ffffff;
             padding: 3px 4px 4px;
             overflow: hidden;
         }
@@ -482,7 +493,7 @@
             text-align: center;
             vertical-align: top;
             border: 1px solid #e5ebe5;
-            background: #f4f6f5;
+            background: #ffffff;
             padding: 5px 3px 5px !important;
             margin: 0;
         }
@@ -541,8 +552,9 @@
         .krem-time {
             margin-top: 8px;
             border-radius: 10px;
-            background: {{ $theme['navy'] }};
-            color: #fff;
+            background: #ffffff;
+            color: {{ $theme['navy'] }};
+            border: 1px solid {{ $theme['navy'] }};
             padding: 5px 6px;
         }
         .krem-time-t {
@@ -551,6 +563,7 @@
             text-transform: uppercase;
             letter-spacing: 0.08em;
             margin-bottom: 4px;
+            color: {{ $theme['navy'] }};
         }
         .krem-time-t img {
             width: 16px; height: 16px;
@@ -576,37 +589,42 @@
             font-weight: bold;
             text-transform: uppercase;
             opacity: 0.85;
+            color: {{ $theme['navy'] }};
         }
         .krem-time-v {
             font-size: 13px;
             font-weight: bold;
             margin-top: 1px;
+            color: {{ $theme['navy'] }};
         }
         .krem-time-batas {
-            background: #dc2626;
+            background: #ffffff;
+            border: 2px solid #dc2626;
             border-radius: 6px;
             padding: 4px 5px !important;
         }
         .krem-time-batas .krem-time-l {
             opacity: 1;
             font-size: 9.5px;
-            color: #ffffff;
+            color: #dc2626;
         }
         .krem-time-batas .krem-time-v {
             font-size: 14.5px;
             font-weight: bold;
             letter-spacing: 0.02em;
-            color: #ffffff;
+            color: #dc2626;
         }
         .krem-banner {
             margin-top: 9px;
             border-radius: 8px;
             padding: 4px 5px;
+            background: #ffffff;
+            border: 1px solid #fca5a5;
             border-left: 3px solid #dc2626;
-            background: #fef2f2;
         }
         .krem-banner.info {
-            background: #fff7ed;
+            background: #ffffff;
+            border-color: #fdba74;
             border-left-color: #ea580c;
         }
         .krem-banner img {
@@ -712,36 +730,41 @@
                                 @endforeach
                             </div>
 
-                            <div class="krem-time">
-                                <div class="krem-time-t">
-                                    <img src="{{ $icons['clockLight'] }}" alt="">
+                            <div class="sec">
+                                <div class="sec-head">
+                                    <img src="{{ $icons['clock'] }}" class="sec-ico" alt="">
                                     Informasi Konsumsi
                                 </div>
-                                <table class="krem-time-grid" cellpadding="0" cellspacing="0" width="100%">
-                                    <tr>
-                                        <td>
-                                            <div class="krem-time-l">Tanggal Produksi</div>
-                                            <div class="krem-time-v">{{ $label['tanggal_produksi'] }}</div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="krem-time-batas">
-                                            <div class="krem-time-l">Batas Konsumsi</div>
-                                            <div class="krem-time-v"><strong>{{ $label['batas_konsumsi'] }}</strong></div>
-                                        </td>
-                                    </tr>
-                                </table>
+                                <div class="sec-body">
+                                    <div class="mi">
+                                        <div class="ml">Tanggal Produksi</div>
+                                        <div class="mv">{{ $label['tanggal_produksi'] }}</div>
+                                    </div>
+                                    <div class="mi mi-batas">
+                                        <div class="ml">Batas Waktu Konsumsi</div>
+                                        <div class="mv"><strong>{{ $label['batas_konsumsi'] }} WITA</strong></div>
+                                    </div>
+                                </div>
                             </div>
 
-                            <div class="krem-banner">
-                                <img src="{{ $icons['warnRed'] }}" alt="">
-                                <span class="krem-banner-t">Peringatan</span>
-                                <div class="krem-banner-p">{{ $peringatan }}</div>
+                            <div class="sec warn">
+                                <div class="sec-head">
+                                    <img src="{{ $icons['warn'] }}" class="sec-ico" alt="">
+                                    Peringatan
+                                </div>
+                                <div class="sec-body">
+                                    <p class="nt">{{ $peringatan }}</p>
+                                </div>
                             </div>
-                            <div class="krem-banner info">
-                                <img src="{{ $icons['infoOrange'] }}" alt="">
-                                <span class="krem-banner-t">Himbauan</span>
-                                <div class="krem-banner-p">{{ $himbauan }}</div>
+
+                            <div class="sec info">
+                                <div class="sec-head">
+                                    <img src="{{ $icons['info'] }}" class="sec-ico" alt="">
+                                    Himbauan
+                                </div>
+                                <div class="sec-body">
+                                    <p class="nt">{{ $himbauan }}</p>
+                                </div>
                             </div>
 
                             <div class="krem-foot">{{ $watermarkText }}</div>
