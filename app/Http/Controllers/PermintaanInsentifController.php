@@ -34,6 +34,7 @@ class PermintaanInsentifController extends Controller
         return view('permintaan-insentif.form', [
             'item' => $item,
             'profil' => $profil,
+            'logoDataUri' => PdfLogoProfil::dataUri($profil),
             'mode' => 'create',
         ]);
     }
@@ -60,9 +61,12 @@ class PermintaanInsentifController extends Controller
         $this->ensureScope($permintaanInsentif);
         $permintaanInsentif->load(['profilMbg', 'creator']);
 
+        $profil = $permintaanInsentif->profilMbg;
+
         return view('permintaan-insentif.show', [
             'item' => $permintaanInsentif,
-            'profil' => $permintaanInsentif->profilMbg,
+            'profil' => $profil,
+            'logoDataUri' => PdfLogoProfil::dataUri($profil),
         ]);
     }
 
@@ -74,6 +78,7 @@ class PermintaanInsentifController extends Controller
         return view('permintaan-insentif.form', [
             'item' => $permintaanInsentif,
             'profil' => $profil,
+            'logoDataUri' => PdfLogoProfil::dataUri($profil),
             'mode' => 'edit',
         ]);
     }

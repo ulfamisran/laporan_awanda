@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\Storage;
 
 class ProfilMbg extends Model
 {
@@ -66,11 +65,7 @@ class ProfilMbg extends Model
     protected function logoUrl(): Attribute
     {
         return Attribute::get(function (): ?string {
-            if (! $this->logo) {
-                return null;
-            }
-
-            return Storage::disk('public')->url('logo-mbg/'.$this->logo);
+            return \App\Support\PdfLogoProfil::publicUrl($this);
         });
     }
 }

@@ -32,8 +32,11 @@
 
     <div class="mx-auto max-w-4xl overflow-hidden rounded-sm border bg-white shadow-sm" style="border-color:#cbd5e1;">
         <div class="border-b px-6 py-5 text-center" style="border-color:#1a4a6b;color:#1a4a6b;">
-            @if ($profil?->logo)
-                <img src="{{ asset('storage/logo-mbg/'.$profil->logo) }}" alt="Logo SPPG" class="mx-auto mb-3 max-h-20 object-contain">
+            @php
+                $logoSrc = $logoDataUri ?? ($profil?->logo_url);
+            @endphp
+            @if (! empty($logoSrc))
+                <img src="{{ $logoSrc }}" alt="Logo SPPG" class="mx-auto mb-3 max-h-20 object-contain">
             @endif
             <div class="text-sm font-bold">BADAN GIZI NASIONAL (<em>NATIONAL NUTRITION AGENCY</em>)</div>
             <div class="text-sm font-bold">SATUAN PELAYANAN PEMENUHAN GIZI (SPPG)</div>
