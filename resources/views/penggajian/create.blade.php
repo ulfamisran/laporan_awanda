@@ -106,8 +106,18 @@
                         </tr>
                     </thead>
                     <tbody>
+                        @php $posisiSebelum = null; @endphp
                         @foreach ($previewRelawans as $r)
-                            @php $sudah = $existingRelawanIds->contains($r->getKey()); @endphp
+                            @php
+                                $sudah = $existingRelawanIds->contains($r->getKey());
+                                $posisiSekarang = $r->posisiRelawan?->nama_posisi ?? 'Tanpa posisi';
+                            @endphp
+                            @if ($posisiSebelum !== $posisiSekarang)
+                                <tr style="background:#f0f6fb;">
+                                    <td colspan="{{ $metode === 'kehadiran' ? 5 : 4 }}" class="py-2 text-xs font-bold uppercase tracking-wide" style="color:#1a4a6b;">{{ $posisiSekarang }}</td>
+                                </tr>
+                                @php $posisiSebelum = $posisiSekarang; @endphp
+                            @endif
                             <tr>
                                 <td>{{ $r->nama_lengkap }}</td>
                                 <td class="inst-td-muted">{{ $r->posisiRelawan?->nama_posisi ?? '—' }}</td>
@@ -170,8 +180,8 @@
                 <label for="relawan_id" class="inst-label">Relawan</label>
                 <select id="relawan_id" name="relawan_id" class="inst-select select2-relawan mt-1 w-full" required>
                     <option value="">— Pilih —</option>
-                    @foreach (\App\Models\Relawan::query()->aktif()->byDapur($profilId)->orderBy('nama_lengkap')->get() as $r)
-                        <option value="{{ $r->id }}">{{ $r->nama_lengkap }} — {{ $r->posisiRelawan?->nama_posisi }}</option>
+                    @foreach (\App\Models\Relawan::query()->aktif()->byDapur($profilId)->with('posisiRelawan')->orderByPosisi()->get() as $r)
+                        <option value="{{ $r->id }}">{{ $r->posisiRelawan?->nama_posisi ?? '—' }} — {{ $r->nama_lengkap }}</option>
                     @endforeach
                 </select>
             </div>

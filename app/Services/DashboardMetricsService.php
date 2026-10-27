@@ -149,7 +149,7 @@ class DashboardMetricsService
             ->whereIn('status', [StatusPenggajian::Draft, StatusPenggajian::Approved]);
         $this->applyProfil($q);
 
-        return $q->orderBy('relawan_id')->limit(30)->get()->map(function (Penggajian $p): array {
+        return $q->orderByRelawanPosisi()->limit(30)->get()->map(function (Penggajian $p): array {
             return [
                 'nama_relawan' => $p->relawan?->nama_lengkap ?? '—',
                 'status_label' => $p->status instanceof StatusPenggajian ? $p->status->label() : (string) $p->status,

@@ -108,7 +108,7 @@ class PenggajianController extends Controller
             ->whereDate('periode_mulai', $mulai)
             ->whereDate('periode_selesai', $selesai)
             ->where('metode_penggajian', $metode)
-            ->orderBy('relawan_id')
+            ->orderByRelawanPosisi()
             ->get();
 
         $this->ensurePenggajianProfil($request, $profilId);
@@ -244,7 +244,7 @@ class PenggajianController extends Controller
             ->whereDate('periode_mulai', $data['mulai'])
             ->whereDate('periode_selesai', $data['selesai'])
             ->where('metode_penggajian', $data['metode'])
-            ->orderBy('relawan_id')
+            ->orderByRelawanPosisi()
             ->get();
 
         $profil = $rows->first()?->profilMbg ?? ProfilMbg::query()->findOrFail($profilId);
@@ -284,7 +284,7 @@ class PenggajianController extends Controller
                 ->aktif()
                 ->byDapur($profilId)
                 ->with('posisiRelawan')
-                ->orderBy('nama_lengkap')
+                ->orderByPosisi()
                 ->get();
 
             $existingRelawanIds = Penggajian::query()
@@ -344,7 +344,7 @@ class PenggajianController extends Controller
         $relawans = Relawan::query()
             ->aktif()
             ->byDapur($profilId)
-            ->orderBy('id')
+            ->orderByPosisi()
             ->get();
 
         if ($metode === 'nominal_bebas') {
@@ -700,7 +700,7 @@ class PenggajianController extends Controller
             ->where('periode_id', PeriodeTenant::id())
             ->whereDate('periode_mulai', $mulai)
             ->whereDate('periode_selesai', $selesai)
-            ->orderBy('relawan_id');
+            ->orderByRelawanPosisi();
 
         if ($this->isAdminDapurOnly($request)) {
             $q->where('status', StatusPenggajian::Draft);
@@ -744,7 +744,7 @@ class PenggajianController extends Controller
             ->where('periode_id', PeriodeTenant::id())
             ->whereDate('periode_mulai', $mulai)
             ->whereDate('periode_selesai', $selesai)
-            ->orderBy('relawan_id');
+            ->orderByRelawanPosisi();
 
         if ($this->isAdminDapurOnly($request)) {
             $query->where('status', StatusPenggajian::Draft);

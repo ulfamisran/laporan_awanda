@@ -84,12 +84,12 @@
                         d.status = document.getElementById('filter-status')?.value || '';
                     },
                 },
-                order: [[0, 'desc']],
+                order: [[3, 'asc'], [2, 'asc']],
                 columns: [
                     { data: 'id', name: 'relawans.id', visible: false, searchable: false },
                     { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false, width: '48px' },
                     { data: 'nama_lengkap', name: 'relawans.nama_lengkap' },
-                    { data: 'posisi_label', name: 'posisi_label', orderable: false, searchable: false },
+                    { data: 'posisi_label', name: 'posisi_relawan.nama_posisi', searchable: false },
                     { data: 'dapur_label', name: 'dapur_label', orderable: false, searchable: false },
                     { data: 'status_badge', name: 'relawans.status', orderable: false, searchable: false },
                     { data: 'gaji_label', name: 'relawans.gaji_pokok', orderable: true, searchable: false },

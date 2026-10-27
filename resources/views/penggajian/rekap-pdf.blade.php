@@ -45,13 +45,22 @@
             </tr>
         </thead>
         <tbody>
-            @foreach ($rows as $i => $r)
+            @php $posisiSebelum = null; $no = 0; @endphp
+            @foreach ($rows as $r)
                 @php
+                    $posisiSekarang = $r->relawan?->posisiRelawan?->nama_posisi ?? 'Tanpa posisi';
                     $tunj = (float) $r->tunjangan_transport + (float) $r->tunjangan_makan + (float) $r->tunjangan_lainnya;
                     $st = $r->status instanceof \App\Enums\StatusPenggajian ? $r->status->label() : (string) $r->status;
                 @endphp
+                @if ($posisiSebelum !== $posisiSekarang)
+                    <tr>
+                        <td colspan="8" style="background:#e8f0f6;font-weight:bold;text-transform:uppercase;font-size:10px;padding:4px 6px;">{{ $posisiSekarang }}</td>
+                    </tr>
+                    @php $posisiSebelum = $posisiSekarang; @endphp
+                @endif
+                @php $no++; @endphp
                 <tr>
-                    <td>{{ $i + 1 }}</td>
+                    <td>{{ $no }}</td>
                     <td>{{ $r->relawan?->nama_lengkap }}</td>
                     <td>{{ $r->relawan?->posisiRelawan?->nama_posisi ?? '—' }}</td>
                     <td class="num">{{ number_format((float) $r->gaji_pokok, 0, ',', '.') }}</td>

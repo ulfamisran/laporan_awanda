@@ -66,11 +66,19 @@
                 </tr>
             </thead>
             <tbody>
+                @php $posisiSebelum = null; @endphp
                 @forelse ($rows as $r)
                     @php
+                        $posisiSekarang = $r->relawan?->posisiRelawan?->nama_posisi ?? 'Tanpa posisi';
                         $tunj = (float) $r->tunjangan_transport + (float) $r->tunjangan_makan + (float) $r->tunjangan_lainnya;
                         $st = $r->status instanceof \App\Enums\StatusPenggajian ? $r->status->label() : (string) $r->status;
                     @endphp
+                    @if ($posisiSebelum !== $posisiSekarang)
+                        <tr style="background:#f0f6fb;">
+                            <td colspan="7" class="py-2 text-xs font-bold uppercase tracking-wide" style="color:#1a4a6b;">{{ $posisiSekarang }}</td>
+                        </tr>
+                        @php $posisiSebelum = $posisiSekarang; @endphp
+                    @endif
                     <tr>
                         <td>{{ $r->relawan?->nama_lengkap }}</td>
                         <td>{{ $r->relawan?->posisiRelawan?->nama_posisi ?? '—' }}</td>

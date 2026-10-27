@@ -118,6 +118,27 @@ class Penggajian extends Model
             ->where('periode_tahun', $tahun);
     }
 
+    /**
+     * Urutkan baris penggajian berdasarkan posisi relawan, lalu nama.
+     */
+    public function scopeOrderByRelawanPosisi(Builder $query): Builder
+    {
+        return $query
+            ->orderBy(
+                Relawan::query()
+                    ->select('posisi_relawan.nama_posisi')
+                    ->leftJoin('posisi_relawan', 'posisi_relawan.id', '=', 'relawans.posisi_relawan_id')
+                    ->whereColumn('relawans.id', 'penggajian.relawan_id')
+                    ->limit(1)
+            )
+            ->orderBy(
+                Relawan::query()
+                    ->select('nama_lengkap')
+                    ->whereColumn('relawans.id', 'penggajian.relawan_id')
+                    ->limit(1)
+            );
+    }
+
     public function getPeriodeLabelAttribute(): string
     {
         if ($this->periode_mulai && $this->periode_selesai) {

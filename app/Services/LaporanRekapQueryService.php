@@ -219,7 +219,7 @@ class LaporanRekapQueryService
             ->where('periode_id', $periodeId)
             ->where('periode_bulan', $bulan)
             ->where('periode_tahun', $tahun)
-            ->orderBy('relawan_id');
+            ->orderByRelawanPosisi();
         if ($status) {
             $q->where('status', $status);
         }
@@ -246,7 +246,7 @@ class LaporanRekapQueryService
             ->whereRaw('(periode_tahun * 12 + periode_bulan) BETWEEN ? AND ?', [$fromKey, $toKey])
             ->orderBy('periode_tahun')
             ->orderBy('periode_bulan')
-            ->orderBy('relawan_id');
+            ->orderByRelawanPosisi();
         if ($status) {
             $q->where('status', $status);
         }

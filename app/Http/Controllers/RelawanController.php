@@ -38,8 +38,8 @@ class RelawanController extends Controller
 
         $query = $this->filteredRelawanQuery($request)
             ->select('relawans.*')
-            ->with(['posisiRelawan', 'profilMbg'])
-            ->orderByDesc('relawans.id');
+            ->leftJoin('posisi_relawan', 'posisi_relawan.id', '=', 'relawans.posisi_relawan_id')
+            ->with(['posisiRelawan', 'profilMbg']);
 
         return DataTables::eloquent($query)
             ->addIndexColumn()
@@ -66,6 +66,7 @@ class RelawanController extends Controller
                 return '<div class="flex flex-wrap items-center justify-end gap-y-1">'.$detail.$edit.$hapus.'</div>';
             })
             ->rawColumns(['status_badge', 'aksi'])
+            ->orderColumn('posisi_relawan.nama_posisi', 'posisi_relawan.nama_posisi $1')
             ->toJson();
     }
 
@@ -161,7 +162,7 @@ class RelawanController extends Controller
 
         $query = $this->filteredRelawanQuery($request)
             ->with(['posisiRelawan', 'profilMbg'])
-            ->orderBy('relawans.nama_lengkap');
+            ->orderByPosisi();
 
         $filename = 'relawan_'.now()->format('Ymd_His').'.xlsx';
 

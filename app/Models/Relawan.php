@@ -91,4 +91,19 @@ class Relawan extends Model
     {
         return $query->where('profil_mbg_id', $profilMbgId);
     }
+
+    /**
+     * Urutkan relawan berdasarkan posisi, lalu nama.
+     */
+    public function scopeOrderByPosisi(Builder $query): Builder
+    {
+        return $query
+            ->orderBy(
+                PosisiRelawan::query()
+                    ->select('nama_posisi')
+                    ->whereColumn('posisi_relawan.id', 'relawans.posisi_relawan_id')
+                    ->limit(1)
+            )
+            ->orderBy('relawans.nama_lengkap');
+    }
 }

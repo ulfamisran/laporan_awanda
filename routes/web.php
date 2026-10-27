@@ -25,6 +25,7 @@ use App\Http\Controllers\OrderBarangController;
 use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\PenggajianController;
 use App\Http\Controllers\PenerimaanBarangController;
+use App\Http\Controllers\PermintaanInsentifController;
 use App\Http\Controllers\PeriodeController;
 use App\Http\Controllers\PosisiRelawanController;
 use App\Http\Controllers\ProfilMbgController;
@@ -299,6 +300,18 @@ Route::middleware(['auth', 'dapur.role:super_admin,admin_pusat,admin', ResolvePe
         Route::delete('/{penggajian}', [PenggajianController::class, 'destroy'])->name('destroy');
         Route::get('/{penggajian}', [PenggajianController::class, 'show'])->name('show');
     });
+
+    Route::prefix('permintaan-insentif')->name('permintaan-insentif.')->group(function () {
+        Route::get('/', [PermintaanInsentifController::class, 'index'])->name('index');
+        Route::get('/create', [PermintaanInsentifController::class, 'create'])->name('create');
+        Route::post('/', [PermintaanInsentifController::class, 'store'])->name('store');
+        Route::get('/{permintaanInsentif}/cetak-pdf', [PermintaanInsentifController::class, 'cetakPdf'])->name('cetak-pdf');
+        Route::get('/{permintaanInsentif}/edit', [PermintaanInsentifController::class, 'edit'])->name('edit');
+        Route::put('/{permintaanInsentif}', [PermintaanInsentifController::class, 'update'])->name('update');
+        Route::delete('/{permintaanInsentif}', [PermintaanInsentifController::class, 'destroy'])->name('destroy');
+        Route::get('/{permintaanInsentif}', [PermintaanInsentifController::class, 'show'])->name('show');
+    });
+
     Route::prefix('label-ompreng')->name('label-ompreng.')->group(function () {
         Route::get('/', [LabelOmprengController::class, 'index'])->name('index');
         Route::get('/create', [LabelOmprengController::class, 'create'])->name('create');

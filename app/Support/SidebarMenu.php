@@ -60,6 +60,13 @@ class SidebarMenu
             ],
             [
                 'type' => 'link',
+                'label' => 'Permintaan Insentif',
+                'route' => 'permintaan-insentif.index',
+                'match' => ['permintaan-insentif.*'],
+                'icon' => 'cash',
+            ],
+            [
+                'type' => 'link',
                 'label' => 'Label Ompreng',
                 'route' => 'label-ompreng.index',
                 'match' => ['label-ompreng.*'],
