@@ -9,6 +9,12 @@
             <p class="inst-page-desc">Kelola relawan per cabang MBG, posisi, dan status kepegawaian.</p>
         </div>
         <div class="flex flex-wrap gap-2">
+            @if (auth()->user()->hasAnyRole(['super_admin', 'admin_pusat']))
+                <a href="{{ route('master.posisi-relawan.index') }}" class="inst-btn-outline shrink-0">
+                    <i data-lucide="list-ordered" class="h-[18px] w-[18px]"></i>
+                    Atur urutan posisi
+                </a>
+            @endif
             <a href="{{ route('master.relawan.export-excel', request()->query()) }}" class="inst-btn-outline shrink-0">
                 <i data-lucide="download" class="h-[18px] w-[18px]"></i>
                 Export Excel

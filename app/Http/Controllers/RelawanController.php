@@ -27,7 +27,7 @@ class RelawanController extends Controller
     {
         $this->authorizeRelawanModule();
 
-        $posisis = PosisiRelawan::query()->orderBy('nama_posisi')->get();
+        $posisis = PosisiRelawan::query()->ordered()->get();
 
         return view('relawan.index', compact('posisis'));
     }
@@ -66,7 +66,7 @@ class RelawanController extends Controller
                 return '<div class="flex flex-wrap items-center justify-end gap-y-1">'.$detail.$edit.$hapus.'</div>';
             })
             ->rawColumns(['status_badge', 'aksi'])
-            ->orderColumn('posisi_relawan.nama_posisi', 'posisi_relawan.nama_posisi $1')
+            ->orderColumn('posisi_relawan.nama_posisi', 'posisi_relawan.urutan $1, posisi_relawan.nama_posisi $1')
             ->toJson();
     }
 
@@ -75,7 +75,7 @@ class RelawanController extends Controller
         $this->authorizeRelawanWrite();
 
         $relawan = new Relawan;
-        $posisis = PosisiRelawan::query()->orderBy('nama_posisi')->get();
+        $posisis = PosisiRelawan::query()->ordered()->get();
 
         return view('relawan.create', compact('relawan', 'posisis'));
     }
@@ -113,7 +113,7 @@ class RelawanController extends Controller
         $this->authorizeRelawanWrite();
         $this->ensureRelawanInScope($relawan);
 
-        $posisis = PosisiRelawan::query()->orderBy('nama_posisi')->get();
+        $posisis = PosisiRelawan::query()->ordered()->get();
 
         return view('relawan.edit', compact('relawan', 'posisis'));
     }

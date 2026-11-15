@@ -119,11 +119,18 @@ class Penggajian extends Model
     }
 
     /**
-     * Urutkan baris penggajian berdasarkan posisi relawan, lalu nama.
+     * Urutkan baris penggajian berdasarkan pengaturan urutan posisi relawan, lalu nama.
      */
     public function scopeOrderByRelawanPosisi(Builder $query): Builder
     {
         return $query
+            ->orderBy(
+                Relawan::query()
+                    ->select('posisi_relawan.urutan')
+                    ->leftJoin('posisi_relawan', 'posisi_relawan.id', '=', 'relawans.posisi_relawan_id')
+                    ->whereColumn('relawans.id', 'penggajian.relawan_id')
+                    ->limit(1)
+            )
             ->orderBy(
                 Relawan::query()
                     ->select('posisi_relawan.nama_posisi')

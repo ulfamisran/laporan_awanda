@@ -93,11 +93,17 @@ class Relawan extends Model
     }
 
     /**
-     * Urutkan relawan berdasarkan posisi, lalu nama.
+     * Urutkan relawan berdasarkan pengaturan urutan posisi, lalu nama.
      */
     public function scopeOrderByPosisi(Builder $query): Builder
     {
         return $query
+            ->orderBy(
+                PosisiRelawan::query()
+                    ->select('urutan')
+                    ->whereColumn('posisi_relawan.id', 'relawans.posisi_relawan_id')
+                    ->limit(1)
+            )
             ->orderBy(
                 PosisiRelawan::query()
                     ->select('nama_posisi')

@@ -6,13 +6,14 @@ use App\Models\PosisiRelawan;
 use App\Models\Relawan;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class PosisiRelawanController extends Controller
 {
     public function index(Request $request): View
     {
-        $query = PosisiRelawan::query()->orderBy('nama_posisi');
+        $query = PosisiRelawan::query()->ordered();
         $q = trim((string) $request->get('q', ''));
         if ($q !== '') {
             $query->where(function ($sub) use ($q) {
@@ -21,7 +22,7 @@ class PosisiRelawanController extends Controller
             });
         }
 
-        $items = $query->paginate(20)->withQueryString();
+        $items = $query->paginate(50)->withQueryString();
 
         return view('posisi-relawan.index', compact('items'));
     }
@@ -45,6 +46,8 @@ class PosisiRelawanController extends Controller
             'deskripsi' => 'deskripsi',
         ]);
 
+        $data['urutan'] = ((int) PosisiRelawan::query()->max('urutan')) + 10;
+
         PosisiRelawan::query()->create($data);
 
         return redirect()
@@ -66,10 +69,16 @@ class PosisiRelawanController extends Controller
         $data = $request->validate([
             'nama_posisi' => ['required', 'string', 'max:255'],
             'deskripsi' => ['nullable', 'string', 'max:5000'],
+            'urutan' => ['nullable', 'integer', 'min:0', 'max:999999'],
         ], [], [
             'nama_posisi' => 'nama posisi',
             'deskripsi' => 'deskripsi',
+            'urutan' => 'urutan',
         ]);
+
+        if (! array_key_exists('urutan', $data) || $data['urutan'] === null) {
+            unset($data['urutan']);
+        }
 
         $posisi_relawan->update($data);
 
@@ -93,6 +102,69 @@ class PosisiRelawanController extends Controller
         return redirect()
             ->route('master.posisi-relawan.index')
             ->with('success', 'Posisi relawan berhasil dihapus (soft delete).');
+    }
+
+    public function move(Request $request, PosisiRelawan $posisi_relawan): RedirectResponse
+    {
+        $this->authorizePosisiWrite();
+
+        $data = $request->validate([
+            'arah' => ['required', 'in:up,down'],
+        ]);
+
+        DB::transaction(function () use ($posisi_relawan, $data) {
+            $rows = PosisiRelawan::query()->ordered()->lockForUpdate()->get()->values();
+            $index = $rows->search(fn (PosisiRelawan $row) => (int) $row->id === (int) $posisi_relawan->id);
+            if ($index === false) {
+                return;
+            }
+
+            $swapWith = $data['arah'] === 'up' ? $index - 1 : $index + 1;
+            if ($swapWith < 0 || $swapWith >= $rows->count()) {
+                return;
+            }
+
+            $a = $rows[$index];
+            $b = $rows[$swapWith];
+            $tmp = $a->urutan;
+            $a->urutan = $b->urutan;
+            $b->urutan = $tmp;
+
+            if ((int) $a->urutan === (int) $b->urutan) {
+                $a->urutan = ($swapWith < $index)
+                    ? max(0, (int) $b->urutan - 1)
+                    : (int) $b->urutan + 1;
+            }
+
+            $a->save();
+            $b->save();
+        });
+
+        return redirect()
+            ->route('master.posisi-relawan.index', $request->only('q', 'page'))
+            ->with('success', 'Urutan posisi diperbarui. Data relawan akan mengikuti urutan ini.');
+    }
+
+    public function reorder(Request $request): RedirectResponse
+    {
+        $this->authorizePosisiWrite();
+
+        $data = $request->validate([
+            'urutan' => ['required', 'array'],
+            'urutan.*' => ['nullable', 'integer', 'min:0', 'max:999999'],
+        ]);
+
+        DB::transaction(function () use ($data) {
+            foreach ($data['urutan'] as $id => $urutan) {
+                PosisiRelawan::query()
+                    ->whereKey((int) $id)
+                    ->update(['urutan' => (int) $urutan]);
+            }
+        });
+
+        return redirect()
+            ->route('master.posisi-relawan.index', $request->only('q', 'page'))
+            ->with('success', 'Urutan posisi disimpan. Data relawan diurutkan sesuai pengaturan ini.');
     }
 
     private function authorizePosisiWrite(): void

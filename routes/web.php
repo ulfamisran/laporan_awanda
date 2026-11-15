@@ -148,6 +148,8 @@ Route::middleware(['auth', 'dapur.role:super_admin,admin_pusat,admin', ResolvePe
         Route::middleware('dapur.role:super_admin,admin_pusat')->group(function () {
             Route::get('posisi-relawan/create', [PosisiRelawanController::class, 'create'])->name('posisi-relawan.create');
             Route::post('posisi-relawan', [PosisiRelawanController::class, 'store'])->name('posisi-relawan.store');
+            Route::post('posisi-relawan/reorder', [PosisiRelawanController::class, 'reorder'])->name('posisi-relawan.reorder');
+            Route::post('posisi-relawan/{posisi_relawan}/move', [PosisiRelawanController::class, 'move'])->name('posisi-relawan.move');
             Route::get('posisi-relawan/{posisi_relawan}/edit', [PosisiRelawanController::class, 'edit'])->name('posisi-relawan.edit');
             Route::put('posisi-relawan/{posisi_relawan}', [PosisiRelawanController::class, 'update'])->name('posisi-relawan.update');
             Route::delete('posisi-relawan/{posisi_relawan}', [PosisiRelawanController::class, 'destroy'])->name('posisi-relawan.destroy');
