@@ -132,9 +132,13 @@
 
             function addRow(init = {}) {
                 const idx = rowIndex++;
+                const itemId = init.id ? String(init.id) : '';
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td class="p-2"><input type="text" name="items[${idx}][nama_barang]" class="inst-input px-2" required value="${escapeHtml(init.nama_barang || '')}" placeholder="Nama barang"></td>
+                    <td class="p-2">
+                        ${itemId ? `<input type="hidden" name="items[${idx}][id]" value="${escapeHtml(itemId)}">` : ''}
+                        <input type="text" name="items[${idx}][nama_barang]" class="inst-input px-2" required value="${escapeHtml(init.nama_barang || '')}" placeholder="Nama barang">
+                    </td>
                     <td class="p-2"><input type="text" name="items[${idx}][harga_barang]" class="inst-input harga-input px-2" required value="${escapeHtml(init.harga_barang || '')}"></td>
                     <td class="p-2"><input type="number" step="0.01" min="0.01" name="items[${idx}][jumlah_barang]" class="inst-input px-2" required value="${escapeHtml(init.jumlah_barang || '')}"></td>
                     <td class="p-2"><input type="text" name="items[${idx}][satuan_barang]" class="inst-input satuan-input px-2" required value="${escapeHtml(init.satuan_barang || '')}"></td>

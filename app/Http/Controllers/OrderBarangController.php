@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\SatuanBarang;
 use App\Enums\StatusAktif;
 use App\Models\Barang;
+use App\Models\BarangMasuk;
 use App\Models\KategoriBarang;
 use App\Models\OrderBarang;
 use App\Models\OrderBarangItem;
@@ -113,6 +114,7 @@ class OrderBarangController extends Controller
 
         $initialItems = old('items', $order->items->map(function ($item): array {
             return [
+                'id' => $item->id,
                 'nama_barang' => $item->nama_barang,
                 'harga_barang' => number_format((float) $item->harga_barang, 0, '', ''),
                 'jumlah_barang' => number_format((float) $item->jumlah_barang, 2, '.', ''),
@@ -142,6 +144,8 @@ class OrderBarangController extends Controller
         $data = $this->validatePayload($request, $order);
 
         DB::transaction(function () use ($order, $data): void {
+            $order->load('items.supplier');
+
             $preservedNotaByKey = [];
             foreach ($order->items as $item) {
                 $key = $this->supplierGroupKey($item->supplier_nama ?? $item->supplier?->nama_supplier);
@@ -155,13 +159,12 @@ class OrderBarangController extends Controller
                 'nomor_order' => $data['nomor_order'],
             ]);
 
-            $order->items()->delete();
-            $this->syncOrderItems($order, $data['items'], $preservedNotaByKey);
+            $this->syncOrderItemsPreserving($order, $data['items'], $preservedNotaByKey);
         });
 
         return redirect()
             ->route('stok.order.index')
-            ->with('success', 'Order barang berhasil diperbarui.');
+            ->with('success', 'Order barang berhasil diperbarui. Penerimaan yang tidak berubah tetap berlanjut.');
     }
 
     public function destroy(OrderBarang $order): RedirectResponse
@@ -559,16 +562,109 @@ class OrderBarangController extends Controller
      */
     private function syncOrderItems(OrderBarang $order, array $rows, array $notaByKey = []): void
     {
-        $groupedRows = [];
+        $notaByKey = $this->ensureNotaByKeyForRows($rows, $notaByKey);
+
         foreach ($rows as $row) {
             $key = $this->supplierGroupKey($row['supplier_nama'] ?? null);
-            $groupedRows[$key][] = $row;
+            $barang = $this->resolveBarang((string) $row['nama_barang'], (float) $row['harga_barang']);
+            $supplier = $this->resolveSupplier($row['supplier_nama'] ?? null);
+
+            $order->items()->create([
+                'barang_id' => (int) $barang->getKey(),
+                'supplier_id' => $supplier?->getKey(),
+                'nama_barang' => $barang->nama_barang,
+                'supplier_nama' => $supplier?->nama_supplier ?? null,
+                'nomor_nota' => $notaByKey[$key],
+                'harga_barang' => (float) $row['harga_barang'],
+                'jumlah_barang' => (float) $row['jumlah_barang'],
+                'satuan_barang' => (string) $row['satuan_barang'],
+                'jumlah_hari_pemakaian' => (int) ($row['jumlah_hari_pemakaian'] ?? 0),
+            ]);
+        }
+    }
+
+    /**
+     * Update item tanpa menghapus semua baris, agar penerimaan yang sudah ada tetap terhubung.
+     * Hanya baris yang berubah material (barang / qty di bawah qty diterima) yang di-reset penerimaannya.
+     *
+     * @param  array<int, array<string, mixed>>  $rows
+     * @param  array<string, string>  $notaByKey
+     */
+    private function syncOrderItemsPreserving(OrderBarang $order, array $rows, array $notaByKey = []): void
+    {
+        $existing = $order->items()->withSum('penerimaan as qty_diterima', 'jumlah')->get()->keyBy('id');
+        $keptIds = [];
+        $notaByKey = $this->ensureNotaByKeyForRows($rows, $notaByKey);
+
+        foreach ($rows as $row) {
+            $itemId = isset($row['id']) ? (int) $row['id'] : 0;
+            $existingItem = $itemId > 0 ? $existing->get($itemId) : null;
+
+            $barang = $this->resolveBarang((string) $row['nama_barang'], (float) $row['harga_barang']);
+            $supplier = $this->resolveSupplier($row['supplier_nama'] ?? null);
+            $key = $this->supplierGroupKey($row['supplier_nama'] ?? null);
+            $jumlahBaru = (float) $row['jumlah_barang'];
+
+            $payload = [
+                'barang_id' => (int) $barang->getKey(),
+                'supplier_id' => $supplier?->getKey(),
+                'nama_barang' => $barang->nama_barang,
+                'supplier_nama' => $supplier?->nama_supplier ?? null,
+                'nomor_nota' => $notaByKey[$key],
+                'harga_barang' => (float) $row['harga_barang'],
+                'jumlah_barang' => $jumlahBaru,
+                'satuan_barang' => (string) $row['satuan_barang'],
+                'jumlah_hari_pemakaian' => (int) ($row['jumlah_hari_pemakaian'] ?? 0),
+            ];
+
+            if ($existingItem) {
+                $qtyDiterima = (float) ($existingItem->qty_diterima ?? 0);
+                $barangBerubah = (int) $existingItem->barang_id !== (int) $barang->getKey();
+                $qtyTurunDiBawahDiterima = $qtyDiterima > 0 && $jumlahBaru + 0.00001 < $qtyDiterima;
+
+                if ($barangBerubah || $qtyTurunDiBawahDiterima) {
+                    $this->resetPenerimaanForItem((int) $existingItem->getKey());
+                }
+
+                $existingItem->update($payload);
+                $keptIds[] = (int) $existingItem->getKey();
+                continue;
+            }
+
+            $created = $order->items()->create($payload);
+            $keptIds[] = (int) $created->getKey();
         }
 
-        ksort($groupedRows);
+        $toDelete = $existing->keys()->diff($keptIds);
+        foreach ($toDelete as $deleteId) {
+            // Putuskan tautan penerimaan dulu (stok masuk tetap ada), lalu hapus detail order.
+            $this->resetPenerimaanForItem((int) $deleteId);
+            OrderBarangItem::query()->whereKey($deleteId)->delete();
+        }
+    }
+
+    private function resetPenerimaanForItem(int $orderBarangItemId): void
+    {
+        BarangMasuk::query()
+            ->where('order_barang_item_id', $orderBarangItemId)
+            ->update(['order_barang_item_id' => null]);
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $rows
+     * @param  array<string, string>  $notaByKey
+     * @return array<string, string>
+     */
+    private function ensureNotaByKeyForRows(array $rows, array $notaByKey = []): array
+    {
+        $keys = collect($rows)
+            ->map(fn (array $row): string => $this->supplierGroupKey($row['supplier_nama'] ?? null))
+            ->unique()
+            ->sort()
+            ->values();
 
         $keysNeedingNota = [];
-        foreach (array_keys($groupedRows) as $key) {
+        foreach ($keys as $key) {
             if (empty($notaByKey[$key])) {
                 $keysNeedingNota[] = $key;
             }
@@ -581,26 +677,7 @@ class OrderBarangController extends Controller
             }
         }
 
-        foreach ($groupedRows as $key => $groupRows) {
-            $nomorNota = $notaByKey[$key];
-
-            foreach ($groupRows as $row) {
-                $barang = $this->resolveBarang((string) $row['nama_barang'], (float) $row['harga_barang']);
-                $supplier = $this->resolveSupplier($row['supplier_nama'] ?? null);
-
-                $order->items()->create([
-                    'barang_id' => (int) $barang->getKey(),
-                    'supplier_id' => $supplier?->getKey(),
-                    'nama_barang' => $barang->nama_barang,
-                    'supplier_nama' => $supplier?->nama_supplier ?? null,
-                    'nomor_nota' => $nomorNota,
-                    'harga_barang' => (float) $row['harga_barang'],
-                    'jumlah_barang' => (float) $row['jumlah_barang'],
-                    'satuan_barang' => (string) $row['satuan_barang'],
-                    'jumlah_hari_pemakaian' => (int) ($row['jumlah_hari_pemakaian'] ?? 0),
-                ]);
-            }
-        }
+        return $notaByKey;
     }
 
     private function ensureNomorNotaAssigned(OrderBarang $order): void
@@ -651,6 +728,7 @@ class OrderBarangController extends Controller
         $rules = [
             'tanggal_order' => ['required', 'date'],
             'items' => ['required', 'array', 'min:1'],
+            'items.*.id' => ['nullable', 'integer'],
             'items.*.nama_barang' => ['required', 'string', 'max:255'],
             'items.*.harga_barang' => ['required', 'numeric', 'min:0'],
             'items.*.jumlah_barang' => ['required', 'numeric', 'min:0.01'],
@@ -662,6 +740,7 @@ class OrderBarangController extends Controller
         $attributes = [
             'tanggal_order' => 'tanggal order',
             'nomor_order' => 'nomor order',
+            'items.*.id' => 'item order',
             'items.*.nama_barang' => 'nama barang',
             'items.*.harga_barang' => 'harga barang',
             'items.*.jumlah_barang' => 'jumlah barang',
@@ -681,6 +760,8 @@ class OrderBarangController extends Controller
                         ->where('periode_id', PeriodeTenant::id()))
                     ->ignore($order->getKey()),
             ];
+            $rules['items.*.id'][] = Rule::exists('order_barang_items', 'id')
+                ->where(fn ($q) => $q->where('order_barang_id', $order->getKey()));
         }
 
         return $request->validate($rules, [

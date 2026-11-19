@@ -65,6 +65,7 @@
             </div>
             <div class="mbg-expand-body" data-expand-body hidden>
                 <div class="space-y-4">
+                    <input type="hidden" data-name="id" value="">
                     <div>
                         <label class="inst-label">Nama barang</label>
                         <input type="text" class="inst-input mt-1 summary-source" data-name="nama_barang" placeholder="Contoh: Beras" required>
@@ -149,10 +150,19 @@
 
                 node.querySelectorAll('[data-name]').forEach(function (input) {
                     const field = input.getAttribute('data-name');
-                    input.name = buildName(idx, field);
-                    if (data && Object.prototype.hasOwnProperty.call(data, field)) {
-                        input.value = data[field] ?? '';
+                    const value = (data && Object.prototype.hasOwnProperty.call(data, field))
+                        ? (data[field] ?? '')
+                        : (input.value || '');
+
+                    // Jangan kirim id kosong untuk baris baru
+                    if (field === 'id' && (value === '' || value === null || value === undefined)) {
+                        input.removeAttribute('name');
+                        input.value = '';
+                        return;
                     }
+
+                    input.name = buildName(idx, field);
+                    input.value = value;
                 });
 
                 const hargaInput = node.querySelector('.harga-input');
