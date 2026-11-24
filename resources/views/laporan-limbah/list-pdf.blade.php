@@ -42,6 +42,12 @@
             color: #1a4a6b;
         }
         tr { page-break-inside: avoid; }
+        .sign-wrap { width: 100%; margin-top: 28px; page-break-inside: avoid; }
+        .sign-table { width: 100%; border-collapse: collapse; }
+        .sign-table td { border: none; width: 50%; vertical-align: top; text-align: center; font-size: 10px; color: #1a4a6b; line-height: 1.35; }
+        .sign-space { height: 52px; }
+        .sign-role { font-weight: bold; }
+        .sign-name { font-weight: bold; }
     </style>
 </head>
 <body>
@@ -89,5 +95,26 @@
             @endforeach
         </tbody>
     </table>
+
+    <div class="sign-wrap">
+        <table class="sign-table">
+            <tr>
+                <td class="sign-role">Dicatat Oleh</td>
+                <td class="sign-role">Mengetahui</td>
+            </tr>
+            <tr>
+                <td>Koordinator Pencuci Alat</td>
+                <td>PLO Gizi</td>
+            </tr>
+            <tr>
+                <td><div class="sign-space">&nbsp;</div></td>
+                <td><div class="sign-space">&nbsp;</div></td>
+            </tr>
+            <tr>
+                <td class="sign-name">(_____________________________)</td>
+                <td class="sign-name">Nidatrisuci, S.Gz, Dietisien</td>
+            </tr>
+        </table>
+    </div>
 </body>
 </html>
